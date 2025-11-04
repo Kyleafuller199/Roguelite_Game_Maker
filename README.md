@@ -17,14 +17,16 @@ Roguelite Game Maker is a **web-based creation tool** designed to enable aspirin
 **Version Control:** GitHub  
 **Hosting:** TBD
 
-## Future Repository Structure
+## Repository Structure
 ```
 Roguelite_Game_Maker/
 │
 ├── frontend/           # React application (UI, components)
 ├── backend/            # Django project (API, database models)
 ├── docs/               # Design documents, mockups, progress reports
-└── README.md           # Project overview (this file)
+├── README.md           # Project overview (this file)
+└── .gitignore          # gitignore file for the project
+
 ```
 
 ## 🚀 Current Progress

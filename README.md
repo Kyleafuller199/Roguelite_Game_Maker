@@ -41,9 +41,9 @@ Roguelite_Game_Maker/
 - Set up basic Django endpoints
 
 ## 🧰 Links
-- [Team Progress Report (Google Slides)](https://docs.google.com/presentation/...)  
-- [Design Documents (Google Drive)](https://drive.google.com/drive/...)  
-- [Figma Wireframes](https://www.figma.com/file/...)  
+- [Team Progress Report (Google Slides)](https://docs.google.com/presentation/d/18LzFhYfBoIUOgVjNIPCIzog1eOLhUJNdYGLC9O8LN7w/edit?slide=id.g21f7013061a_0_1202#slide=id.g21f7013061a_0_1202)  
+- [Design Documents (Google Drive)](https://drive.google.com/drive/folders/135fvkcfRq7YdU5f5osruQmDuQnx2cLbF)  
+- [Figma Wireframes](https://www.figma.com/design/KklAOrmSQmefzzYM1UUQcx/Roguelite-Game-Maker?node-id=0-1&p=f&t=e1Fnk0QWPMJxrjaT-0) 
 
 ---
 

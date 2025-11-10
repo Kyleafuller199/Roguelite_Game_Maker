@@ -103,12 +103,12 @@ class Card:
 
 # --- Create example cards ---
 cards = [
-    Card("Strike", "Deal 6 damage.", 1, card_class="ironclad", type="attack", rarity="common"),
-    Card("Defend", "Gain 5 Block.", 1, card_class="silent", type="skill", rarity="common"),
-    Card("Zap", "Channel 1 Lightning.", 1, card_class="defect", type="skill", rarity="common"),
-    Card("Eruption", "Enter Wrath. Deal 9 damage.", 2, card_class="watcher", type="attack", rarity="uncommon"),
-    Card("Bandage Up", "Heal 4 HP. Exhaust.", 0, card_class="colorless", type="skill", rarity="uncommon"),
-    Card("Regret", "At the end of your turn, lose HP equal to number of cards in hand.", 0, card_class="curse", type="status", rarity="curse"),
+    Card("Strike", "Deal 6 damage.", 1, card_class="A", type="attack", rarity="common"),
+    Card("Defend", "Gain 5 Block.", 1, card_class="B", type="skill", rarity="common"),
+    Card("Zap", "Channel 1 Lightning.", 1, card_class="C", type="skill", rarity="common"),
+    Card("Eruption", "Enter Wrath. Deal 9 damage.", 2, card_class="D", type="attack", rarity="uncommon"),
+    Card("Bandage Up", "Heal 4 HP. Exhaust.", 0, card_class="E", type="skill", rarity="uncommon"),
+    Card("Regret", "At the end of your turn, lose HP equal to number of cards in hand.", 0, card_class="F", type="status", rarity="curse"),
 ]
 
 for c in cards:

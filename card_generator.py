@@ -1,3 +1,5 @@
+# install pip install Pillow==9.5.0
+
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 import os, textwrap
 

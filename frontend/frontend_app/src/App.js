@@ -1,14 +1,24 @@
-import './App.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Root from "./pages/Root";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
+import Editor from "./pages/Editor";
+import Test from "./pages/Test";
+import Play from "./pages/Play";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Roguelite Game Maker</h1>
-        <p>Frontend is up and running successfully!</p>
-        <p>This React app will serve as the user interface for the project.</p>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Root />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/editor" element={<Editor />} />
+        <Route path="/test" element={<Test />} />
+        <Route path="/play" element={<Play />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

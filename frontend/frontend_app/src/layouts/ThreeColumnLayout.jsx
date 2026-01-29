@@ -5,7 +5,7 @@ export default function ThreeColumnLayout({ header, left, right, children }) {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden", // stops the whole page scrolling
+        overflow: "hidden",
       }}
     >
       <div style={{ flex: "0 0 auto" }}>{header}</div>
@@ -14,12 +14,15 @@ export default function ThreeColumnLayout({ header, left, right, children }) {
         style={{
           flex: "1 1 auto",
           display: "flex",
-          minHeight: 0, // IMPORTANT: enables child scroll areas in flex layouts
+          minHeight: 0,
         }}
       >
+        {/* LEFT / Editor Sidebar */}
         <aside
           style={{
-            width: 220,
+            width: 240,
+            flexShrink: 0,
+            boxSizing: "border-box",
             borderRight: "1px solid #ddd",
             minHeight: 0,
             overflow: "hidden",
@@ -28,6 +31,7 @@ export default function ThreeColumnLayout({ header, left, right, children }) {
           {left}
         </aside>
 
+        {/* CENTER */}
         <main
           style={{
             flex: 1,
@@ -39,9 +43,12 @@ export default function ThreeColumnLayout({ header, left, right, children }) {
           {children}
         </main>
 
+        {/* RIGHT / Inspector */}
         <aside
           style={{
             width: 260,
+            flexShrink: 0,
+            boxSizing: "border-box",
             borderLeft: "1px solid #ddd",
             minHeight: 0,
             overflow: "hidden",

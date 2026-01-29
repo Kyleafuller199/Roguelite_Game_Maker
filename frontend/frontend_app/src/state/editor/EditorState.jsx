@@ -10,7 +10,7 @@ import { createEnemy, updateSelectedEnemy } from "./assets/enemies";
 
 
 const EditorContext = createContext(null);
-const STORAGE_KEY = "rgm_editor_state_v1";
+const STORAGE_KEY = "rgm_editor_state_v2";
 
 export function EditorProvider({ children }) {
   const [state, setState] = useState(() => {

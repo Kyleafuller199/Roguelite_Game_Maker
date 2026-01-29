@@ -6,6 +6,52 @@ export default function EditorSidebar() {
   const isAssets = state.mode === "assets";
 
   const cards = state.assets.cards.allIds.map((id) => state.assets.cards.byId[id]);
+  const relics = state.assets.relics.allIds.map((id) => state.assets.relics.byId[id]);
+  const potions = state.assets.potions.allIds.map((id) => state.assets.potions.byId[id]);
+  const enemies = state.assets.enemies.allIds.map((id) => state.assets.enemies.byId[id]);
+
+  function AssetSection({ title, entityType, items, onCreate, createLabel }) {
+    return (
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 8, fontWeight: 700 }}>{title}</div>
+
+        <button
+          onClick={onCreate}
+          style={{
+            width: "100%",
+            textAlign: "left",
+            padding: 12,
+            marginBottom: 10,
+            cursor: "pointer",
+          }}
+        >
+          {createLabel}
+        </button>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {items.map((item) => {
+            const selected = state.entityType === entityType && state.selectedId === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => actions.selectEntity(entityType, item.id)}
+                style={{
+                  textAlign: "left",
+                  padding: 12,
+                  border: "transparent",
+                  background: selected ? "#888" : "transparent",
+                  color: "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                {item.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 12 }}>
@@ -26,42 +72,37 @@ export default function EditorSidebar() {
 
       {isAssets ? (
         <div>
-          <div style={{ marginBottom: 8, fontWeight: 700 }}>Cards</div>
+          <AssetSection
+            title="Cards"
+            entityType="card"
+            items={cards}
+            onCreate={() => actions.createCard()}
+            createLabel="+ New Card"
+          />
 
-          <button
-            onClick={() => actions.createCard()}
-            style={{
-              width: "100%",
-              textAlign: "left",
-              padding: 12,
-              marginBottom: 10,
-              cursor: "pointer",
-            }}
-          >
-            + New Card
-          </button>
+          <AssetSection
+            title="Relics"
+            entityType="relic"
+            items={relics}
+            onCreate={() => actions.createRelic()}
+            createLabel="+ New Relic"
+          />
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {cards.map((c) => {
-              const selected = state.entityType === "card" && state.selectedId === c.id;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => actions.selectEntity("card", c.id)}
-                  style={{
-                    textAlign: "left",
-                    padding: 12,
-                    border: "transparent",
-                    background: selected ? "#888" : "transparent",
-                    color: "inherit",
-                    cursor: "pointer",
-                  }}
-                >
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
+          <AssetSection
+            title="Potions"
+            entityType="potion"
+            items={potions}
+            onCreate={() => actions.createPotion()}
+            createLabel="+ New Potion"
+          />
+
+          <AssetSection
+            title="Enemies"
+            entityType="enemy"
+            items={enemies}
+            onCreate={() => actions.createEnemy()}
+            createLabel="+ New Enemy"
+          />
         </div>
       ) : (
         <div>

@@ -2,7 +2,12 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 
 import { initialState } from "./InitialState";
+
 import { createCard, updateSelectedCard } from "./assets/cards";
+import { createRelic, updateSelectedRelic } from "./assets/relics";
+import { createPotion, updateSelectedPotion } from "./assets/potions";
+import { createEnemy, updateSelectedEnemy } from "./assets/enemies";
+
 
 const EditorContext = createContext(null);
 const STORAGE_KEY = "rgm_editor_state_v1";
@@ -55,6 +60,30 @@ export function EditorProvider({ children }) {
 
       updateSelectedCard(patch) {
         updateSelectedCard(setState, patch);
+      },
+
+      createRelic() { 
+        createRelic(setState); 
+      },
+
+      updateSelectedRelic(patch) {
+        updateSelectedRelic(setState, patch); 
+      },
+
+      createPotion() { 
+        createPotion(setState); 
+      },
+
+      updateSelectedPotion(patch) { 
+        updateSelectedPotion(setState, patch); 
+      },
+
+      createEnemy() { 
+        createEnemy(setState); 
+      },
+
+      updateSelectedEnemy(patch) { 
+        updateSelectedEnemy(setState, patch); 
       },
     };
   }, []);

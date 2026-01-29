@@ -9,7 +9,6 @@ export default function EditorSidebar() {
 
   return (
     <div style={{ padding: 12 }}>
-      {/* Mode toggle */}
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         <button
           onClick={() => actions.setMode("assets")}
@@ -25,10 +24,23 @@ export default function EditorSidebar() {
         </button>
       </div>
 
-      {/* Left nav content */}
       {isAssets ? (
         <div>
           <div style={{ marginBottom: 8, fontWeight: 700 }}>Cards</div>
+
+          <button
+            onClick={() => actions.createCard()}
+            style={{
+              width: "100%",
+              textAlign: "left",
+              padding: 12,
+              marginBottom: 10,
+              cursor: "pointer",
+            }}
+          >
+            + New Card
+          </button>
+
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {cards.map((c) => {
               const selected = state.entityType === "card" && state.selectedId === c.id;
@@ -38,10 +50,9 @@ export default function EditorSidebar() {
                   onClick={() => actions.selectEntity("card", c.id)}
                   style={{
                     textAlign: "left",
-                    padding: 10,
-                    borderRadius: 8,
-                    border: "1px solid #444",
-                    background: selected ? "#222" : "transparent",
+                    padding: 12,
+                    border: "transparent",
+                    background: selected ? "#888" : "transparent",
                     color: "inherit",
                     cursor: "pointer",
                   }}

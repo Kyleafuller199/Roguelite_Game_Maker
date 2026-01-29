@@ -4,11 +4,9 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 const EditorContext = createContext(null);
 
 const initialState = {
-  mode: "assets", // "assets" | "projects" in the future
-  entityType: "card", // "card" | "relic" | "potion" | "enemy" | "globalPool" | "character" in the future
-  selectedId: "card_basic_strike", // ID of the selected entity
-
-  // Minimal data for the first loop
+  mode: "assets",
+  entityType: "card",
+  selectedId: "card_basic_strike",
   assets: {
     cards: {
       byId: {
@@ -30,7 +28,6 @@ const initialState = {
       allIds: ["card_basic_strike", "card_2"],
     },
   },
-
   projects: {
     globalPools: { byId: {}, allIds: [] },
     characters: { byId: {}, allIds: [] },
@@ -44,7 +41,6 @@ export function EditorProvider({ children }) {
     return {
       setMode(mode) {
         setState((prev) => {
-          // Keep selection valid when switching modes
           if (mode === "assets") {
             return { ...prev, mode, entityType: "card", selectedId: prev.selectedId };
           }
@@ -54,6 +50,38 @@ export function EditorProvider({ children }) {
 
       selectEntity(entityType, id) {
         setState((prev) => ({ ...prev, entityType, selectedId: id }));
+      },
+
+      createCard() {
+        setState((prev) => {
+          const id = `card_${Date.now()}`;
+
+          const newCard = {
+            id,
+            name: "New Card",
+            type: "Attack",
+            rarity: "Common",
+            cost: 1,
+          };
+
+          return {
+            ...prev,
+            mode: "assets",
+            entityType: "card",
+            selectedId: id,
+            assets: {
+              ...prev.assets,
+              cards: {
+                ...prev.assets.cards,
+                byId: {
+                  ...prev.assets.cards.byId,
+                  [id]: newCard,
+                },
+                allIds: [id, ...prev.assets.cards.allIds],
+              },
+            },
+          };
+        });
       },
 
       updateSelectedCard(patch) {

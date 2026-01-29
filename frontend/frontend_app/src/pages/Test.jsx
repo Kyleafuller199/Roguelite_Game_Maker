@@ -1,6 +1,6 @@
-import TwoColumnLayout from "../layouts/TwoColumnLayout";
-import AppHeader from "../components/AppHeader";
-import Sidebar from "../components/Sidebar";
+import TwoColumnLayout from "@/layouts/TwoColumnLayout";
+import AppHeader from "@/components/AppHeader";
+import Sidebar from "@/components/Sidebar";
 
 export default function Test() {
   return (

@@ -1,5 +1,5 @@
-import OneColumnLayout from "../layouts/OneColumnLayout";
-import AppHeader from "../components/AppHeader";
+import OneColumnLayout from "@/layouts/OneColumnLayout";
+import AppHeader from "@/components/AppHeader";
 
 export default function Play() {
   return (

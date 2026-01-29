@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Root from "./pages/Root";
-import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Editor from "./pages/Editor";
-import Test from "./pages/Test";
-import Play from "./pages/Play";
+import Root from "@/pages/Root";
+import Auth from "@/pages/Auth";
+import Dashboard from "@/pages/Dashboard";
+import Editor from "@/pages/Editor";
+import Test from "@/pages/Test";
+import Play from "@/pages/Play";
 
 function App() {
   return (

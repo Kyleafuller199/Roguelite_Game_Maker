@@ -1,5 +1,5 @@
-import OneColumnLayout from "../layouts/OneColumnLayout";
-import PublicHeader from "../components/PublicHeader";
+import OneColumnLayout from "@/layouts/OneColumnLayout";
+import PublicHeader from "@/components/PublicHeader";
 import { Link } from "react-router-dom";
 
 export default function Root() {

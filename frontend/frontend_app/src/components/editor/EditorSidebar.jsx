@@ -1,5 +1,5 @@
 // src/components/editor/EditorSidebar.jsx
-import { useEditor } from "../../state/editor/EditorState";
+import { useEditor } from "@/state/editor/EditorState";
 
 export default function EditorSidebar() {
   const { state, actions } = useEditor();

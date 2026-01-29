@@ -1,12 +1,12 @@
 // src/state/editor/EditorState.jsx
 import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 
-import { initialState } from "./InitialState";
+import { initialState } from "@/InitialState";
 
-import { createCard, updateSelectedCard } from "./assets/cards";
-import { createRelic, updateSelectedRelic } from "./assets/relics";
-import { createPotion, updateSelectedPotion } from "./assets/potions";
-import { createEnemy, updateSelectedEnemy } from "./assets/enemies";
+import { createCard, updateSelectedCard } from "@/assets/cards";
+import { createRelic, updateSelectedRelic } from "@/assets/relics";
+import { createPotion, updateSelectedPotion } from "@/assets/potions";
+import { createEnemy, updateSelectedEnemy } from "@/assets/enemies";
 
 
 const EditorContext = createContext(null);

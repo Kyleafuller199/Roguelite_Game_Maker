@@ -1,7 +1,14 @@
 // src/state/editor/EditorState.jsx
-import React, { createContext, useContext, useMemo, useState } from "react";
-
+import React, {
+    createContext,
+    useContext,
+    useMemo,
+    useState,
+    useEffect
+  } from "react";
+  
 const EditorContext = createContext(null);
+const STORAGE_KEY = "rgm_editor_state_v1";
 
 const initialState = {
   mode: "assets",
@@ -35,7 +42,26 @@ const initialState = {
 };
 
 export function EditorProvider({ children }) {
-  const [state, setState] = useState(initialState);
+    const [state, setState] = useState(() => {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return initialState;
+      
+          const parsed = JSON.parse(raw);
+          return { ...initialState, ...parsed };
+        } catch {
+          return initialState;
+        }
+      });      
+      
+      useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch {
+          // ignore quota or serialization errors
+        }
+      }, [state]);
+      
 
   const actions = useMemo(() => {
     return {

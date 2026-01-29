@@ -34,7 +34,11 @@ export default function EditorSidebar() {
             return (
               <button
                 key={item.id}
-                onClick={() => actions.selectEntity(entityType, item.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.blur(); // prevents focus-driven scroll jump
+                  actions.selectEntity(entityType, item.id);
+                }}                
                 style={{
                   textAlign: "left",
                   padding: 12,
@@ -54,62 +58,91 @@ export default function EditorSidebar() {
   }
 
   return (
-    <div style={{ padding: 12 }}>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <button
-          onClick={() => actions.setMode("assets")}
-          style={{ flex: 1, fontWeight: isAssets ? "700" : "400" }}
-        >
-          Assets
-        </button>
-        <button
-          onClick={() => actions.setMode("projects")}
-          style={{ flex: 1, fontWeight: !isAssets ? "700" : "400" }}
-        >
-          Projects
-        </button>
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0, // IMPORTANT: allows child overflow to work in flex layouts
+      }}
+    >
+      {/* Sticky header */}
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          padding: 12,
+          background: "#101013", // set to your sidebar bg
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={() => actions.setMode("assets")}
+            style={{ flex: 1, fontWeight: isAssets ? "700" : "400" }}
+          >
+            Assets
+          </button>
+          <button
+            onClick={() => actions.setMode("projects")}
+            style={{ flex: 1, fontWeight: !isAssets ? "700" : "400" }}
+          >
+            Projects
+          </button>
+        </div>
       </div>
 
-      {isAssets ? (
-        <div>
-          <AssetSection
-            title="Cards"
-            entityType="card"
-            items={cards}
-            onCreate={() => actions.createCard()}
-            createLabel="+ New Card"
-          />
+      {/* Scrollable content */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: 12,
+          minHeight: 0,
+        }}
+      >
+        {isAssets ? (
+          <div>
+            <AssetSection
+              title="Cards"
+              entityType="card"
+              items={cards}
+              onCreate={() => actions.createCard()}
+              createLabel="+ New Card"
+            />
 
-          <AssetSection
-            title="Relics"
-            entityType="relic"
-            items={relics}
-            onCreate={() => actions.createRelic()}
-            createLabel="+ New Relic"
-          />
+            <AssetSection
+              title="Relics"
+              entityType="relic"
+              items={relics}
+              onCreate={() => actions.createRelic()}
+              createLabel="+ New Relic"
+            />
 
-          <AssetSection
-            title="Potions"
-            entityType="potion"
-            items={potions}
-            onCreate={() => actions.createPotion()}
-            createLabel="+ New Potion"
-          />
+            <AssetSection
+              title="Potions"
+              entityType="potion"
+              items={potions}
+              onCreate={() => actions.createPotion()}
+              createLabel="+ New Potion"
+            />
 
-          <AssetSection
-            title="Enemies"
-            entityType="enemy"
-            items={enemies}
-            onCreate={() => actions.createEnemy()}
-            createLabel="+ New Enemy"
-          />
-        </div>
-      ) : (
-        <div>
-          <div style={{ marginBottom: 8, fontWeight: 700 }}>Characters</div>
-          <div style={{ opacity: 0.7 }}>Project mode coming next</div>
-        </div>
-      )}
+            <AssetSection
+              title="Enemies"
+              entityType="enemy"
+              items={enemies}
+              onCreate={() => actions.createEnemy()}
+              createLabel="+ New Enemy"
+            />
+          </div>
+        ) : (
+          <div>
+            <div style={{ marginBottom: 8, fontWeight: 700 }}>Characters</div>
+            <div style={{ opacity: 0.7 }}>Project mode coming next</div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

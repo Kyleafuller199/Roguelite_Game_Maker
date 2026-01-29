@@ -4,9 +4,9 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 const EditorContext = createContext(null);
 
 const initialState = {
-  mode: "assets", // "assets" | "projects"
-  entityType: "card", // "card" | "relic" | "potion" | "enemy" | "globalPool" | "character"
-  selectedId: "card_basic_strike",
+  mode: "assets", // "assets" | "projects" in the future
+  entityType: "card", // "card" | "relic" | "potion" | "enemy" | "globalPool" | "character" in the future
+  selectedId: "card_basic_strike", // ID of the selected entity
 
   // Minimal data for the first loop
   assets: {

@@ -1,19 +1,11 @@
-// src/components/editor/EditorInspector.jsx
+/**
+ * EditorInspector.jsx
+ * Renders the inspector panel for the currently selected entity.
+ * (Currently: asset mode only; project mode comes later.)
+ */
 import { useEditor } from "@/state/editor/useEditor";
-
-function Label({ children }) {
-  return (
-    <label style={{ display: "block", marginBottom: 6, opacity: 0.8 }}>
-      {children}
-    </label>
-  );
-}
-
-function clampNumber(value, min, max) {
-  const n = Number(value);
-  if (Number.isNaN(n)) return min;
-  return Math.max(min, Math.min(max, n));
-}
+import Label from "@/components/editor/inspector/shared/Label";
+import clampNumber from "@/components/editor/inspector/shared/clampNumber";
 
 export default function EditorInspector() {
   const { state, actions } = useEditor();
@@ -27,7 +19,7 @@ export default function EditorInspector() {
 
   const { entityType, selectedId } = state;
 
-  // Get selected entity + update function based on entityType
+  // Resolve selected entity + update handler based on entity type
   let selected = null;
   let update = null;
 
@@ -53,7 +45,7 @@ export default function EditorInspector() {
     <div style={{ padding: 12 }}>
       <div style={{ fontWeight: 700, marginBottom: 12 }}>Identity</div>
 
-      {/* Name (shared) */}
+      {/* Shared: Name */}
       <Label>Name</Label>
       <input
         value={selected.name ?? ""}
@@ -70,9 +62,7 @@ export default function EditorInspector() {
             min={0}
             max={9}
             value={selected.cost ?? 0}
-            onChange={(e) =>
-              update({ cost: clampNumber(e.target.value, 0, 9) })
-            }
+            onChange={(e) => update({ cost: clampNumber(e.target.value, 0, 9) })}
             style={{ width: "100%", padding: 10, marginBottom: 12 }}
           />
 
@@ -144,9 +134,7 @@ export default function EditorInspector() {
             min={1}
             max={9}
             value={selected.uses ?? 1}
-            onChange={(e) =>
-              update({ uses: clampNumber(e.target.value, 1, 9) })
-            }
+            onChange={(e) => update({ uses: clampNumber(e.target.value, 1, 9) })}
             style={{ width: "100%", padding: 10 }}
           />
         </>
@@ -161,9 +149,7 @@ export default function EditorInspector() {
             min={1}
             max={999}
             value={selected.hp ?? 1}
-            onChange={(e) =>
-              update({ hp: clampNumber(e.target.value, 1, 999) })
-            }
+            onChange={(e) => update({ hp: clampNumber(e.target.value, 1, 999) })}
             style={{ width: "100%", padding: 10 }}
           />
         </>

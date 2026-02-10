@@ -6,7 +6,7 @@
 import { useEditor } from "@/state/editor/useEditor";
 import Label from "@/components/editor/inspector/shared/Label";
 
-import CardInspector from "@/components/editor/inspector/assets/CardInspector";
+import CardInspector from "@/components/editor/inspector/assets/cards/CardInspector";
 import RelicInspector from "@/components/editor/inspector/assets/RelicInspector";
 import PotionInspector from "@/components/editor/inspector/assets/PotionInspector";
 import EnemyInspector from "@/components/editor/inspector/assets/EnemyInspector";
@@ -57,16 +57,6 @@ export default function EditorInspector() {
 
   return (
     <div style={{ padding: 12 }}>
-      <div style={{ fontWeight: 700, marginBottom: 12 }}>Identity</div>
-
-      {/* Shared: Name */}
-      <Label>Name</Label>
-      <input
-        value={selected.name ?? ""}
-        onChange={(e) => update({ name: e.target.value })}
-        style={{ width: "100%", padding: 10, marginBottom: 12 }}
-      />
-
       {/* Asset-specific fields */}
       <Inspector selected={selected} update={update} />
     </div>

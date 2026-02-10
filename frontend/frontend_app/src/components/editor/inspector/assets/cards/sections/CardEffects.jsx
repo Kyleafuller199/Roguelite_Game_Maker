@@ -10,18 +10,18 @@ import clampNumber from "../../../shared/clampNumber";
 
 // Controls which fields appear for each effect type
 const EFFECT_CONFIG = {
-  damage: { label: "Damage", requiresTarget: true, supportsRepeat: true },
-  block: { label: "Block", requiresTarget: false, supportsRepeat: true },
-  heal: { label: "Heal", requiresTarget: false, supportsRepeat: true },
-  draw: { label: "Draw", requiresTarget: false, supportsRepeat: true },
-  gainEnergy: { label: "Gain Energy", requiresTarget: false, supportsRepeat: true },
-
-  weak: { label: "Weak", requiresTarget: true, supportsRepeat: true },
-  vulnerable: { label: "Vulnerable", requiresTarget: true, supportsRepeat: true },
-  frail: { label: "Frail", requiresTarget: true, supportsRepeat: true },
-  strength: { label: "Strength", requiresTarget: true, supportsRepeat: true },
-  dexterity: { label: "Dexterity", requiresTarget: true, supportsRepeat: true },
-};
+    damage: { label: "Damage", requiresTarget: true, supportsRepeat: true },
+    block: { label: "Block", requiresTarget: true, supportsRepeat: true },
+    heal: { label: "Heal", requiresTarget: true, supportsRepeat: true },
+    draw: { label: "Draw", requiresTarget: false, supportsRepeat: true },
+    gainEnergy: { label: "Gain Energy", requiresTarget: false, supportsRepeat: true },
+  
+    weak: { label: "Weak", requiresTarget: true, supportsRepeat: true },
+    vulnerable: { label: "Vulnerable", requiresTarget: true, supportsRepeat: true },
+    frail: { label: "Frail", requiresTarget: true, supportsRepeat: true },
+    strength: { label: "Strength", requiresTarget: true, supportsRepeat: true },
+    dexterity: { label: "Dexterity", requiresTarget: true, supportsRepeat: true },
+  };
 
 const EFFECT_TYPES = Object.keys(EFFECT_CONFIG);
 
@@ -38,7 +38,7 @@ function normalizeEffectForType(effect, nextType) {
   if (!cfg.supportsRepeat) delete next.repeat;
 
   // Ensure defaults exist when needed
-  if (cfg.requiresTarget && !next.target) next.target = "enemy";
+  if (cfg.requiresTarget && !next.target) next.target = "selectedEnemy";
   if (cfg.supportsRepeat && (!next.repeat || next.repeat < 1)) next.repeat = 1;
 
   // baseValue always applies in V1
@@ -60,7 +60,7 @@ export default function CardEffects({ selected, update }) {
         id: makeId(),
         effectType: "damage",
         baseValue: 6,
-        target: "enemy",
+        target: "selectedEnemy",
         repeat: 1,
       },
       "damage"
@@ -145,7 +145,7 @@ export default function CardEffects({ selected, update }) {
                   <>
                     <Label>Target</Label>
                     <select
-                      value={eff.target ?? "enemy"}
+                      value={eff.target ?? "selectedEnemy"}
                       onChange={(e) => patchEffect(eff.id, { target: e.target.value })}
                       style={{ width: "100%", padding: 10, marginBottom: 12 }}
                     >

@@ -6,7 +6,7 @@
 import { useEditor } from "@/state/editor/useEditor";
 
 import CardInspector from "@/components/editor/inspector/assets/cards/CardInspector";
-import RelicInspector from "@/components/editor/inspector/assets/RelicInspector";
+import RelicInspector from "@/components/editor/inspector/assets/relics/RelicInspector";
 import PotionInspector from "@/components/editor/inspector/assets/PotionInspector";
 import EnemyInspector from "@/components/editor/inspector/assets/EnemyInspector";
 

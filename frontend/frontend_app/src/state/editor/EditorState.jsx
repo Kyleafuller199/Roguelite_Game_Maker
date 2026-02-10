@@ -15,7 +15,7 @@ import { createPotion, updateSelectedPotion, deleteSelectedPotion } from "@/stat
 import { createEnemy, updateSelectedEnemy, deleteSelectedEnemy } from "@/state/editor/assets/enemies";
 
 // localStorage key for editor persistence
-const STORAGE_KEY = "rgm_editor_state_v2";
+const STORAGE_KEY = "rgm_editor_state_v3";
 
 export function EditorProvider({ children }) {
   // Initialize state from localStorage (fallback to defaults)

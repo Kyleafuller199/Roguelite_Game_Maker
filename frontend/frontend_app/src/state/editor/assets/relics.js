@@ -1,7 +1,17 @@
 export function createRelic(setState) {
   setState((prev) => {
     const id = `relic_${Date.now()}`;
-    const newRelic = { id, name: "New Relic", tier: "Common" };
+
+    const newRelic = {
+      id,
+      imageId: "",
+      identity: {
+        name: "New Relic",
+        rarity: "Common",
+      },
+      effects: [],
+      triggers: [],
+    };
 
     return {
       ...prev,
@@ -19,10 +29,11 @@ export function createRelic(setState) {
     };
   });
 }
-  
+
 export function updateSelectedRelic(setState, patch) {
   setState((prev) => {
     if (prev.mode !== "assets" || prev.entityType !== "relic" || !prev.selectedId) return prev;
+
     const id = prev.selectedId;
     const current = prev.assets.relics.byId[id];
     if (!current) return prev;

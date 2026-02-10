@@ -1,11 +1,11 @@
 /**
- * CardImage.jsx
+ * RelicImage.jsx
  * Image section: display selected image + placeholder for adding/selecting images.
- * V1: stores an imageUrl string on the card (until switch to imageId + asset library).
+ * V1: stores an imageUrl string on the relic.
  */
 import Label from "../../../shared/Label";
 
-export default function CardImage({ selected, update }) {
+export default function RelicImage({ selected, update }) {
   const imageUrl = selected.imageUrl ?? "";
 
   return (
@@ -23,8 +23,12 @@ export default function CardImage({ selected, update }) {
       {imageUrl ? (
         <img
           src={imageUrl}
-          alt="Card"
-          style={{ width: "100%", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)" }}
+          alt="Relic"
+          style={{
+            width: "100%",
+            borderRadius: 8,
+            border: "1px solid rgba(0,0,0,0.1)",
+          }}
         />
       ) : (
         <div style={{ opacity: 0.7, fontSize: 14 }}>

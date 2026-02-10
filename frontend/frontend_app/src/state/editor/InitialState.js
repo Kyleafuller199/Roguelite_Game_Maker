@@ -35,13 +35,17 @@ export const initialState = {
       byId: {
         relic_ancient_coin: {
           id: "relic_ancient_coin",
-          name: "Ancient Coin",
-          tier: "Rare",
+          imageId: "",
+          identity: { name: "Ancient Coin", rarity: "Rare" },
+          effects: [],
+          triggers: [],
         },
         relic_burning_blood: {
           id: "relic_burning_blood",
-          name: "Burning Blood",
-          tier: "Starter",
+          imageId: "",
+          identity: { name: "Burning Blood", rarity: "Starter" },
+          effects: [],
+          triggers: [],
         },
       },
       allIds: ["relic_ancient_coin", "relic_burning_blood"],

@@ -12,6 +12,7 @@ function AssetSection({
   onCreate,
   createLabel,
   onSelect,
+  getItemLabel,
 }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -52,7 +53,7 @@ function AssetSection({
                 cursor: "pointer",
               }}
             >
-              {item.name}
+              {getItemLabel ? getItemLabel(item) : item.name}
             </button>
           );
         })}
@@ -131,6 +132,7 @@ export default function EditorSidebar() {
               onCreate={actions.createCard}
               createLabel="+ New Card"
               onSelect={actions.selectEntity}
+              getItemLabel={(c) => c.name ?? "Unnamed Card"}
             />
 
             <AssetSection
@@ -142,6 +144,7 @@ export default function EditorSidebar() {
               onCreate={actions.createRelic}
               createLabel="+ New Relic"
               onSelect={actions.selectEntity}
+              getItemLabel={(r) => r.identity?.name ?? r.name ?? "Unnamed Relic"}
             />
 
             <AssetSection
@@ -153,6 +156,7 @@ export default function EditorSidebar() {
               onCreate={actions.createPotion}
               createLabel="+ New Potion"
               onSelect={actions.selectEntity}
+              getItemLabel={(p) => p.name ?? "Unnamed Potion"}
             />
 
             <AssetSection
@@ -164,6 +168,7 @@ export default function EditorSidebar() {
               onCreate={actions.createEnemy}
               createLabel="+ New Enemy"
               onSelect={actions.selectEntity}
+              getItemLabel={(e) => e.name ?? "Unnamed Enemy"}
             />
           </div>
         ) : (

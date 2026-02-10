@@ -1,7 +1,18 @@
 export function createPotion(setState) {
   setState((prev) => {
     const id = `potion_${Date.now()}`;
-    const newPotion = { id, name: "New Potion", rarity: "Common", uses: 1 };
+
+    const newPotion = {
+      id,
+      imageId: "",
+      imageUrl: "",
+      identity: {
+        name: "New Potion",
+        rarity: "Common",
+        useContext: "anyTime",
+      },
+      effects: [],
+    };
 
     return {
       ...prev,
@@ -19,7 +30,7 @@ export function createPotion(setState) {
     };
   });
 }
-  
+
 export function updateSelectedPotion(setState, patch) {
   setState((prev) => {
     if (prev.mode !== "assets" || prev.entityType !== "potion" || !prev.selectedId) return prev;

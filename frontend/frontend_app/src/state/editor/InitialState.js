@@ -55,15 +55,17 @@ export const initialState = {
       byId: {
         potion_fire: {
           id: "potion_fire",
-          name: "Fire Potion",
-          rarity: "Common",
-          uses: 1,
+          imageId: "",
+          imageUrl: "",
+          identity: { name: "Fire Potion", rarity: "Common", useContext: "anyTime" },
+          effects: [],
         },
         potion_strength: {
           id: "potion_strength",
-          name: "Strength Potion",
-          rarity: "Uncommon",
-          uses: 1,
+          imageId: "",
+          imageUrl: "",
+          identity: { name: "Strength Potion", rarity: "Uncommon", useContext: "anyTime" },
+          effects: [],
         },
       },
       allIds: ["potion_fire", "potion_strength"],

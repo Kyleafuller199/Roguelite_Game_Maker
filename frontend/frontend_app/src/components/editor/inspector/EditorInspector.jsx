@@ -7,7 +7,7 @@ import { useEditor } from "@/state/editor/useEditor";
 
 import CardInspector from "@/components/editor/inspector/assets/cards/CardInspector";
 import RelicInspector from "@/components/editor/inspector/assets/relics/RelicInspector";
-import PotionInspector from "@/components/editor/inspector/assets/PotionInspector";
+import PotionInspector from "@/components/editor/inspector/assets//potions/PotionInspector";
 import EnemyInspector from "@/components/editor/inspector/assets/EnemyInspector";
 
 // Maps entity types to their inspector components

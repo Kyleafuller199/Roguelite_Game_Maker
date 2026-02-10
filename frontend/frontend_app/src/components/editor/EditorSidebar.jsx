@@ -156,7 +156,7 @@ export default function EditorSidebar() {
               onCreate={actions.createPotion}
               createLabel="+ New Potion"
               onSelect={actions.selectEntity}
-              getItemLabel={(p) => p.name ?? "Unnamed Potion"}
+              getItemLabel={(r) => r.identity?.name ?? r.name ?? "Unnamed Potion"}
             />
 
             <AssetSection

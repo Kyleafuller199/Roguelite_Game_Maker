@@ -50,9 +50,9 @@ def run_interactive(graph, icons):
                     node = graph.nodes[nid]
                     icon = icons[node.type]
                     w, h = icon.get_size()
-                    rect = pygame.Rect(node.x - w//2, node.y - h//2, w, h)
-                    if rect.collidepoint(mx, my):
+                    if node.is_clicked(mx, my, NODE_RADIUS):
                         current_node = node
+
                         print(f"Entered {node.type} node (row {node.row})")
                         break
 

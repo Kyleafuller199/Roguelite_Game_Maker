@@ -6,37 +6,38 @@ import pygame
 import os
 from config import ICONS_DIR, MAP_WIDTH, MAP_HEIGHT
 
-def load_icons_pygame():
-    pygame.init()
-    pygame.display.set_mode((MAP_WIDTH, MAP_HEIGHT))  # Required for convert_alpha()
+NODE_TYPES = ["start", "battle", "rest", "treasure", "elite", "event", "boss"]
 
+def load_icons(loader, post_process=None):
     icons = {}
-    for name in ["start", "battle", "rest", "treasure", "elite", "event", "boss"]:
+    for name in NODE_TYPES:
         path = os.path.join(ICONS_DIR, f"{name}.png")
-        icon = pygame.image.load(path).convert_alpha()
-        icon = pygame.transform.smoothscale(icon, (48, 48))
+        icon = loader(path)
+        if post_process:
+            icon = post_process(icon)
         icons[name] = icon
     return icons
 
-def load_icons_pil():
-    icons = {}
-    for name in ["start", "battle", "rest", "treasure", "elite", "event", "boss"]:
-        path = os.path.join(ICONS_DIR, f"{name}.png")
-        icons[name] = Image.open(path).convert("RGBA")
-    return icons
 
 def main():
     graph = generate_map(seed=None)
 
-    # Render printable map
-    icons_pil = load_icons_pil()
+    # Render printable map (PIL)
+    icons_pil = load_icons(
+        loader=lambda p: Image.open(p).convert("RGBA")
+    )
     render_map(graph, icons_pil)
 
-    # Load pygame icons
-    icons_pygame = load_icons_pygame()
+    # Interactive map (pygame)
+    pygame.init()
+    pygame.display.set_mode((MAP_WIDTH, MAP_HEIGHT))
 
-    # Run interactive map
+    icons_pygame = load_icons(
+        loader=lambda p: pygame.image.load(p).convert_alpha(),
+        post_process=lambda i: pygame.transform.smoothscale(i, (48, 48))
+    )
     run_interactive(graph, icons_pygame)
+
 
 if __name__ == "__main__":
     main()

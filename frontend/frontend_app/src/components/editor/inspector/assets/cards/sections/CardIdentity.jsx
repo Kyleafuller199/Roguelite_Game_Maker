@@ -1,13 +1,15 @@
 /**
- * CardInspector.jsx
- * Renders card-specific inspector fields (assets mode).
+ * CardIdentity.jsx
+ * Identity fields: name/cost/type/rarity.
  */
-import Label from "../shared/Label";
-import clampNumber from "../shared/clampNumber";
+import Label from "../../../shared/Label";
+import clampNumber from "../../../shared/clampNumber";
 
-export default function CardInspector({ selected, update }) {
+export default function CardIdentitySection({ selected, update }) {
   return (
     <>
+      <div style={{ fontWeight: 700, marginBottom: 12 }}>Identity</div>
+
       <Label>Cost</Label>
       <input
         type="number"

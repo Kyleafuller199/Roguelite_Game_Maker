@@ -10,9 +10,9 @@ import { EditorContext } from "@/state/editor/editorContext";
 
 // Asset action delegates (kept separate for scalability)
 import { createCard, updateSelectedCard, deleteSelectedCard } from "@/state/editor/assets/cards";
-import { createRelic, updateSelectedRelic } from "@/state/editor/assets/relics";
-import { createPotion, updateSelectedPotion } from "@/state/editor/assets/potions";
-import { createEnemy, updateSelectedEnemy } from "@/state/editor/assets/enemies";
+import { createRelic, updateSelectedRelic, deleteSelectedRelic } from "@/state/editor/assets/relics";
+import { createPotion, updateSelectedPotion, deleteSelectedPotion } from "@/state/editor/assets/potions";
+import { createEnemy, updateSelectedEnemy, deleteSelectedEnemy } from "@/state/editor/assets/enemies";
 
 // localStorage key for editor persistence
 const STORAGE_KEY = "rgm_editor_state_v2";
@@ -62,12 +62,15 @@ export function EditorProvider({ children }) {
 
       createRelic() { createRelic(setState); },
       updateSelectedRelic(patch) { updateSelectedRelic(setState, patch); },
+      deleteSelectedRelic() { deleteSelectedRelic(setState); },
 
       createPotion() { createPotion(setState); },
       updateSelectedPotion(patch) { updateSelectedPotion(setState, patch); },
+      deleteSelectedPotion() { deleteSelectedPotion(setState); },
 
       createEnemy() { createEnemy(setState); },
       updateSelectedEnemy(patch) { updateSelectedEnemy(setState, patch); },
+      deleteSelectedEnemy() { deleteSelectedEnemy(setState); },
     }),
     []
   );

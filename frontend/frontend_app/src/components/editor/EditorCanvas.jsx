@@ -1,5 +1,5 @@
 // src/components/editor/EditorCanvas.jsx
-import { useEditor } from "@/state/editor/EditorState";
+import { useEditor } from "@/state/editor/useEditor";
 
 export default function EditorCanvas() {
   const { state } = useEditor();

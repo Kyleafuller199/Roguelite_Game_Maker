@@ -1,5 +1,5 @@
 // src/components/editor/EditorInspector.jsx
-import { useEditor } from "@/state/editor/EditorState";
+import { useEditor } from "@/state/editor/useEditor";
 
 function Label({ children }) {
   return (

@@ -24,9 +24,9 @@ function Toggle({ label, checked, onChange }) {
         <div style={{ fontWeight: 700, marginBottom: 12 }}>Rules</div>
   
         <Toggle
-          label="Playable"
-          checked={Boolean(selected.playable)}
-          onChange={(e) => setFlag("playable", e.target.checked)}
+          label="Unplayable"
+          checked={Boolean(selected.unplayable)}
+          onChange={(e) => setFlag("unplayable", e.target.checked)}
         />
         <Toggle
           label="Ethereal"

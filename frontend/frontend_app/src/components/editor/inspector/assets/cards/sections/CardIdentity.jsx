@@ -10,6 +10,13 @@ export default function CardIdentitySection({ selected, update }) {
     <>
       <div style={{ fontWeight: 700, marginBottom: 12 }}>Identity</div>
 
+      <Label>Name</Label>
+      <input
+        value={selected.name ?? ""}
+        onChange={(e) => update({ name: e.target.value })}
+        style={{ width: "100%", padding: 10, marginBottom: 12 }}
+      />
+
       <Label>Cost</Label>
       <input
         type="number"
@@ -29,7 +36,6 @@ export default function CardIdentitySection({ selected, update }) {
         <option value="Attack">Attack</option>
         <option value="Skill">Skill</option>
         <option value="Power">Power</option>
-        <option value="Status">Status</option>
         <option value="Curse">Curse</option>
       </select>
 
@@ -42,8 +48,6 @@ export default function CardIdentitySection({ selected, update }) {
         <option value="Common">Common</option>
         <option value="Uncommon">Uncommon</option>
         <option value="Rare">Rare</option>
-        <option value="Starter">Starter</option>
-        <option value="Special">Special</option>
         <option value="Curse">Curse</option>
       </select>
     </>

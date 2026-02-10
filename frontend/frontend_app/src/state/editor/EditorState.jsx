@@ -9,7 +9,7 @@ import { initialState } from "@/state/editor/initialState";
 import { EditorContext } from "@/state/editor/editorContext";
 
 // Asset action delegates (kept separate for scalability)
-import { createCard, updateSelectedCard } from "@/state/editor/assets/cards";
+import { createCard, updateSelectedCard, deleteSelectedCard } from "@/state/editor/assets/cards";
 import { createRelic, updateSelectedRelic } from "@/state/editor/assets/relics";
 import { createPotion, updateSelectedPotion } from "@/state/editor/assets/potions";
 import { createEnemy, updateSelectedEnemy } from "@/state/editor/assets/enemies";
@@ -58,6 +58,7 @@ export function EditorProvider({ children }) {
       // Asset actions (delegated)
       createCard() { createCard(setState); },
       updateSelectedCard(patch) { updateSelectedCard(setState, patch); },
+      deleteSelectedCard() { deleteSelectedCard(setState); },
 
       createRelic() { createRelic(setState); },
       updateSelectedRelic(patch) { updateSelectedRelic(setState, patch); },

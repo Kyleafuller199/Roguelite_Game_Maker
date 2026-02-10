@@ -53,7 +53,7 @@ export default function CardPreview({ selected }) {
   
         <Section title="Rules">
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            <RuleTag label="Playable" on={Boolean(selected.playable)} />
+            <RuleTag label="Unplayable" on={Boolean(selected.unplayable)} />
             <RuleTag label="Ethereal" on={Boolean(selected.ethereal)} />
             <RuleTag label="Exhaust" on={Boolean(selected.exhaust)} />
             <RuleTag label="Innate" on={Boolean(selected.innate)} />

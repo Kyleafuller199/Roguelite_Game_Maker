@@ -99,7 +99,6 @@ export default function EditorSidebar() {
           top: 0,
           zIndex: 10,
           padding: 12,
-          background: "#101013",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
         }}
       >

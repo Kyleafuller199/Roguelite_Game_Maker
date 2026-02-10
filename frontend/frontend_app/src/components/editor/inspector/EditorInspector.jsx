@@ -4,7 +4,6 @@
  * (Currently: asset mode only; project mode comes later.)
  */
 import { useEditor } from "@/state/editor/useEditor";
-import Label from "@/components/editor/inspector/shared/Label";
 
 import CardInspector from "@/components/editor/inspector/assets/cards/CardInspector";
 import RelicInspector from "@/components/editor/inspector/assets/RelicInspector";
@@ -56,9 +55,24 @@ export default function EditorInspector() {
   }
 
   return (
-    <div style={{ padding: 12 }}>
-      {/* Asset-specific fields */}
-      <Inspector selected={selected} update={update} />
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        minHeight: 0, // lets the scroll container shrink inside a flex parent
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: 12,
+          minHeight: 0,
+        }}
+      >
+        <Inspector selected={selected} update={update} />
+      </div>
     </div>
   );
 }

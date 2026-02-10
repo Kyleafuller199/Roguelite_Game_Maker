@@ -6,3 +6,5 @@ html, body, #root {
   body {
     overflow: hidden;
   }
+
+  * { box-sizing: border-box; }

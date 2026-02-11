@@ -168,7 +168,7 @@ export default function EditorSidebar() {
               onCreate={actions.createEnemy}
               createLabel="+ New Enemy"
               onSelect={actions.selectEntity}
-              getItemLabel={(e) => e.name ?? "Unnamed Enemy"}
+              getItemLabel={(e) => e.identity?.name ?? e.name ?? "Unnamed Enemy"}
             />
           </div>
         ) : (

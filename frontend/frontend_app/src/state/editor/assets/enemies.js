@@ -1,7 +1,23 @@
 export function createEnemy(setState) {
   setState((prev) => {
     const id = `enemy_${Date.now()}`;
-    const newEnemy = { id, name: "New Enemy", hp: 30 };
+
+    const newEnemy = {
+      id,
+      imageUrl: "", // V1 (same idea as card/relic/potion)
+      identity: {
+        name: "New Enemy",
+        enemyType: "normal", // normal | elite | boss
+        act: 1,
+        maxHealth: 40,
+        startingBlock: 0,
+      },
+      moves: [],
+      behavior: {
+        behaviorType: "cycle", // cycle | custom (for now)
+        cycleOrder: [],        // array of move ids
+      },
+    };
 
     return {
       ...prev,

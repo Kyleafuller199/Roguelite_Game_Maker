@@ -59,6 +59,8 @@ export default function RelicPreview({ selected }) {
   );
 }
 
+/* ---------- helpers ---------- */
+
 function Section({ title, children }) {
   return (
     <div style={{ marginTop: 14 }}>

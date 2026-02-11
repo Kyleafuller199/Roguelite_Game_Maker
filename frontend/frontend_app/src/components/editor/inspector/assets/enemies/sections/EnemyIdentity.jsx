@@ -25,11 +25,11 @@ export default function EnemyIdentity({ selected, update }) {
 
       <Label>Type</Label>
       <select
-        value={identity.enemyType ?? "normal"}
+        value={identity.enemyType ?? "basic"}
         onChange={(e) => patchIdentity({ enemyType: e.target.value })}
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       >
-        <option value="normal">Normal</option>
+        <option value="basic">Basic</option>
         <option value="elite">Elite</option>
         <option value="boss">Boss</option>
       </select>

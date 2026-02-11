@@ -13,8 +13,16 @@ const BEHAVIOR_TYPES = [
 ];
 
 function moveLabel(m) {
-  return `${m.name ?? "Unnamed Move"} (${m.id})`;
+  // Removed id from label
+  return m.name ?? "Unnamed Move";
 }
+
+const actionBtnStyle = {
+  padding: "4px 8px",
+  cursor: "pointer",
+  flex: "0 0 auto",
+  maxWidth: "100%",
+};
 
 export default function EnemyBehavior({ selected, update }) {
   const moves = useMemo(() => selected.moves ?? [], [selected.moves]);
@@ -53,7 +61,6 @@ export default function EnemyBehavior({ selected, update }) {
     setBehavior({ ...behavior, cycleOrder: next });
   }
 
-  // Only allow ids that exist
   const moveById = new Map(moves.map((m) => [m.id, m]));
   const availableMoves = moves;
 
@@ -105,7 +112,7 @@ export default function EnemyBehavior({ selected, update }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {cycleOrder.map((moveId, idx) => {
                 const m = moveById.get(moveId);
-                const label = m ? moveLabel(m) : `Missing move (${moveId})`;
+                const label = m ? moveLabel(m) : "Missing move";
 
                 return (
                   <div
@@ -117,22 +124,31 @@ export default function EnemyBehavior({ selected, update }) {
                       padding: 10,
                       border: "1px solid rgba(0,0,0,0.10)",
                       borderRadius: 8,
+                      maxWidth: "100%",
+                      overflow: "hidden", // keeps buttons from pushing layout wider
                     }}
                   >
-                    <div style={{ flex: 1, fontSize: 14 }}>
+                    <div
+                      style={{
+                        flex: "1 1 auto",
+                        fontSize: 14,
+                        minWidth: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      title={label}
+                    >
                       <b>{idx + 1}.</b> {label}
                     </div>
 
-                    <button onClick={() => moveUp(idx)} style={{ padding: "4px 8px", cursor: "pointer" }}>
+                    <button onClick={() => moveUp(idx)} style={actionBtnStyle}>
                       ↑
                     </button>
-                    <button onClick={() => moveDown(idx)} style={{ padding: "4px 8px", cursor: "pointer" }}>
+                    <button onClick={() => moveDown(idx)} style={actionBtnStyle}>
                       ↓
                     </button>
-                    <button
-                      onClick={() => removeFromOrder(idx)}
-                      style={{ padding: "4px 8px", cursor: "pointer" }}
-                    >
+                    <button onClick={() => removeFromOrder(idx)} style={actionBtnStyle}>
                       Remove
                     </button>
                   </div>

@@ -7,7 +7,7 @@ export function createEnemy(setState) {
       imageUrl: "", // V1 (same idea as card/relic/potion)
       identity: {
         name: "New Enemy",
-        enemyType: "normal", // normal | elite | boss
+        enemyType: "basic", // basic | elite | boss
         act: 1,
         maxHealth: 40,
         startingBlock: 0,

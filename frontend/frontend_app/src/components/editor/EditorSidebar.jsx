@@ -1,61 +1,88 @@
 // src/components/editor/EditorSidebar.jsx
-import { useEditor } from "@/state/editor/EditorState";
+import { useMemo } from "react";
+import { useEditor } from "@/state/editor/useEditor";
+
+// Reusable section component (defined at module scope; not recreated per render)
+function AssetSection({
+  title,
+  entityType,
+  items,
+  selectedEntityType,
+  selectedId,
+  onCreate,
+  createLabel,
+  onSelect,
+  getItemLabel,
+}) {
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 8, fontWeight: 700 }}>{title}</div>
+
+      <button
+        onClick={onCreate}
+        style={{
+          width: "100%",
+          textAlign: "left",
+          padding: 12,
+          marginBottom: 10,
+          cursor: "pointer",
+        }}
+      >
+        {createLabel}
+      </button>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {items.map((item) => {
+          const selected =
+            selectedEntityType === entityType && selectedId === item.id;
+
+          return (
+            <button
+              key={item.id}
+              onClick={(e) => {
+                e.preventDefault();
+                e.currentTarget.blur(); // prevents focus-driven scroll jump
+                onSelect(entityType, item.id);
+              }}
+              style={{
+                textAlign: "left",
+                padding: 12,
+                border: "transparent",
+                background: selected ? "#888" : "transparent",
+                color: "inherit",
+                cursor: "pointer",
+              }}
+            >
+              {getItemLabel ? getItemLabel(item) : item.name}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function EditorSidebar() {
   const { state, actions } = useEditor();
   const isAssets = state.mode === "assets";
 
-  const cards = state.assets.cards.allIds.map((id) => state.assets.cards.byId[id]);
-  const relics = state.assets.relics.allIds.map((id) => state.assets.relics.byId[id]);
-  const potions = state.assets.potions.allIds.map((id) => state.assets.potions.byId[id]);
-  const enemies = state.assets.enemies.allIds.map((id) => state.assets.enemies.byId[id]);
-
-  function AssetSection({ title, entityType, items, onCreate, createLabel }) {
-    return (
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ marginBottom: 8, fontWeight: 700 }}>{title}</div>
-
-        <button
-          onClick={onCreate}
-          style={{
-            width: "100%",
-            textAlign: "left",
-            padding: 12,
-            marginBottom: 10,
-            cursor: "pointer",
-          }}
-        >
-          {createLabel}
-        </button>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {items.map((item) => {
-            const selected = state.entityType === entityType && state.selectedId === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.blur(); // prevents focus-driven scroll jump
-                  actions.selectEntity(entityType, item.id);
-                }}                
-                style={{
-                  textAlign: "left",
-                  padding: 12,
-                  border: "transparent",
-                  background: selected ? "#888" : "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                }}
-              >
-                {item.name}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
+  // Derive lists once per state change
+  const cards = useMemo(
+    () => state.assets.cards.allIds.map((id) => state.assets.cards.byId[id]),
+    [state.assets.cards.allIds, state.assets.cards.byId]
+  );
+  const relics = useMemo(
+    () => state.assets.relics.allIds.map((id) => state.assets.relics.byId[id]),
+    [state.assets.relics.allIds, state.assets.relics.byId]
+  );
+  const potions = useMemo(
+    () => state.assets.potions.allIds.map((id) => state.assets.potions.byId[id]),
+    [state.assets.potions.allIds, state.assets.potions.byId]
+  );
+  const enemies = useMemo(
+    () => state.assets.enemies.allIds.map((id) => state.assets.enemies.byId[id]),
+    [state.assets.enemies.allIds, state.assets.enemies.byId]
+  );
 
   return (
     <div
@@ -63,7 +90,7 @@ export default function EditorSidebar() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        minHeight: 0, // IMPORTANT: allows child overflow to work in flex layouts
+        minHeight: 0, // allows child overflow to work in flex layouts
       }}
     >
       {/* Sticky header */}
@@ -73,7 +100,6 @@ export default function EditorSidebar() {
           top: 0,
           zIndex: 10,
           padding: 12,
-          background: "#101013", // set to your sidebar bg
           borderBottom: "1px solid rgba(255,255,255,0.08)",
         }}
       >
@@ -94,46 +120,55 @@ export default function EditorSidebar() {
       </div>
 
       {/* Scrollable content */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: 12,
-          minHeight: 0,
-        }}
-      >
+      <div style={{ flex: 1, overflowY: "auto", padding: 12, minHeight: 0 }}>
         {isAssets ? (
           <div>
             <AssetSection
               title="Cards"
               entityType="card"
               items={cards}
-              onCreate={() => actions.createCard()}
+              selectedEntityType={state.entityType}
+              selectedId={state.selectedId}
+              onCreate={actions.createCard}
               createLabel="+ New Card"
+              onSelect={actions.selectEntity}
+              getItemLabel={(c) => c.name ?? "Unnamed Card"}
             />
 
             <AssetSection
               title="Relics"
               entityType="relic"
               items={relics}
-              onCreate={() => actions.createRelic()}
+              selectedEntityType={state.entityType}
+              selectedId={state.selectedId}
+              onCreate={actions.createRelic}
               createLabel="+ New Relic"
+              onSelect={actions.selectEntity}
+              getItemLabel={(r) => r.identity?.name ?? r.name ?? "Unnamed Relic"}
             />
 
             <AssetSection
               title="Potions"
               entityType="potion"
               items={potions}
-              onCreate={() => actions.createPotion()}
+              selectedEntityType={state.entityType}
+              selectedId={state.selectedId}
+              onCreate={actions.createPotion}
               createLabel="+ New Potion"
+              onSelect={actions.selectEntity}
+              getItemLabel={(r) => r.identity?.name ?? r.name ?? "Unnamed Potion"}
             />
 
             <AssetSection
               title="Enemies"
               entityType="enemy"
               items={enemies}
-              onCreate={() => actions.createEnemy()}
+              selectedEntityType={state.entityType}
+              selectedId={state.selectedId}
+              onCreate={actions.createEnemy}
               createLabel="+ New Enemy"
+              onSelect={actions.selectEntity}
+              getItemLabel={(e) => e.identity?.name ?? e.name ?? "Unnamed Enemy"}
             />
           </div>
         ) : (

@@ -1,4 +1,26 @@
-export default function ThreeColumnLayout({ header, left, right, children }) {
+/**
+ * ThreeColumnLayout.jsx
+ *
+ * Core editor layout.
+ *
+ * Responsibilities:
+ * - Renders a header
+ * - Provides fixed-width left sidebar
+ * - Provides scrollable center canvas area
+ * - Provides fixed-width right inspector panel
+ *
+ * Designed specifically for the Editor page.
+ */
+
+ /**
+  * ThreeColumnLayout
+  *
+  * @param {ReactNode} header - Top header component
+  * @param {ReactNode} left - Left sidebar content
+  * @param {ReactNode} right - Right inspector content
+  * @param {ReactNode} children - Center canvas content
+  */
+ export default function ThreeColumnLayout({ header, left, right, children }) {
   return (
     <div
       style={{
@@ -8,8 +30,10 @@ export default function ThreeColumnLayout({ header, left, right, children }) {
         overflow: "hidden",
       }}
     >
-      <div style={{ flex: "0 0 auto" }}>{header}</div>
+      {/* Header */}
+      {header && <div style={{ flex: "0 0 auto" }}>{header}</div>}
 
+      {/* Main Editor Surface */}
       <div
         style={{
           flex: "1 1 auto",
@@ -17,45 +41,49 @@ export default function ThreeColumnLayout({ header, left, right, children }) {
           minHeight: 0,
         }}
       >
-        {/* LEFT / Editor Sidebar */}
-        <aside
-          style={{
-            width: 240,
-            flexShrink: 0,
-            boxSizing: "border-box",
-            borderRight: "1px solid #ddd",
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
-          {left}
-        </aside>
+        {/* Left Sidebar */}
+        {left && (
+          <aside
+            style={{
+              width: 240,
+              flexShrink: 0,
+              boxSizing: "border-box",
+              borderRight: "1px solid #ddd",
+              minHeight: 0,
+              overflow: "hidden",
+            }}
+          >
+            {left}
+          </aside>
+        )}
 
-        {/* CENTER */}
+        {/* Center Canvas Area */}
         <main
           style={{
             flex: 1,
             minHeight: 0,
-            overflow: "auto",
+            overflow: "auto", // Enables scrolling in center panel
             padding: 16,
           }}
         >
           {children}
         </main>
 
-        {/* RIGHT / Inspector */}
-        <aside
-          style={{
-            width: 260,
-            flexShrink: 0,
-            boxSizing: "border-box",
-            borderLeft: "1px solid #ddd",
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
-          {right}
-        </aside>
+        {/* Right Inspector */}
+        {right && (
+          <aside
+            style={{
+              width: 360,
+              flexShrink: 0,
+              boxSizing: "border-box",
+              borderLeft: "1px solid #ddd",
+              minHeight: 0,
+              overflow: "hidden",
+            }}
+          >
+            {right}
+          </aside>
+        )}
       </div>
     </div>
   );

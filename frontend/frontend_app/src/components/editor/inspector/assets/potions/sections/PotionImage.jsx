@@ -1,10 +1,27 @@
 /**
  * PotionImage.jsx
- * Image section for potions.
+ *
+ * Inspector section responsible for editing the potion's visual reference.
+ *
+ * V1 Storage:
+ * - Stores a direct `imageUrl` string on the potion object.
+ *
+ * JSON Shape Controlled Here:
+ * potion.imageUrl = string
+ *
+ * Future Direction:
+ * - Replace `imageUrl` with `imageId` referencing an image in the asset library
+ *   (normalized storage + reuse across assets/projects).
+ *
+ * Responsibility:
+ * - Provide a URL input for the image
+ * - Show a simple preview when a URL is present
  */
+
 import Label from "../../../shared/Label";
 
 export default function PotionImage({ selected, update }) {
+  // Always treat missing value as empty string for controlled input stability
   const imageUrl = selected.imageUrl ?? "";
 
   return (
@@ -19,6 +36,7 @@ export default function PotionImage({ selected, update }) {
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
+      {/* Preview if an image URL exists; otherwise show an empty state message */}
       {imageUrl ? (
         <img
           src={imageUrl}
@@ -30,9 +48,7 @@ export default function PotionImage({ selected, update }) {
           }}
         />
       ) : (
-        <div style={{ opacity: 0.7, fontSize: 14 }}>
-          No image selected
-        </div>
+        <div style={{ opacity: 0.7, fontSize: 14 }}>No image selected</div>
       )}
     </div>
   );

@@ -1,8 +1,38 @@
-// src/components/editor/EditorSidebar.jsx
+/**
+ * EditorSidebar.jsx
+ *
+ * Left navigation panel for the Editor page.
+ *
+ * Responsibilities:
+ * - Switches between editor modes ("assets" vs "project")
+ * - Lists entities for the current mode
+ * - Allows creating new entities
+ * - Allows selecting an entity to edit (drives canvas + inspector)
+ *
+ * Notes:
+ * - This component is UI-only; state is owned by the editor context (useEditor).
+ * - Scrolling is handled internally (sticky mode toggle + scrollable list).
+ */
+
 import { useMemo } from "react";
 import { useEditor } from "@/state/editor/useEditor";
 
-// Reusable section component (defined at module scope; not recreated per render)
+/**
+ * AssetSection
+ *
+ * Reusable list section used for each asset category (Cards, Relics, etc.).
+ * Defined at module scope so it is not recreated per render.
+ *
+ * @param {string} title - Section title shown above the list
+ * @param {string} entityType - Entity type string passed back on selection
+ * @param {Array<object>} items - List of entities to display
+ * @param {string} selectedEntityType - Currently selected entity type
+ * @param {string|number|null} selectedId - Currently selected entity id
+ * @param {Function} onCreate - Handler to create a new entity in this section
+ * @param {string} createLabel - Label for the create button
+ * @param {Function} onSelect - Handler to select an entity (entityType, id)
+ * @param {Function} getItemLabel - Optional label resolver for an item
+ */
 function AssetSection({
   title,
   entityType,
@@ -18,6 +48,7 @@ function AssetSection({
     <div style={{ marginBottom: 16 }}>
       <div style={{ marginBottom: 8, fontWeight: 700 }}>{title}</div>
 
+      {/* Create new entity in this section */}
       <button
         onClick={onCreate}
         style={{
@@ -31,6 +62,7 @@ function AssetSection({
         {createLabel}
       </button>
 
+      {/* Entity list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         {items.map((item) => {
           const selected =
@@ -41,7 +73,8 @@ function AssetSection({
               key={item.id}
               onClick={(e) => {
                 e.preventDefault();
-                e.currentTarget.blur(); // prevents focus-driven scroll jump
+                // Prevent focus styles from causing "scroll-to-focused" behavior in some browsers.
+                e.currentTarget.blur();
                 onSelect(entityType, item.id);
               }}
               style={{
@@ -62,11 +95,21 @@ function AssetSection({
   );
 }
 
+/**
+ * EditorSidebar
+ *
+ * Renders mode toggles (Assets / Projects) and the list for the active mode.
+ */
 export default function EditorSidebar() {
   const { state, actions } = useEditor();
   const isAssets = state.mode === "assets";
 
-  // Derive lists once per state change
+  /**
+   * Derive entity lists from normalized state (allIds + byId).
+   * useMemo keeps list identity stable unless the underlying slice changes.
+   *
+   * Note: In the future, you can simplify these to selector helpers in state/editor.
+   */
   const cards = useMemo(
     () => state.assets.cards.allIds.map((id) => state.assets.cards.byId[id]),
     [state.assets.cards.allIds, state.assets.cards.byId]
@@ -90,10 +133,10 @@ export default function EditorSidebar() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        minHeight: 0, // allows child overflow to work in flex layouts
+        minHeight: 0, // Enables child scrolling inside flex parents
       }}
     >
-      {/* Sticky header */}
+      {/* Mode toggle header stays visible while lists scroll */}
       <div
         style={{
           position: "sticky",
@@ -111,7 +154,7 @@ export default function EditorSidebar() {
             Assets
           </button>
           <button
-            onClick={() => actions.setMode("projects")}
+            onClick={() => actions.setMode("project")}
             style={{ flex: 1, fontWeight: !isAssets ? "700" : "400" }}
           >
             Projects
@@ -119,7 +162,7 @@ export default function EditorSidebar() {
         </div>
       </div>
 
-      {/* Scrollable content */}
+      {/* Scrollable section list */}
       <div style={{ flex: 1, overflowY: "auto", padding: 12, minHeight: 0 }}>
         {isAssets ? (
           <div>
@@ -156,7 +199,7 @@ export default function EditorSidebar() {
               onCreate={actions.createPotion}
               createLabel="+ New Potion"
               onSelect={actions.selectEntity}
-              getItemLabel={(r) => r.identity?.name ?? r.name ?? "Unnamed Potion"}
+              getItemLabel={(p) => p.identity?.name ?? p.name ?? "Unnamed Potion"}
             />
 
             <AssetSection

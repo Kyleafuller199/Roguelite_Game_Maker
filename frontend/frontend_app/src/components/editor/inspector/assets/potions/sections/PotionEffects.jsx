@@ -1,8 +1,29 @@
 /**
  * PotionEffects.jsx
- * Effect section: list editor for potion effects.
- * V1: stores effects as selected.effects[].
+ *
+ * Inspector section responsible for editing `potion.effects`.
+ *
+ * V1 Storage:
+ * - Stores effects directly on the potion object as `selected.effects[]`.
+ *
+ * JSON Shape Controlled Here:
+ * potion.effects = [
+ *   {
+ *     id: string,
+ *     effectType: string,     // keys from EFFECT_CONFIG
+ *     baseValue: number,
+ *     target?: string,        // only when required by effect type
+ *     repeat?: number         // only when supported by effect type
+ *   }
+ * ]
+ *
+ * Design Notes:
+ * - EFFECT_CONFIG drives both UI (which fields show) and normalization rules.
+ * - normalizeEffectForType keeps effect objects valid when switching types
+ *   by removing irrelevant fields and applying defaults.
+ * - IDs should be stable for persistence; use crypto.randomUUID() in the browser.
  */
+
 import { useMemo } from "react";
 import Label from "../../../shared/Label";
 import clampNumber from "../../../shared/clampNumber";
@@ -23,12 +44,23 @@ const EFFECT_CONFIG = {
 
 const EFFECT_TYPES = Object.keys(EFFECT_CONFIG);
 
+/**
+ * makeId
+ * Generates a stable UUID for newly created effects (frontend-friendly).
+ */
 function makeId(prefix = "eff") {
-  return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
+  return `${prefix}_${crypto.randomUUID()}`;
 }
 
+/**
+ * normalizeEffectForType
+ *
+ * Ensures an effect object matches the rules for its effectType:
+ * - Removes fields not used by the selected type (target/repeat)
+ * - Applies defaults for required fields
+ */
 function normalizeEffectForType(effect, nextType) {
-  const cfg = EFFECT_CONFIG[nextType];
+  const cfg = EFFECT_CONFIG[nextType] ?? EFFECT_CONFIG.damage;
   const next = { ...effect, effectType: nextType };
 
   if (!cfg.requiresTarget) delete next.target;
@@ -43,17 +75,25 @@ function normalizeEffectForType(effect, nextType) {
 }
 
 export default function PotionEffects({ selected, update }) {
+  // Effects list is owned by the selected potion.
   const effects = useMemo(() => selected.effects ?? [], [selected.effects]);
 
+  /**
+   * setEffects
+   * Replaces the entire effects array (immutable update).
+   */
   function setEffects(next) {
     update({ effects: next });
   }
 
+  /**
+   * addEffect
+   * Potion-friendly default: heal self.
+   */
   function addEffect() {
-    // Potion-friendly default: heal self
     const newEffect = normalizeEffectForType(
       {
-        id: makeId(),
+        id: makeId("eff"),
         effectType: "heal",
         baseValue: 12,
         target: "self",
@@ -65,20 +105,33 @@ export default function PotionEffects({ selected, update }) {
     setEffects([...effects, newEffect]);
   }
 
+  /**
+   * removeEffect
+   * Removes an effect by id.
+   */
   function removeEffect(id) {
     setEffects(effects.filter((e) => e.id !== id));
   }
 
+  /**
+   * patchEffect
+   * Applies a shallow patch to an effect by id.
+   */
   function patchEffect(id, patch) {
     setEffects(effects.map((e) => (e.id === id ? { ...e, ...patch } : e)));
   }
 
+  /**
+   * setEffectType
+   * Updates effectType and normalizes the effect object to match.
+   */
   function setEffectType(id, nextType) {
     setEffects(effects.map((e) => (e.id === id ? normalizeEffectForType(e, nextType) : e)));
   }
 
   return (
     <div style={{ marginTop: 16 }}>
+      {/* Section header + primary action */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontWeight: 700 }}>Effects</div>
         <button onClick={addEffect} style={{ padding: "6px 10px", cursor: "pointer" }}>
@@ -86,6 +139,7 @@ export default function PotionEffects({ selected, update }) {
         </button>
       </div>
 
+      {/* Empty state */}
       {effects.length === 0 ? (
         <div style={{ marginTop: 10, opacity: 0.7, fontSize: 14 }}>No effects yet.</div>
       ) : (
@@ -102,6 +156,7 @@ export default function PotionEffects({ selected, update }) {
                   borderRadius: 8,
                 }}
               >
+                {/* Effect header row */}
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                   <div style={{ fontWeight: 700, marginBottom: 10 }}>Effect</div>
                   <button
@@ -112,6 +167,7 @@ export default function PotionEffects({ selected, update }) {
                   </button>
                 </div>
 
+                {/* Effect type */}
                 <Label>Type</Label>
                 <select
                   value={eff.effectType}
@@ -125,6 +181,7 @@ export default function PotionEffects({ selected, update }) {
                   ))}
                 </select>
 
+                {/* Base value */}
                 <Label>Base Value</Label>
                 <input
                   type="number"
@@ -135,6 +192,7 @@ export default function PotionEffects({ selected, update }) {
                   style={{ width: "100%", padding: 10, marginBottom: 12 }}
                 />
 
+                {/* Target (conditional) */}
                 {cfg.requiresTarget && (
                   <>
                     <Label>Target</Label>
@@ -151,6 +209,7 @@ export default function PotionEffects({ selected, update }) {
                   </>
                 )}
 
+                {/* Repeat (conditional) */}
                 {cfg.supportsRepeat && (
                   <>
                     <Label>Times Repeated</Label>

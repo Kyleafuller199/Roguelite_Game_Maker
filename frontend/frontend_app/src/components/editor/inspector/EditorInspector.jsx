@@ -1,16 +1,29 @@
 /**
  * EditorInspector.jsx
- * Renders the inspector panel for the currently selected entity.
- * (Currently: asset mode only; project mode comes later.)
+ *
+ * Editor right panel renderer ("inspector" region).
+ *
+ * Responsibilities:
+ * - Displays editable fields for the currently selected entity
+ * - Routes to the correct inspector based on editor mode + entity type
+ * - Provides common inspector chrome (sticky header + delete action + scroll area)
+ *
+ * Current behavior:
+ * - Asset mode: renders an asset inspector for the selected entity
+ * - Project mode: placeholder (to be implemented)
  */
+
 import { useEditor } from "@/state/editor/useEditor";
 
 import CardInspector from "@/components/editor/inspector/assets/cards/CardInspector";
 import RelicInspector from "@/components/editor/inspector/assets/relics/RelicInspector";
-import PotionInspector from "@/components/editor/inspector/assets//potions/PotionInspector";
+import PotionInspector from "@/components/editor/inspector/assets/potions/PotionInspector";
 import EnemyInspector from "@/components/editor/inspector/assets/enemies/EnemyInspector";
 
-// Maps entity types to their inspector components
+/**
+ * Inspector component lookup by entity type.
+ * Keeps routing logic compact and consistent with EditorCanvas routing.
+ */
 const INSPECTORS = {
   card: CardInspector,
   relic: RelicInspector,
@@ -20,17 +33,26 @@ const INSPECTORS = {
 
 export default function EditorInspector() {
   const { state, actions } = useEditor();
+  const { mode, entityType, selectedId } = state;
 
-  const isAssetMode = state.mode === "assets";
-  const hasSelection = Boolean(state.selectedId);
-
-  if (!isAssetMode || !hasSelection) {
+  // Placeholder until project mode inspector is implemented.
+  if (mode !== "assets") {
     return <div style={{ padding: 12 }}>Select something to edit</div>;
   }
 
-  const { entityType, selectedId } = state;
+  // Asset mode requires a selection.
+  if (!selectedId || !entityType) {
+    return <div style={{ padding: 12 }}>Select something to edit</div>;
+  }
 
-  // Resolve selected entity + update handler + delete handler
+  /**
+   * Resolve:
+   * - selected entity from normalized state
+   * - update handler for the current entity type
+   * - delete handler for the current entity type
+   *
+   * Later, this can be extracted into a single selector/helper in state/editor.
+   */
   let selected = null;
   let update = null;
   let onDelete = null;
@@ -55,10 +77,16 @@ export default function EditorInspector() {
 
   const Inspector = INSPECTORS[entityType];
 
+  // Defensive rendering for stale selections or unsupported entity types.
   if (!selected || !update || !Inspector) {
     return <div style={{ padding: 12 }}>Selection not found</div>;
   }
 
+  /**
+   * Confirm before deleting to prevent accidental destructive actions.
+   * Keeping this confirm here (in the shared inspector chrome) avoids duplication
+   * across all asset inspector implementations.
+   */
   function handleDelete() {
     if (!onDelete) return;
     const ok = window.confirm(`Delete this ${entityType}? This cannot be undone.`);
@@ -72,10 +100,10 @@ export default function EditorInspector() {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        minHeight: 0,
+        minHeight: 0, // Enables scroll area to size correctly in flex layouts
       }}
     >
-      {/* Sticky header */}
+      {/* Sticky header: remains visible while inspector sections scroll */}
       <div
         style={{
           position: "sticky",
@@ -106,7 +134,7 @@ export default function EditorInspector() {
         </button>
       </div>
 
-      {/* Scroll area */}
+      {/* Scrollable content area */}
       <div style={{ flex: 1, overflowY: "auto", padding: 12, minHeight: 0 }}>
         <Inspector selected={selected} update={update} />
       </div>

@@ -1,15 +1,42 @@
 /**
  * CardIdentity.jsx
- * Identity fields: name/cost/type/rarity.
+ *
+ * Card identity section.
+ *
+ * JSON Shape Controlled Here:
+ * card.identity = {
+ *   name: string,
+ *   cost: number,
+ *   cardType: "attack" | "skill" | "power" | "curse",
+ *   cardRarity: "common" | "uncommon" | "rare" | "curse",
+ * }
+ *
+ * It is stateless and relies entirely on:
+ *   - `selected` (current entity snapshot)
+ *   - `update` (partial update handler)
  */
+
 import Label from "../../../shared/Label";
 import clampNumber from "../../../shared/clampNumber";
 
+/**
+ * CardIdentitySection
+ *
+ * @param {object} selected - Currently selected card entity
+ * @param {Function} update - Update handler (partial patch function)
+ *
+ * The `update` function is expected to merge partial updates
+ * into the selected card within editor state.
+ */
 export default function CardIdentitySection({ selected, update }) {
   return (
     <>
-      <div style={{ fontWeight: 700, marginBottom: 12 }}>Identity</div>
+      {/* Section Title */}
+      <div style={{ fontWeight: 700, marginBottom: 12 }}>
+        Identity
+      </div>
 
+      {/* Name */}
       <Label>Name</Label>
       <input
         value={selected.name ?? ""}
@@ -17,16 +44,22 @@ export default function CardIdentitySection({ selected, update }) {
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
+      {/* Cost */}
       <Label>Cost</Label>
       <input
         type="number"
         min={0}
         max={9}
         value={selected.cost ?? 0}
-        onChange={(e) => update({ cost: clampNumber(e.target.value, 0, 9) })}
+        onChange={(e) =>
+          update({
+            cost: clampNumber(e.target.value, 0, 9),
+          })
+        }
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
+      {/* Type */}
       <Label>Type</Label>
       <select
         value={selected.type ?? "Attack"}
@@ -39,6 +72,7 @@ export default function CardIdentitySection({ selected, update }) {
         <option value="Curse">Curse</option>
       </select>
 
+      {/* Rarity */}
       <Label>Rarity</Label>
       <select
         value={selected.rarity ?? "Common"}

@@ -1,4 +1,4 @@
-export function createPotion(setState) {
+export function createPotion(setState, name) {
   setState((prev) => {
     const id = `potion_${Date.now()}`;
 
@@ -7,7 +7,7 @@ export function createPotion(setState) {
       imageId: "",
       imageUrl: "",
       identity: {
-        name: "New Potion",
+        name: name || "New Potion",
         rarity: "Common",
         useContext: "anyTime",
       },

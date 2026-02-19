@@ -1,4 +1,4 @@
-export function createEnemy(setState) {
+export function createEnemy(setState, name) {
   setState((prev) => {
     const id = `enemy_${Date.now()}`;
 
@@ -6,7 +6,7 @@ export function createEnemy(setState) {
       id,
       imageUrl: "", // V1 (same idea as card/relic/potion)
       identity: {
-        name: "New Enemy",
+        name: name || "New Enemy",
         enemyType: "basic", // basic | elite | boss
         act: 1,
         maxHealth: 40,

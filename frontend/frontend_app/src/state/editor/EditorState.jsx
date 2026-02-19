@@ -206,8 +206,8 @@ export function EditorProvider({ children }) {
       // -------------------------------------------------
 
       /** Cards */
-      createCard() {
-        createCard(setState);
+      createCard(name) {
+        createCard(setState, name);
       },
       updateSelectedCard(patch) {
         updateSelectedCard(setState, patch);
@@ -217,8 +217,8 @@ export function EditorProvider({ children }) {
       },
 
       /** Relics */
-      createRelic() {
-        createRelic(setState);
+      createRelic(name) {
+        createRelic(setState, name);
       },
       updateSelectedRelic(patch) {
         updateSelectedRelic(setState, patch);
@@ -228,8 +228,8 @@ export function EditorProvider({ children }) {
       },
 
       /** Potions */
-      createPotion() {
-        createPotion(setState);
+      createPotion(name) {
+        createPotion(setState, name);
       },
       updateSelectedPotion(patch) {
         updateSelectedPotion(setState, patch);
@@ -239,8 +239,8 @@ export function EditorProvider({ children }) {
       },
 
       /** Enemies */
-      createEnemy() {
-        createEnemy(setState);
+      createEnemy(name) {
+        createEnemy(setState, name);
       },
       updateSelectedEnemy(patch) {
         updateSelectedEnemy(setState, patch);

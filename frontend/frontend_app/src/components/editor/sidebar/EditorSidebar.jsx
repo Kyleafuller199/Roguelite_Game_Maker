@@ -6,32 +6,44 @@
  * Responsibilities:
  * - Switches between editor modes ("assets" vs "project")
  * - Lists entities for the current mode
- * - Allows creating new entities
+ * - Opens NewAssetModal to create new assets (centralized "+ New Asset" button)
  * - Allows selecting an entity to edit (drives canvas + inspector)
  *
  * Notes:
- * - This component is UI-only; state is owned by the editor context (useEditor).
- * - Scrolling is handled internally (sticky mode toggle + scrollable list).
+ * - UI-only; all editor state is owned by EditorContext (useEditor).
+ * - Collapse state for asset sections is local — it's a pure UI preference
+ *   with no semantic meaning to the editor. Project tree expansion state
+ *   lives in EditorContext because it needs programmatic control.
+ * - Scrolling: sticky top section always visible, scrollable list below.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useEditor } from "@/state/editor/useEditor";
+import CollapsibleSection from "@/components/editor/shared/CollapsibleSection";
+import SidebarItem from "@/components/editor/shared/SidebarItem";
+import ProjectSidebar from "@/components/editor/sidebar/ProjectSidebar";
+import NewAssetModal from "@/components/editor/sidebar/modal/NewAssetModal";
+import {
+  sidebarContainer,
+  stickySection,
+  toggleRow,
+  sidebarButtonStyle,
+  toggleButtonStyle,
+} from "@/components/editor/shared/sidebarStyles";
 
 /**
  * AssetSection
  *
- * Reusable list section used for each asset category (Cards, Relics, etc.).
- * Defined at module scope so it is not recreated per render.
+ * One collapsible group for a single asset type (Cards, Relics, etc.).
+ * Owns its own open/closed state via local useState.
  *
- * @param {string} title - Section title shown above the list
- * @param {string} entityType - Entity type string passed back on selection
- * @param {Array<object>} items - List of entities to display
- * @param {string} selectedEntityType - Currently selected entity type
- * @param {string|number|null} selectedId - Currently selected entity id
- * @param {Function} onCreate - Handler to create a new entity in this section
- * @param {string} createLabel - Label for the create button
- * @param {Function} onSelect - Handler to select an entity (entityType, id)
- * @param {Function} getItemLabel - Optional label resolver for an item
+ * @param {string}          title               - Section heading
+ * @param {string}          entityType          - Asset type key ("card" | "relic" | etc.)
+ * @param {Array<object>}   items               - Resolved asset objects for this type
+ * @param {string}          selectedEntityType  - Currently active entity type
+ * @param {string|null}     selectedId          - Currently active entity id
+ * @param {Function}        onSelect            - Selects an asset (entityType, id)
+ * @param {Function}        [getItemLabel]      - Resolves display label from an item
  */
 function AssetSection({
   title,
@@ -39,76 +51,50 @@ function AssetSection({
   items,
   selectedEntityType,
   selectedId,
-  onCreate,
-  createLabel,
   onSelect,
   getItemLabel,
 }) {
+  const [isOpen, setIsOpen] = useState(true);
+
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ marginBottom: 8, fontWeight: 700 }}>{title}</div>
-
-      {/* Create new entity in this section */}
-      <button
-        onClick={onCreate}
-        style={{
-          width: "100%",
-          textAlign: "left",
-          padding: 12,
-          marginBottom: 10,
-          cursor: "pointer",
-        }}
-      >
-        {createLabel}
-      </button>
-
-      {/* Entity list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {items.map((item) => {
-          const selected =
-            selectedEntityType === entityType && selectedId === item.id;
-
-          return (
-            <button
-              key={item.id}
-              onClick={(e) => {
-                e.preventDefault();
-                // Prevent focus styles from causing "scroll-to-focused" behavior in some browsers.
-                e.currentTarget.blur();
-                onSelect(entityType, item.id);
-              }}
-              style={{
-                textAlign: "left",
-                padding: 12,
-                border: "transparent",
-                background: selected ? "#888" : "transparent",
-                color: "inherit",
-                cursor: "pointer",
-              }}
-            >
-              {getItemLabel ? getItemLabel(item) : item.name}
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <CollapsibleSection
+      title={title}
+      isOpen={isOpen}
+      onToggle={() => setIsOpen((o) => !o)}
+    >
+      {items.map((item) => (
+        <SidebarItem
+          key={item.id}
+          label={getItemLabel ? getItemLabel(item) : (item.name ?? "Unnamed")}
+          selected={selectedEntityType === entityType && selectedId === item.id}
+          onClick={() => onSelect(entityType, item.id)}
+          indent={1}
+        />
+      ))}
+    </CollapsibleSection>
   );
 }
 
 /**
  * EditorSidebar
  *
- * Renders mode toggles (Assets / Projects) and the list for the active mode.
+ * Renders the sticky top section (mode toggle + New Asset button) and the
+ * scrollable list for whichever mode is active.
  */
 export default function EditorSidebar() {
   const { state, actions } = useEditor();
   const isAssets = state.mode === "assets";
 
+  // Hover tracking for sticky-section buttons
+  const [hoveredBtn, setHoveredBtn] = useState(null);
+
+  // New Asset modal visibility
+  const [modalOpen, setModalOpen] = useState(false);
+
   /**
-   * Derive entity lists from normalized state (allIds + byId).
-   * useMemo keeps list identity stable unless the underlying slice changes.
-   *
-   * Note: In the future, you can simplify these to selector helpers in state/editor.
+   * Derive flat arrays from normalised state.
+   * useMemo keeps list identity stable so AssetSection doesn't re-render
+   * unless the relevant slice actually changed.
    */
   const cards = useMemo(
     () => state.assets.cards.allIds.map((id) => state.assets.cards.byId[id]),
@@ -128,99 +114,101 @@ export default function EditorSidebar() {
   );
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0, // Enables child scrolling inside flex parents
-      }}
-    >
-      {/* Mode toggle header stays visible while lists scroll */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          padding: 12,
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <div style={{ display: "flex", gap: 8 }}>
+    <div style={sidebarContainer}>
+
+      {/* ── Top sticky section ──────────────────────────────────── */}
+      <div style={stickySection}>
+
+        {/* Mode toggle — Assets | Projects */}
+        <div style={toggleRow}>
           <button
             onClick={() => actions.setMode("assets")}
-            style={{ flex: 1, fontWeight: isAssets ? "700" : "400" }}
+            onMouseEnter={() => setHoveredBtn("assets")}
+            onMouseLeave={() => setHoveredBtn(null)}
+            style={toggleButtonStyle(isAssets, hoveredBtn === "assets")}
           >
             Assets
           </button>
           <button
             onClick={() => actions.setMode("project")}
-            style={{ flex: 1, fontWeight: !isAssets ? "700" : "400" }}
+            onMouseEnter={() => setHoveredBtn("project")}
+            onMouseLeave={() => setHoveredBtn(null)}
+            style={toggleButtonStyle(!isAssets, hoveredBtn === "project")}
           >
             Projects
           </button>
         </div>
+
+        {/* New Asset / New Project action */}
+        <button
+          onMouseEnter={() => setHoveredBtn("action")}
+          onMouseLeave={() => setHoveredBtn(null)}
+          onClick={() => isAssets && setModalOpen(true)}
+          style={sidebarButtonStyle(false, hoveredBtn === "action")}
+        >
+          {isAssets ? "+ New Asset" : "+ New Project"}
+        </button>
+
       </div>
 
-      {/* Scrollable section list */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 12, minHeight: 0 }}>
+      {/* ── Scrollable content ──────────────────────────────────── */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "0 4px", minHeight: 0 }}>
         {isAssets ? (
-          <div>
+          <>
             <AssetSection
               title="Cards"
               entityType="card"
               items={cards}
               selectedEntityType={state.entityType}
               selectedId={state.selectedId}
-              onCreate={actions.createCard}
-              createLabel="+ New Card"
               onSelect={actions.selectEntity}
               getItemLabel={(c) => c.name ?? "Unnamed Card"}
             />
-
             <AssetSection
               title="Relics"
               entityType="relic"
               items={relics}
               selectedEntityType={state.entityType}
               selectedId={state.selectedId}
-              onCreate={actions.createRelic}
-              createLabel="+ New Relic"
               onSelect={actions.selectEntity}
               getItemLabel={(r) => r.identity?.name ?? r.name ?? "Unnamed Relic"}
             />
-
             <AssetSection
               title="Potions"
               entityType="potion"
               items={potions}
               selectedEntityType={state.entityType}
               selectedId={state.selectedId}
-              onCreate={actions.createPotion}
-              createLabel="+ New Potion"
               onSelect={actions.selectEntity}
               getItemLabel={(p) => p.identity?.name ?? p.name ?? "Unnamed Potion"}
             />
-
             <AssetSection
               title="Enemies"
               entityType="enemy"
               items={enemies}
               selectedEntityType={state.entityType}
               selectedId={state.selectedId}
-              onCreate={actions.createEnemy}
-              createLabel="+ New Enemy"
               onSelect={actions.selectEntity}
               getItemLabel={(e) => e.identity?.name ?? e.name ?? "Unnamed Enemy"}
             />
-          </div>
+          </>
         ) : (
-          <div>
-            <div style={{ marginBottom: 8, fontWeight: 700 }}>Characters</div>
-            <div style={{ opacity: 0.7 }}>Project mode coming next</div>
-          </div>
+          <ProjectSidebar />
         )}
       </div>
+
+      {/* ── New Asset modal (portal — renders outside sidebar overflow) ── */}
+      <NewAssetModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onCreateByType={{
+          card:   actions.createCard,
+          relic:  actions.createRelic,
+          potion: actions.createPotion,
+          enemy:  actions.createEnemy,
+        }}
+      />
+
     </div>
   );
 }

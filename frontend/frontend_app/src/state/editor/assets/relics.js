@@ -1,4 +1,4 @@
-export function createRelic(setState) {
+export function createRelic(setState, name) {
   setState((prev) => {
     const id = `relic_${Date.now()}`;
 
@@ -6,7 +6,7 @@ export function createRelic(setState) {
       id,
       imageId: "",
       identity: {
-        name: "New Relic",
+        name: name || "New Relic",
         rarity: "Common",
       },
       effects: [],

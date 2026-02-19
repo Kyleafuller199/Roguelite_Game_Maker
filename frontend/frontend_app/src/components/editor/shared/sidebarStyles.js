@@ -54,7 +54,9 @@ export const stickySection = {
   display: "flex",
   flexDirection: "column",
   gap: 12,
-  padding: 12,
+  paddingLeft: 12,
+  paddingRight: 12,
+  paddingTop: 12,
   backgroundColor: COLOR_SIDEBAR_BG,
   boxSizing: "border-box",
   flexShrink: 0,
@@ -105,8 +107,8 @@ export function sidebarButtonStyle(isSelected, isHovered) {
     paddingLeft: 12,
     color: isSelected ? COLOR_TEXT_MAIN : COLOR_TEXT_SECONDARY,
     cursor: "pointer",
-    fontSize: 12,
-    fontWeight: isSelected ? 600 : 500,
+    fontSize: 13,
+    fontWeight: isSelected ? 500 : 500,
     textAlign: "left",
     boxSizing: "border-box",
   };
@@ -152,7 +154,10 @@ export const sectionHeaderChevron = {
 export const sectionBody = {
   display: "flex",
   flexDirection: "column",
-  padding: 12,
+  paddingLeft: 12,
+  paddingRight: 12,
+  paddingBottom: 12,
+  paddingTop: 8,
   gap: 4,
 };
 

@@ -1,37 +1,24 @@
 /**
- * EnemyIdentity.jsx
+ * RelicIdentity.jsx
  *
  * Inspector section responsible for editing the top-level
- * `identity` object of an Enemy asset.
+ * `identity` object of a Relic asset.
  *
- * JSON Shape Controlled Here:
- * enemy.identity = {
+ * JSON Shape Controlled Here (example - adjust as needed):
+ * relic.identity = {
  *   name: string,
- *   enemyType: "basic" | "elite" | "boss",
- *   act: number,
- *   maxHealth: number,
- *   startingBlock: number
+ *   rarity: "common" | "uncommon" | "rare" | "boss" | "shop",
+ *   act: number
  * }
- *
- * Responsibility:
- * - Reads current identity values from `selected`
- * - Updates only the `identity` branch using a shallow merge
- * - Enforces numeric constraints via clampNumber
  */
 
 import Label from "../../../shared/Label";
+import InspectorSection from "../../../shared/InspectorSection";
 import clampNumber from "../../../shared/clampNumber";
 
-export default function EnemyIdentity({ selected, update }) {
-  // Ensure identity always exists to prevent undefined access
+export default function RelicIdentity({ selected, update }) {
   const identity = selected.identity ?? {};
 
-  /**
-   * patchIdentity
-   *
-   * Merges partial updates into the existing identity object.
-   * Prevents overwriting unrelated identity fields.
-   */
   function patchIdentity(patch) {
     update({
       identity: {
@@ -42,37 +29,27 @@ export default function EnemyIdentity({ selected, update }) {
   }
 
   return (
-    <div>
-      {/* Section Title */}
-      <div style={{ fontWeight: 700, marginBottom: 12 }}>
-        Identity
-      </div>
-
-      {/* Name */}
+    <InspectorSection title="Identity">
       <Label>Name</Label>
       <input
         value={identity.name ?? ""}
-        onChange={(e) =>
-          patchIdentity({ name: e.target.value })
-        }
+        onChange={(e) => patchIdentity({ name: e.target.value })}
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
-      {/* Enemy Type Classification */}
-      <Label>Type</Label>
+      <Label>Rarity</Label>
       <select
-        value={identity.enemyType ?? "basic"}
-        onChange={(e) =>
-          patchIdentity({ enemyType: e.target.value })
-        }
+        value={identity.rarity ?? "common"}
+        onChange={(e) => patchIdentity({ rarity: e.target.value })}
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       >
-        <option value="basic">Basic</option>
-        <option value="elite">Elite</option>
+        <option value="common">Common</option>
+        <option value="uncommon">Uncommon</option>
+        <option value="rare">Rare</option>
         <option value="boss">Boss</option>
+        <option value="shop">Shop</option>
       </select>
 
-      {/* Act (Game Progression Tier) */}
       <Label>Act</Label>
       <input
         type="number"
@@ -80,42 +57,10 @@ export default function EnemyIdentity({ selected, update }) {
         max={3}
         value={identity.act ?? 1}
         onChange={(e) =>
-          patchIdentity({
-            act: clampNumber(e.target.value, 1, 3),
-          })
-        }
-        style={{ width: "100%", padding: 10, marginBottom: 12 }}
-      />
-
-      {/* Maximum Health Pool */}
-      <Label>Max Health</Label>
-      <input
-        type="number"
-        min={1}
-        max={999}
-        value={identity.maxHealth ?? 40}
-        onChange={(e) =>
-          patchIdentity({
-            maxHealth: clampNumber(e.target.value, 1, 999),
-          })
-        }
-        style={{ width: "100%", padding: 10, marginBottom: 12 }}
-      />
-
-      {/* Starting Block (initial defense value) */}
-      <Label>Starting Block</Label>
-      <input
-        type="number"
-        min={0}
-        max={999}
-        value={identity.startingBlock ?? 0}
-        onChange={(e) =>
-          patchIdentity({
-            startingBlock: clampNumber(e.target.value, 0, 999),
-          })
+          patchIdentity({ act: clampNumber(e.target.value, 1, 3) })
         }
         style={{ width: "100%", padding: 10 }}
       />
-    </div>
+    </InspectorSection>
   );
 }

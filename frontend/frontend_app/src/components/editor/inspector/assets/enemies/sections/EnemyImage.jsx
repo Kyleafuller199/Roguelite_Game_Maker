@@ -8,29 +8,16 @@
  *
  * JSON Shape Controlled Here:
  * enemy.imageUrl = string
- *
- * Future Direction:
- * - Replace `imageUrl` with `imageId` that references an image in the asset library
- *   (normalized storage + reuse across projects/assets).
- *
- * Responsibility:
- * - Provide a simple URL input
- * - Preview the image when a URL is present
- *
- * Note:
- * - This component performs no validation of the URL beyond presence/absence.
  */
 
 import Label from "../../../shared/Label";
+import InspectorSection from "../../../shared/InspectorSection";
 
 export default function EnemyImage({ selected, update }) {
-  // Always treat missing value as empty string for controlled input stability
   const imageUrl = selected.imageUrl ?? "";
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ fontWeight: 700, marginBottom: 12 }}>Image</div>
-
+    <InspectorSection title="Image" defaultOpen={false}>
       <Label>Image URL (V1)</Label>
       <input
         value={imageUrl}
@@ -39,7 +26,6 @@ export default function EnemyImage({ selected, update }) {
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
-      {/* Simple preview if an image URL exists; otherwise show an empty state message */}
       {imageUrl ? (
         <img
           src={imageUrl}
@@ -53,6 +39,6 @@ export default function EnemyImage({ selected, update }) {
       ) : (
         <div style={{ opacity: 0.7, fontSize: 14 }}>No image selected</div>
       )}
-    </div>
+    </InspectorSection>
   );
 }

@@ -1,33 +1,17 @@
 /**
  * PotionImage.jsx
  *
- * Inspector section responsible for editing the potion's visual reference.
- *
- * V1 Storage:
- * - Stores a direct `imageUrl` string on the potion object.
- *
- * JSON Shape Controlled Here:
- * potion.imageUrl = string
- *
- * Future Direction:
- * - Replace `imageUrl` with `imageId` referencing an image in the asset library
- *   (normalized storage + reuse across assets/projects).
- *
- * Responsibility:
- * - Provide a URL input for the image
- * - Show a simple preview when a URL is present
+ * Inspector section for potion.imageUrl (V1).
  */
 
 import Label from "../../../shared/Label";
+import InspectorSection from "../../../shared/InspectorSection";
 
 export default function PotionImage({ selected, update }) {
-  // Always treat missing value as empty string for controlled input stability
   const imageUrl = selected.imageUrl ?? "";
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ fontWeight: 700, marginBottom: 12 }}>Image</div>
-
+    <InspectorSection title="Image">
       <Label>Image URL (V1)</Label>
       <input
         value={imageUrl}
@@ -36,20 +20,15 @@ export default function PotionImage({ selected, update }) {
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       />
 
-      {/* Preview if an image URL exists; otherwise show an empty state message */}
       {imageUrl ? (
         <img
           src={imageUrl}
           alt="Potion"
-          style={{
-            width: "100%",
-            borderRadius: 8,
-            border: "1px solid rgba(0,0,0,0.1)",
-          }}
+          style={{ width: "100%", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)" }}
         />
       ) : (
         <div style={{ opacity: 0.7, fontSize: 14 }}>No image selected</div>
       )}
-    </div>
+    </InspectorSection>
   );
 }

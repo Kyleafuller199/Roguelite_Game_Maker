@@ -1,61 +1,20 @@
 /**
  * RelicTriggers.jsx
  *
- * Inspector section responsible for editing `relic.triggers`.
- *
- * Purpose:
- * - Defines WHEN a relic activates (event)
- * - Defines WHICH relic effects fire on that event (effectIds)
- *
- * V1 Storage:
- * - Stores triggers directly on the relic as `selected.triggers[]`
- * - Each trigger stores references to effects by id: `trigger.effectIds[]`
- *
- * JSON Shape Controlled Here:
- * relic.triggers = [
- *   {
- *     id: string,
- *     event: string,        // one of RELIC_EVENTS
- *     effectIds: string[]   // references to relic.effects[*].id
- *   }
- * ]
- *
- * Design Notes:
- * - Triggers reference effects by id (not by object) to keep data normalized.
- * - This file uses browser `crypto.randomUUID()` for stable ids (no Node import).
+ * Inspector section for relic.triggers[].
  */
 
 import { useMemo } from "react";
 import Label from "../../../shared/Label";
+import InspectorSection from "../../../shared/InspectorSection";
 
-/**
- * RELIC_EVENTS
- * Supported trigger events for V1.
- * (Can later be expanded or replaced with a shared enum/constants module.)
- */
 const RELIC_EVENTS = [
-  "startOfCombat",
-  "startOfTurn",
-  "endOfTurn",
-  "endOfCombat",
-  "cardPlayed",
-  "cardDrawn",
-  "damageTaken",
+  "startOfCombat", "startOfTurn", "endOfTurn", "endOfCombat",
+  "cardPlayed", "cardDrawn", "damageTaken",
 ];
 
-/**
- * makeId
- * Frontend-friendly UUID generator for newly created triggers.
- * Uses the browser Web Crypto API (no import required).
- */
-function makeId(prefix = "trigger") {
-  return `${prefix}_${crypto.randomUUID()}`;
-}
+function makeId(prefix = "trigger") { return `${prefix}_${crypto.randomUUID()}`; }
 
-/**
- * effectSummary
- * Small UI helper to render a readable one-line summary of an effect.
- */
 function effectSummary(eff) {
   const type = eff.effectType ?? "effect";
   const val = eff.baseValue ?? 0;
@@ -64,118 +23,50 @@ function effectSummary(eff) {
   return `${type} ${val}${rep}${tgt}`;
 }
 
+const actionBtnStyle = {
+  padding: "2px 8px", fontSize: 12, cursor: "pointer",
+  background: "transparent", border: "1px solid rgba(255,255,255,0.2)",
+  borderRadius: 4, color: "#e5e5e5",
+};
+
 export default function RelicTriggers({ selected, update }) {
-  /**
-   * Read triggers and effects from the selected relic.
-   * useMemo avoids re-allocating arrays on unrelated renders.
-   */
   const triggers = useMemo(() => selected.triggers ?? [], [selected.triggers]);
-  const effects = useMemo(() => selected.effects ?? [], [selected.effects]);
+  const effects  = useMemo(() => selected.effects  ?? [], [selected.effects]);
 
-  /**
-   * setTriggers
-   * Replaces the entire triggers array (immutable update).
-   */
-  function setTriggers(next) {
-    update({ triggers: next });
-  }
-
-  /**
-   * addTrigger
-   * Adds a new trigger with a default event and no attached effects.
-   */
-  function addTrigger() {
-    const trg = {
-      id: makeId("trg"),
-      event: "startOfTurn",
-      effectIds: [],
-    };
-    setTriggers([trg, ...triggers]);
-  }
-
-  /**
-   * removeTrigger
-   * Removes a trigger by id.
-   */
-  function removeTrigger(id) {
-    setTriggers(triggers.filter((t) => t.id !== id));
-  }
-
-  /**
-   * patchTrigger
-   * Applies a shallow patch to a trigger by id.
-   */
-  function patchTrigger(id, patch) {
-    setTriggers(triggers.map((t) => (t.id === id ? { ...t, ...patch } : t)));
-  }
-
-  /**
-   * toggleEffect
-   * Adds or removes an effect id from a trigger's effectIds list.
-   * This allows multiple effects to be attached to a single trigger.
-   */
+  function setTriggers(next) { update({ triggers: next }); }
+  function addTrigger() { setTriggers([{ id: makeId("trg"), event: "startOfTurn", effectIds: [] }, ...triggers]); }
+  function removeTrigger(id) { setTriggers(triggers.filter((t) => t.id !== id)); }
+  function patchTrigger(id, patch) { setTriggers(triggers.map((t) => t.id === id ? { ...t, ...patch } : t)); }
   function toggleEffect(triggerId, effectId) {
     const trg = triggers.find((t) => t.id === triggerId);
-    const currentIds = trg?.effectIds ?? [];
-
-    const nextIds = currentIds.includes(effectId)
-      ? currentIds.filter((x) => x !== effectId)
-      : [...currentIds, effectId];
-
-    patchTrigger(triggerId, { effectIds: nextIds });
+    const current = trg?.effectIds ?? [];
+    patchTrigger(triggerId, {
+      effectIds: current.includes(effectId) ? current.filter((x) => x !== effectId) : [...current, effectId],
+    });
   }
 
   return (
-    <div style={{ marginTop: 16 }}>
-      {/* Section header + primary action */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontWeight: 700 }}>Triggers</div>
-        <button onClick={addTrigger} style={{ padding: "6px 10px", cursor: "pointer" }}>
-          + Add Trigger
-        </button>
-      </div>
-
-      {/* Empty state */}
+    <InspectorSection
+      title="Triggers"
+      action={<button onClick={addTrigger} style={actionBtnStyle}>+ Add Trigger</button>}
+    >
       {triggers.length === 0 ? (
-        <div style={{ marginTop: 10, opacity: 0.7, fontSize: 14 }}>No triggers yet.</div>
+        <div style={{ opacity: 0.7, fontSize: 14 }}>No triggers yet.</div>
       ) : (
-        <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {triggers.map((trg) => (
-            <div
-              key={trg.id}
-              style={{
-                padding: 12,
-                border: "1px solid rgba(0,0,0,0.12)",
-                borderRadius: 8,
-              }}
-            >
-              {/* Trigger header row */}
+            <div key={trg.id} style={{ padding: 12, border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ fontWeight: 700 }}>Trigger</div>
-                <button
-                  onClick={() => removeTrigger(trg.id)}
-                  style={{ cursor: "pointer", padding: "4px 8px" }}
-                >
-                  Remove
-                </button>
+                <button onClick={() => removeTrigger(trg.id)} style={actionBtnStyle}>Remove</button>
               </div>
 
               <div style={{ marginTop: 10 }}>
-                {/* Event selector */}
                 <Label>Event</Label>
-                <select
-                  value={trg.event ?? "startOfTurn"}
-                  onChange={(e) => patchTrigger(trg.id, { event: e.target.value })}
-                  style={{ width: "100%", padding: 10, marginBottom: 12 }}
-                >
-                  {RELIC_EVENTS.map((ev) => (
-                    <option key={ev} value={ev}>
-                      {ev}
-                    </option>
-                  ))}
+                <select value={trg.event ?? "startOfTurn"} onChange={(e) => patchTrigger(trg.id, { event: e.target.value })} style={{ width: "100%", padding: 10, marginBottom: 12 }}>
+                  {RELIC_EVENTS.map((ev) => <option key={ev} value={ev}>{ev}</option>)}
                 </select>
 
-                {/* Effects binding */}
                 <Label>Effects</Label>
                 {effects.length === 0 ? (
                   <div style={{ marginTop: 8, opacity: 0.7, fontSize: 14 }}>
@@ -185,14 +76,9 @@ export default function RelicTriggers({ selected, update }) {
                   <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 8 }}>
                     {effects.map((eff) => {
                       const checked = (trg.effectIds ?? []).includes(eff.id);
-
                       return (
                         <label key={eff.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => toggleEffect(trg.id, eff.id)}
-                          />
+                          <input type="checkbox" checked={checked} onChange={() => toggleEffect(trg.id, eff.id)} />
                           <span style={{ fontSize: 14 }}>{effectSummary(eff)}</span>
                         </label>
                       );
@@ -204,6 +90,6 @@ export default function RelicTriggers({ selected, update }) {
           ))}
         </div>
       )}
-    </div>
+    </InspectorSection>
   );
 }

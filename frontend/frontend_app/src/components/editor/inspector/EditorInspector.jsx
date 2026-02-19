@@ -20,6 +20,14 @@ import RelicInspector from "@/components/editor/inspector/assets/relics/RelicIns
 import PotionInspector from "@/components/editor/inspector/assets/potions/PotionInspector";
 import EnemyInspector from "@/components/editor/inspector/assets/enemies/EnemyInspector";
 
+import {
+  COLOR_SIDEBAR_BG,
+  COLOR_TEXT_MAIN,
+  COLOR_TEXT_SECONDARY,
+  COLOR_SELECTED_BG,
+  sectionHeaderTitle,
+} from "@/components/editor/shared/sidebarStyles";
+
 /**
  * Inspector component lookup by entity type.
  * Keeps routing logic compact and consistent with EditorCanvas routing.
@@ -31,18 +39,62 @@ const INSPECTORS = {
   enemy: EnemyInspector,
 };
 
+/** Shared root style — sidebar background + primary text colour. */
+const rootStyle = {
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  minHeight: 0,
+  backgroundColor: COLOR_SIDEBAR_BG,
+  color: COLOR_TEXT_MAIN,
+};
+
+/** Sticky header row — pinned to top, visually separates entity identity from form. */
+const stickyHeaderStyle = {
+  position: "sticky",
+  top: 0,
+  zIndex: 10,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  padding: "0 12px",
+  height: 40,
+  backgroundColor: COLOR_SELECTED_BG,
+  boxSizing: "border-box",
+  flexShrink: 0,
+};
+
+/** Delete button — minimal style that fits the dark theme. */
+const deleteBtnStyle = {
+  padding: "2px 8px",
+  fontSize: 12,
+  background: "transparent",
+  border: "1px solid rgba(255,255,255,0.2)",
+  borderRadius: 4,
+  color: COLOR_TEXT_SECONDARY,
+};
+
 export default function EditorInspector() {
   const { state, actions } = useEditor();
   const { mode, entityType, selectedId } = state;
 
   // Placeholder until project mode inspector is implemented.
   if (mode !== "assets") {
-    return <div style={{ padding: 12 }}>Select something to edit</div>;
+    return (
+      <div style={{ ...rootStyle, padding: 12 }}>
+        Select something to edit
+      </div>
+    );
   }
 
   // Asset mode requires a selection.
   if (!selectedId || !entityType) {
-    return <div style={{ padding: 12 }}>Select something to edit</div>;
+    return (
+      <div style={{ ...rootStyle, padding: 12 }}>
+        Select something to edit
+      </div>
+    );
   }
 
   /**
@@ -50,8 +102,6 @@ export default function EditorInspector() {
    * - selected entity from normalized state
    * - update handler for the current entity type
    * - delete handler for the current entity type
-   *
-   * Later, this can be extracted into a single selector/helper in state/editor.
    */
   let selected = null;
   let update = null;
@@ -79,7 +129,11 @@ export default function EditorInspector() {
 
   // Defensive rendering for stale selections or unsupported entity types.
   if (!selected || !update || !Inspector) {
-    return <div style={{ padding: 12 }}>Selection not found</div>;
+    return (
+      <div style={{ ...rootStyle, padding: 12 }}>
+        Selection not found
+      </div>
+    );
   }
 
   /**
@@ -95,47 +149,25 @@ export default function EditorInspector() {
   }
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: 0, // Enables scroll area to size correctly in flex layouts
-      }}
-    >
-      {/* Sticky header: remains visible while inspector sections scroll */}
-      <div
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          padding: 12,
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
-        <div style={{ fontWeight: 700 }}>
+    <div style={rootStyle}>
+      {/* Sticky header: entity identity + delete action */}
+      <div style={stickyHeaderStyle}>
+        <span style={sectionHeaderTitle}>
           {entityType}
           {selected?.name ? ` • ${selected.name}` : ""}
-        </div>
+        </span>
 
         <button
           onClick={handleDelete}
           disabled={!onDelete}
-          style={{
-            padding: "6px 10px",
-            cursor: onDelete ? "pointer" : "not-allowed",
-          }}
+          style={{ ...deleteBtnStyle, cursor: onDelete ? "pointer" : "not-allowed" }}
         >
           Delete
         </button>
       </div>
 
-      {/* Scrollable content area */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 12, minHeight: 0 }}>
+      {/* Scrollable inspector sections */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         <Inspector selected={selected} update={update} />
       </div>
     </div>

@@ -4,37 +4,41 @@
  * V1: text-based preview of identity, image, and effects.
  */
 
+import CanvasSection from "@/components/editor/canvas/CanvasSection";
+import {
+  canvasEntityName,
+  canvasEntityMeta,
+  canvasBodyText,
+  COLOR_TEXT_SECONDARY,
+} from "@/components/editor/canvas/canvasStyles";
+
 export default function PotionPreview({ selected }) {
   const effects = selected.effects ?? [];
 
   return (
-    <div style={{ opacity: 0.9 }}>
-      {/* Identity */}
+    <div>
+      {/* Identity header */}
       <div style={{ marginBottom: 12 }}>
-        <div>
-          <b>{selected.identity?.name ?? selected.name ?? "Unnamed Potion"}</b>
+        <div style={canvasEntityName}>
+          {selected.identity?.name ?? selected.name ?? "Unnamed Potion"}
         </div>
-        <div>
+        <div style={canvasEntityMeta}>
           {selected.identity?.rarity ?? selected.rarity ?? "Common"} •{" "}
           {labelUseContext(selected.identity?.useContext)}
         </div>
       </div>
 
-      {/* Image */}
-      <Section title="Image">
+      <CanvasSection title="Image">
         <div>
-          {selected.imageUrl
-            ? `Image: ${selected.imageUrl}`
-            : "No image selected"}
+          {selected.imageUrl ? `Image: ${selected.imageUrl}` : "No image selected"}
         </div>
-      </Section>
+      </CanvasSection>
 
-      {/* Effects */}
-      <Section title="Effects">
+      <CanvasSection title="Effects">
         {effects.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No effects</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, ...canvasBodyText }}>
             {effects.map((e, idx) => (
               <li key={e.id ?? idx}>
                 {e.effectType}
@@ -45,21 +49,12 @@ export default function PotionPreview({ selected }) {
             ))}
           </ul>
         )}
-      </Section>
+      </CanvasSection>
     </div>
   );
 }
 
 /* ---------- helpers ---------- */
-
-function Section({ title, children }) {
-  return (
-    <div style={{ marginTop: 14 }}>
-      <div style={{ fontWeight: 700, marginBottom: 6 }}>{title}</div>
-      {children}
-    </div>
-  );
-}
 
 function labelUseContext(ctx) {
   switch (ctx) {

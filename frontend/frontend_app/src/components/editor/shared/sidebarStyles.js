@@ -143,7 +143,7 @@ export const sectionHeaderTitle = {
 
 /** Section header chevron — primary colour, sits on the right */
 export const sectionHeaderChevron = {
-  fontSize: 20,
+  fontSize: 16,
   color: COLOR_TEXT_MAIN,
 };
 
@@ -154,10 +154,10 @@ export const sectionHeaderChevron = {
 export const sectionBody = {
   display: "flex",
   flexDirection: "column",
-  paddingLeft: 12,
-  paddingRight: 12,
+  paddingTop: 12,
+  paddingLeft: 16,
+  paddingRight: 8,
   paddingBottom: 12,
-  paddingTop: 8,
   gap: 4,
 };
 

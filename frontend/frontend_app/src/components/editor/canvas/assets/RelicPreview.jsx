@@ -2,6 +2,15 @@
  * RelicPreview.jsx
  * Live preview for a relic asset. V1: text-based preview of all sections.
  */
+
+import CanvasSection from "@/components/editor/canvas/CanvasSection";
+import {
+  canvasEntityName,
+  canvasEntityMeta,
+  canvasBodyText,
+  COLOR_TEXT_SECONDARY,
+} from "@/components/editor/canvas/canvasStyles";
+
 export default function RelicPreview({ selected }) {
   const identity = selected.identity ?? {};
   const effects = selected.effects ?? [];
@@ -9,23 +18,26 @@ export default function RelicPreview({ selected }) {
   const imageUrl = selected.imageUrl ?? "";
 
   return (
-    <div style={{ opacity: 0.9 }}>
+    <div>
+      {/* Identity header */}
       <div style={{ marginBottom: 12 }}>
-        <div>
-          <b>{identity.name ?? selected.name ?? "Unnamed Relic"}</b>
+        <div style={canvasEntityName}>
+          {identity.name ?? selected.name ?? "Unnamed Relic"}
         </div>
-        <div>Rarity: {identity.rarity ?? selected.tier ?? "Common"}</div>
+        <div style={canvasEntityMeta}>
+          Rarity: {identity.rarity ?? selected.tier ?? "Common"}
+        </div>
       </div>
 
-      <Section title="Image">
+      <CanvasSection title="Image">
         <div>{imageUrl ? `Image: ${imageUrl}` : "No image selected"}</div>
-      </Section>
+      </CanvasSection>
 
-      <Section title="Effects">
+      <CanvasSection title="Effects">
         {effects.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No effects</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, ...canvasBodyText }}>
             {effects.map((e, idx) => (
               <li key={e.id ?? idx}>
                 {e.effectType} {e.baseValue != null ? `(${e.baseValue})` : ""}
@@ -35,40 +47,27 @@ export default function RelicPreview({ selected }) {
             ))}
           </ul>
         )}
-      </Section>
+      </CanvasSection>
 
-      <Section title="Triggers">
+      <CanvasSection title="Triggers">
         {triggers.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No triggers</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No triggers</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, ...canvasBodyText }}>
             {triggers.map((t) => (
               <li key={t.id}>
-                <div>
-                  <b>{t.event ?? "unknownEvent"}</b>
-                </div>
-                <div style={{ opacity: 0.85 }}>
-                  {renderTriggerEffects(effects, t.effectIds)}
-                </div>
+                <div style={{ fontWeight: 600 }}>{t.event ?? "unknownEvent"}</div>
+                <div>{renderTriggerEffects(effects, t.effectIds)}</div>
               </li>
             ))}
           </ul>
         )}
-      </Section>
+      </CanvasSection>
     </div>
   );
 }
 
 /* ---------- helpers ---------- */
-
-function Section({ title, children }) {
-  return (
-    <div style={{ marginTop: 14 }}>
-      <div style={{ fontWeight: 700, marginBottom: 6 }}>{title}</div>
-      {children}
-    </div>
-  );
-}
 
 function renderTriggerEffects(effects, effectIds) {
   const ids = effectIds ?? [];

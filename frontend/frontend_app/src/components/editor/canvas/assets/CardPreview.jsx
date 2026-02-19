@@ -2,28 +2,39 @@
  * CardPreview.jsx
  * Live preview for a card asset. V1: text-based preview of all sections.
  */
+
+import CanvasSection from "@/components/editor/canvas/CanvasSection";
+import {
+  canvasEntityName,
+  canvasEntityMeta,
+  canvasBodyText,
+  COLOR_TEXT_SECONDARY,
+} from "@/components/editor/canvas/canvasStyles";
+
 export default function CardPreview({ selected }) {
   const effects = selected.effects ?? [];
   const scaling = selected.scaling ?? [];
 
   return (
-    <div style={{ opacity: 0.9 }}>
+    <div>
+      {/* Identity header */}
       <div style={{ marginBottom: 12 }}>
-        <div><b>{selected.name ?? "Unnamed Card"}</b></div>
-        <div>
-          {selected.type ?? "Attack"} • {selected.rarity ?? "Common"} • Cost {selected.cost ?? 0}
+        <div style={canvasEntityName}>{selected.name ?? "Unnamed Card"}</div>
+        <div style={canvasEntityMeta}>
+          {selected.type ?? "Attack"} • {selected.rarity ?? "Common"} • Cost{" "}
+          {selected.cost ?? 0}
         </div>
       </div>
 
-      <Section title="Image">
+      <CanvasSection title="Image">
         <div>{selected.imagePath ? `Image: ${selected.imagePath}` : "No image selected"}</div>
-      </Section>
+      </CanvasSection>
 
-      <Section title="Effects">
+      <CanvasSection title="Effects">
         {effects.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No effects</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, ...canvasBodyText }}>
             {effects.map((e, idx) => (
               <li key={e.id ?? idx}>
                 {e.effectType} {e.baseValue != null ? `(${e.baseValue})` : ""}
@@ -33,13 +44,13 @@ export default function CardPreview({ selected }) {
             ))}
           </ul>
         )}
-      </Section>
+      </CanvasSection>
 
-      <Section title="Scaling">
+      <CanvasSection title="Scaling">
         {scaling.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No scaling rules</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No scaling rules</div>
         ) : (
-          <ul style={{ margin: 0, paddingLeft: 18 }}>
+          <ul style={{ margin: 0, paddingLeft: 18, ...canvasBodyText }}>
             {scaling.map((s) => (
               <li key={s.id}>
                 {s.operation} {s.amountPerUnit} per {s.basedOn} on{" "}
@@ -49,9 +60,9 @@ export default function CardPreview({ selected }) {
             ))}
           </ul>
         )}
-      </Section>
+      </CanvasSection>
 
-      <Section title="Rules">
+      <CanvasSection title="Rules">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <RuleTag label="Unplayable" on={Boolean(selected.unplayable)} />
           <RuleTag label="Ethereal" on={Boolean(selected.ethereal)} />
@@ -59,26 +70,18 @@ export default function CardPreview({ selected }) {
           <RuleTag label="Innate" on={Boolean(selected.innate)} />
           <RuleTag label="Retain" on={Boolean(selected.retain)} />
         </div>
-      </Section>
+      </CanvasSection>
     </div>
   );
 }
 
 /* ---------- helpers ---------- */
 
-function Section({ title, children }) {
-  return (
-    <div style={{ marginTop: 14 }}>
-      <div style={{ fontWeight: 700, marginBottom: 6 }}>{title}</div>
-      {children}
-    </div>
-  );
-}
-
 function RuleTag({ label, on }) {
   return (
     <span
       style={{
+        fontSize: 13,
         padding: "4px 8px",
         borderRadius: 999,
         border: "1px solid rgba(255,255,255,0.15)",

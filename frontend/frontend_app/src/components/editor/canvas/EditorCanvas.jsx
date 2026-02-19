@@ -19,6 +19,12 @@ import RelicPreview from "@/components/editor/canvas/assets/RelicPreview";
 import PotionPreview from "@/components/editor/canvas/assets/PotionPreview";
 import EnemyPreview from "@/components/editor/canvas/assets/EnemyPreview";
 
+import {
+  canvasContainer,
+  canvasSectionTitle,
+  COLOR_TEXT_SECONDARY,
+} from "./canvasStyles";
+
 /**
  * Preview component lookup by entity type.
  * Keeps the render logic compact and avoids repeated conditionals.
@@ -36,18 +42,27 @@ export default function EditorCanvas() {
 
   // Placeholder until project mode canvas is implemented.
   if (mode !== "assets") {
-    return <div style={{ padding: 16 }}>Live Preview</div>;
+    return (
+      <div style={canvasContainer}>
+        <div style={{ ...canvasSectionTitle, marginBottom: 0 }}>Live Preview</div>
+      </div>
+    );
   }
 
   // Asset mode requires a selection to preview.
   if (!selectedId || !entityType) {
-    return <div style={{ padding: 16 }}>Live Preview</div>;
+    return (
+      <div style={canvasContainer}>
+        <div style={{ ...canvasSectionTitle, marginBottom: 0, fontSize: 20 }}>Live Preview</div>
+        <div style={{ fontSize: 13, color: COLOR_TEXT_SECONDARY, marginTop: 8 }}>
+          Select an asset to preview it here.
+        </div>
+      </div>
+    );
   }
 
   /**
    * Resolve the selected asset from normalized state by entity type.
-   * This is intentionally explicit for clarity; later you can extract a selector:
-   *   getSelectedEntity(state)
    */
   let selected = null;
 
@@ -60,12 +75,18 @@ export default function EditorCanvas() {
 
   // Defensive rendering for stale selections or unsupported entity types.
   if (!selected || !Preview) {
-    return <div style={{ padding: 16 }}>Selection not found</div>;
+    return (
+      <div style={canvasContainer}>
+        <div style={{ fontSize: 13, color: COLOR_TEXT_SECONDARY }}>
+          Selection not found.
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ marginTop: 0 }}>Live Preview</h2>
+    <div style={canvasContainer}>
+      <div style={{ ...canvasSectionTitle, marginBottom: 12, fontSize: 20 }}>Live Preview</div>
       <Preview selected={selected} />
     </div>
   );

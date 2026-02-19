@@ -47,9 +47,7 @@
             style={{
               width: 240,
               flexShrink: 0,
-              boxSizing: "border-box",
-              borderRight: "1px solid #ddd",
-              minHeight: 0,
+              height: "100%",
               overflow: "hidden",
             }}
           >
@@ -62,8 +60,8 @@
           style={{
             flex: 1,
             minHeight: 0,
-            overflow: "auto", // Enables scrolling in center panel
-            padding: 16,
+            overflow: "hidden",
+            display: "flex",
           }}
         >
           {children}

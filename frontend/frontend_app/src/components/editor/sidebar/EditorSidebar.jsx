@@ -152,7 +152,7 @@ export default function EditorSidebar() {
       </div>
 
       {/* ── Scrollable content ──────────────────────────────────── */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "0 4px", minHeight: 0 }}>
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         {isAssets ? (
           <>
             <AssetSection

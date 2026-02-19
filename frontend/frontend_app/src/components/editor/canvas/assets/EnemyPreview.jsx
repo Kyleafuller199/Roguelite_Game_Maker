@@ -2,6 +2,15 @@
  * EnemyPreview.jsx
  * Live preview for an enemy asset.
  */
+
+import CanvasSection from "@/components/editor/canvas/CanvasSection";
+import {
+  canvasEntityName,
+  canvasEntityMeta,
+  canvasBodyText,
+  COLOR_TEXT_SECONDARY,
+} from "@/components/editor/canvas/canvasStyles";
+
 export default function EnemyPreview({ selected }) {
   const identity = selected.identity ?? {};
   const moves = selected.moves ?? [];
@@ -10,28 +19,26 @@ export default function EnemyPreview({ selected }) {
   const moveById = new Map(moves.map((m) => [m.id, m]));
 
   return (
-    <div style={{ opacity: 0.9 }}>
-      {/* Identity */}
+    <div>
+      {/* Identity header */}
       <div style={{ marginBottom: 12 }}>
-        <div>
-          <b>{identity.name ?? "Unnamed Enemy"}</b>
-        </div>
-        <div>
+        <div style={canvasEntityName}>{identity.name ?? "Unnamed Enemy"}</div>
+        <div style={canvasEntityMeta}>
           {identity.enemyType ?? "basic"} • Act {identity.act ?? 1}
         </div>
-        <div>
+        <div style={canvasEntityMeta}>
           HP {identity.maxHealth ?? "?"} • Block {identity.startingBlock ?? 0}
         </div>
       </div>
 
       {/* Moves */}
-      <Section title="Moves">
+      <CanvasSection title="Moves">
         {moves.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No moves defined</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No moves defined</div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {moves.map((m) => (
-              <div key={m.id}>
+              <div key={m.id} style={canvasBodyText}>
                 <div style={{ fontWeight: 600 }}>{m.name ?? "Unnamed Move"}</div>
                 {m.effects?.length ? (
                   <ul style={{ margin: 0, paddingLeft: 18 }}>
@@ -45,22 +52,23 @@ export default function EnemyPreview({ selected }) {
                     ))}
                   </ul>
                 ) : (
-                  <div style={{ opacity: 0.7 }}>No effects</div>
+                  <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>
                 )}
               </div>
             ))}
           </div>
         )}
-      </Section>
+      </CanvasSection>
 
       {/* Behavior */}
-      <Section title="Behavior">
-        <div style={{ marginBottom: 8 }}>
-          <b>Type:</b> {behavior.behaviorType ?? "cycle"}
+      <CanvasSection title="Behavior">
+        <div style={{ ...canvasBodyText, marginBottom: 8 }}>
+          <span style={{ fontWeight: 600 }}>Type:</span>{" "}
+          {behavior.behaviorType ?? "cycle"}
         </div>
 
         {behavior.cycleOrder?.length ? (
-          <ol style={{ margin: 0, paddingLeft: 18 }}>
+          <ol style={{ margin: 0, paddingLeft: 18, ...canvasBodyText }}>
             {behavior.cycleOrder.map((moveId, i) => {
               const m = moveById.get(moveId);
               return (
@@ -71,20 +79,9 @@ export default function EnemyPreview({ selected }) {
             })}
           </ol>
         ) : (
-          <div style={{ opacity: 0.7 }}>No behavior defined</div>
+          <div style={{ color: COLOR_TEXT_SECONDARY }}>No behavior defined</div>
         )}
-      </Section>
-    </div>
-  );
-}
-
-/* ---------- helpers ---------- */
-
-function Section({ title, children }) {
-  return (
-    <div style={{ marginTop: 14 }}>
-      <div style={{ fontWeight: 700, marginBottom: 6 }}>{title}</div>
-      {children}
+      </CanvasSection>
     </div>
   );
 }

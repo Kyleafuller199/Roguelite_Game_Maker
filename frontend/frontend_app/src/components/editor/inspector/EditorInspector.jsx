@@ -60,7 +60,7 @@ const stickyHeaderStyle = {
   gap: 12,
   padding: "0 12px",
   height: 40,
-  backgroundColor: COLOR_SELECTED_BG,
+  backgroundColor: COLOR_SIDEBAR_BG,
   boxSizing: "border-box",
   flexShrink: 0,
 };

@@ -74,7 +74,6 @@
               width: 360,
               flexShrink: 0,
               boxSizing: "border-box",
-              borderLeft: "1px solid #ddd",
               minHeight: 0,
               overflow: "hidden",
             }}

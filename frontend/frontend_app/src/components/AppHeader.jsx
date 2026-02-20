@@ -35,7 +35,6 @@ export default function AppHeader({ title }) {
         display: "flex",
         alignItems: "center",
         padding: "0 16px",
-        borderBottom: "1px solid #ddd",
         boxSizing: "border-box",
       }}
     >

@@ -1,7 +1,10 @@
 /**
  * RelicIdentity.jsx
  *
- * Inspector section for relic.identity = { name, rarity }.
+ * Relic identity section.
+ *
+ * JSON Shape Controlled Here:
+ * relic = { name, rarity }
  */
 
 import Label from "../../../shared/Label";

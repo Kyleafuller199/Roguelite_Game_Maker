@@ -19,7 +19,7 @@ export default function RelicPreview({ selected }) {
 
   return (
     <div>
-      {/* Identity header */}
+      {/* Identity Section */}
       <div style={{ marginBottom: 12 }}>
         <div style={canvasEntityName}>
           {identity.name ?? selected.name ?? "Unnamed Relic"}
@@ -29,10 +29,12 @@ export default function RelicPreview({ selected }) {
         </div>
       </div>
 
+      {/* Image Section */}
       <CanvasSection title="Image">
         <div>{imageUrl ? `Image: ${imageUrl}` : "No image selected"}</div>
       </CanvasSection>
 
+      {/* Effects Section */}
       <CanvasSection title="Effects">
         {effects.length === 0 ? (
           <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>
@@ -49,6 +51,7 @@ export default function RelicPreview({ selected }) {
         )}
       </CanvasSection>
 
+      {/* Triggers Section */}
       <CanvasSection title="Triggers">
         {triggers.length === 0 ? (
           <div style={{ color: COLOR_TEXT_SECONDARY }}>No triggers</div>

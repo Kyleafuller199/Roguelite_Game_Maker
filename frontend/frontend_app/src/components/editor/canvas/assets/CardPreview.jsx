@@ -17,7 +17,7 @@ export default function CardPreview({ selected }) {
 
   return (
     <div>
-      {/* Identity header */}
+      {/* Identity Section */}
       <div style={{ marginBottom: 12 }}>
         <div style={canvasEntityName}>{selected.name ?? "Unnamed Card"}</div>
         <div style={canvasEntityMeta}>
@@ -26,10 +26,12 @@ export default function CardPreview({ selected }) {
         </div>
       </div>
 
+      {/* Image Section */}
       <CanvasSection title="Image">
         <div>{selected.imagePath ? `Image: ${selected.imagePath}` : "No image selected"}</div>
       </CanvasSection>
 
+      {/* Effects Section */}
       <CanvasSection title="Effects">
         {effects.length === 0 ? (
           <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>
@@ -46,6 +48,7 @@ export default function CardPreview({ selected }) {
         )}
       </CanvasSection>
 
+      {/* Scaling Section */}
       <CanvasSection title="Scaling">
         {scaling.length === 0 ? (
           <div style={{ color: COLOR_TEXT_SECONDARY }}>No scaling rules</div>
@@ -62,6 +65,7 @@ export default function CardPreview({ selected }) {
         )}
       </CanvasSection>
 
+      {/* Rules Section */}
       <CanvasSection title="Rules">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <RuleTag label="Unplayable" on={Boolean(selected.unplayable)} />

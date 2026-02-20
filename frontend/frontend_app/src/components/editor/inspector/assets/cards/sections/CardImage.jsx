@@ -1,9 +1,13 @@
 /**
  * CardImage.jsx
  *
- * Card image section.
+ * Inspector section responsible for editing the card's visual reference.
  *
- * Data model (V1): selected.imageUrl string.
+ * V1 Storage:
+ * - Stores a direct `imageUrl` string on the card object.
+ *
+ * JSON Shape Controlled Here:
+ * card.imageUrl = string
  */
 
 import Label from "../../../shared/Label";

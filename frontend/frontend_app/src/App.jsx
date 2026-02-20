@@ -1,12 +1,6 @@
 /**
  * App.jsx
- *
- * Root application component.
- *
- * Responsibilities:
- * - Initializes React Router
- * - Defines top-level application routes
- * - Maps URL paths to page-level components
+ * Root component — configures React Router and maps URL paths to pages.
  */
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";

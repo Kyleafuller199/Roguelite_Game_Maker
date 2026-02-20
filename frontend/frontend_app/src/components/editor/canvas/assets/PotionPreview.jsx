@@ -1,7 +1,6 @@
 /**
  * PotionPreview.jsx
- * Live preview for a potion asset.
- * V1: text-based preview of identity, image, and effects.
+ * Live preview for a potion asset. V1: text-based preview of all sections.
  */
 
 import CanvasSection from "@/components/editor/canvas/CanvasSection";
@@ -17,7 +16,7 @@ export default function PotionPreview({ selected }) {
 
   return (
     <div>
-      {/* Identity header */}
+      {/* Identity Section */}
       <div style={{ marginBottom: 12 }}>
         <div style={canvasEntityName}>
           {selected.identity?.name ?? selected.name ?? "Unnamed Potion"}
@@ -28,12 +27,14 @@ export default function PotionPreview({ selected }) {
         </div>
       </div>
 
+      {/* Image Section */}
       <CanvasSection title="Image">
         <div>
           {selected.imageUrl ? `Image: ${selected.imageUrl}` : "No image selected"}
         </div>
       </CanvasSection>
 
+      {/* Effects Section */}
       <CanvasSection title="Effects">
         {effects.length === 0 ? (
           <div style={{ color: COLOR_TEXT_SECONDARY }}>No effects</div>

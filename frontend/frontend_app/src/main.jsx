@@ -1,13 +1,6 @@
 /**
- * main.jsx
- *
- * Application entry point.
- *
- * Responsibilities:
- * - Imports global styles
- * - Creates the React root
- * - Mounts the <App /> component into the DOM
- * - Wraps the app in React.StrictMode for development checks
+ * App.jsx
+ * Entry point — mounts <App /> into the DOM with StrictMode enabled.
  */
 
 import React from 'react';
@@ -15,16 +8,8 @@ import ReactDOM from 'react-dom/client';
 import App from '@/App';
 import "./index.css";
 
-/**
- * Create the React root using the DOM element with id="root".
- * This element is defined in index.html.
- */
-const rootElement = document.getElementById('root');
-const root = ReactDOM.createRoot(rootElement);
+const root = ReactDOM.createRoot(document.getElementById('root'));
 
-/**
- * Render the application.
- */
 root.render(
   <React.StrictMode>
     <App />

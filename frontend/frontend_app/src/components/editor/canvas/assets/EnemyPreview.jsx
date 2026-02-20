@@ -1,6 +1,6 @@
 /**
  * EnemyPreview.jsx
- * Live preview for an enemy asset.
+ * Live preview for an enemy asset. V1: text-based preview of all sections.
  */
 
 import CanvasSection from "@/components/editor/canvas/CanvasSection";
@@ -20,7 +20,7 @@ export default function EnemyPreview({ selected }) {
 
   return (
     <div>
-      {/* Identity header */}
+      {/* Identity Section */}
       <div style={{ marginBottom: 12 }}>
         <div style={canvasEntityName}>{identity.name ?? "Unnamed Enemy"}</div>
         <div style={canvasEntityMeta}>
@@ -31,7 +31,7 @@ export default function EnemyPreview({ selected }) {
         </div>
       </div>
 
-      {/* Moves */}
+      {/* Moves Section */}
       <CanvasSection title="Moves">
         {moves.length === 0 ? (
           <div style={{ color: COLOR_TEXT_SECONDARY }}>No moves defined</div>
@@ -60,7 +60,7 @@ export default function EnemyPreview({ selected }) {
         )}
       </CanvasSection>
 
-      {/* Behavior */}
+      {/* Behavior Section */}
       <CanvasSection title="Behavior">
         <div style={{ ...canvasBodyText, marginBottom: 8 }}>
           <span style={{ fontWeight: 600 }}>Type:</span>{" "}

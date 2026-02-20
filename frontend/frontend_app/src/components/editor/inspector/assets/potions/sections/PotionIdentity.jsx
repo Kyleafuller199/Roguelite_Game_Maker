@@ -1,8 +1,12 @@
 /**
  * PotionIdentity.jsx
  *
- * Inspector section for potion.identity = { name, rarity, useContext }.
+ * Potion identity section.
+ *
+ * JSON Shape Controlled Here:
+ * potion = { name, rarity, useCase }
  */
+
 
 import Label from "../../../shared/Label";
 import InspectorSection from "../../../shared/InspectorSection";

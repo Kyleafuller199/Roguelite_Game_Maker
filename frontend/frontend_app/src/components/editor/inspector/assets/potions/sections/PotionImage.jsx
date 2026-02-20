@@ -1,7 +1,13 @@
 /**
  * PotionImage.jsx
  *
- * Inspector section for potion.imageUrl (V1).
+ * Inspector section responsible for editing the potion's visual reference.
+ *
+ * V1 Storage:
+ * - Stores a direct `imageUrl` string on the potion object.
+ *
+ * JSON Shape Controlled Here:
+ * potion.imageUrl = string
  */
 
 import Label from "../../../shared/Label";

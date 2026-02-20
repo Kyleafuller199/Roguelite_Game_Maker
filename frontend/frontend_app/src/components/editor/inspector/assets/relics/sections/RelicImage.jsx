@@ -1,7 +1,13 @@
 /**
  * RelicImage.jsx
  *
- * Inspector section for relic.imageUrl (V1).
+ * Inspector section responsible for editing the relic's visual reference.
+ *
+ * V1 Storage:
+ * - Stores a direct `imageUrl` string on the relic object.
+ *
+ * JSON Shape Controlled Here:
+ * relic.imageUrl = string
  */
 
 import Label from "../../../shared/Label";

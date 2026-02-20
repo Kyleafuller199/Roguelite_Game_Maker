@@ -1,15 +1,10 @@
 /**
- * RelicIdentity.jsx
+ * EnemyIdentity.jsx
  *
- * Inspector section responsible for editing the top-level
- * `identity` object of a Relic asset.
+ * Enemy identity section.
  *
- * JSON Shape Controlled Here (example - adjust as needed):
- * relic.identity = {
- *   name: string,
- *   rarity: "common" | "uncommon" | "rare" | "boss" | "shop",
- *   act: number
- * }
+ * JSON Shape Controlled Here:
+ * enemy = { name, rarity, act }
  */
 
 import Label from "../../../shared/Label";

@@ -4,15 +4,14 @@
  * High-level container for editing Enemy assets inside the editor.
  *
  * Responsibility:
- * - Composes all enemy-related inspector sections.
+ * - Composes all enemy-related inspector sections in a fixed order.
  * - Mirrors the top-level enemy JSON structure.
- * - Passes the selected enemy object and update handler
- *   down to each section.
+ * - Passes the currently selected enemy (`selected`) and the editor update
+ *   function (`update`) down to each section.
  *
  * Data Flow:
- * - `selected` represents the currently selected enemy asset.
- * - `update` is a function used by child sections to mutate
- *   specific fields within the selected enemy.
+ * - `selected` is the active enemy asset being edited.
+ * - `update` applies partial patches to the selected enemy in editor state.
  */
 
 import EnemyIdentity from "./sections/EnemyIdentity";

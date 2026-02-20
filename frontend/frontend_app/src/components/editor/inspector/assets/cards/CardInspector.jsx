@@ -1,11 +1,17 @@
 /**
  * CardInspector.jsx
  *
- * Card inspector composition.
+ * High-level container for editing Card assets inside the editor.
  *
- * Responsibilities:
- * - Renders the full set of card inspector sections
- * - Keeps section order aligned with the card JSON structure
+ * Responsibility:
+ * - Composes all card-related inspector sections in a fixed order.
+ * - Mirrors the top-level card JSON structure.
+ * - Passes the currently selected card (`selected`) and the editor update
+ *   function (`update`) down to each section.
+ *
+ * Data Flow:
+ * - `selected` is the active carc asset being edited.
+ * - `update` applies partial patches to the selected card in editor state.
  */
 
 import CardIdentity from "./sections/CardIdentity";

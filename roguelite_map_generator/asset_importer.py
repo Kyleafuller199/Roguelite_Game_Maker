@@ -9,7 +9,8 @@ ASSET_FOLDERS = {
     "fonts": "fonts",
     "icons": "icons",
     "monsters": "monsters",
-    "scenes": "scenes"
+    "scenes": "scenes",
+    "playable_characters": "playable_characters"
 }
 
 def import_asset_with_folder_choice():

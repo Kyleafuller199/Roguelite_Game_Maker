@@ -10,7 +10,7 @@
  *
  * Current behavior:
  * - Asset mode: renders an asset inspector for the selected entity
- * - Project mode: placeholder (to be implemented)
+ * - Project mode: delegates to ProjectInspector for pool/character selection
  */
 
 import { useEditor } from "@/state/editor/useEditor";
@@ -19,6 +19,7 @@ import CardInspector from "@/components/editor/inspector/assets/cards/CardInspec
 import RelicInspector from "@/components/editor/inspector/assets/relics/RelicInspector";
 import PotionInspector from "@/components/editor/inspector/assets/potions/PotionInspector";
 import EnemyInspector from "@/components/editor/inspector/assets/enemies/EnemyInspector";
+import ProjectInspector from "@/components/editor/inspector/ProjectInspector";
 
 import {
   COLOR_SIDEBAR_BG,
@@ -79,13 +80,8 @@ export default function EditorInspector() {
   const { state, actions } = useEditor();
   const { mode, entityType, selectedId } = state;
 
-  // Placeholder until project mode inspector is implemented.
-  if (mode !== "assets") {
-    return (
-      <div style={{ ...rootStyle, padding: 12 }}>
-        Select something to edit
-      </div>
-    );
+  if (mode === "project") {
+    return <ProjectInspector state={state} actions={actions} />;
   }
 
   // Asset mode requires a selection.

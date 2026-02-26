@@ -8,6 +8,7 @@
  * - Persist state changes to localStorage (V1 persistence)
  * - Provide stable editor actions for UI components to call
  * - Delegate asset-specific CRUD logic to /state/editor/assets/*
+ * - Delegate project-specific logic to /state/editor/project/*
  *
  * Data Model:
  * - state.mode controls which UI/selection logic is active ("assets" | "project")
@@ -29,6 +30,14 @@ import { createCard, updateSelectedCard, deleteSelectedCard } from "@/state/edit
 import { createRelic, updateSelectedRelic, deleteSelectedRelic } from "@/state/editor/assets/relics";
 import { createPotion, updateSelectedPotion, deleteSelectedPotion } from "@/state/editor/assets/potions";
 import { createEnemy, updateSelectedEnemy, deleteSelectedEnemy } from "@/state/editor/assets/enemies";
+
+// Project action delegates
+import {
+  createProject,
+  createCharacter,
+  togglePoolAsset,
+  toggleActEnemy,
+} from "@/state/editor/project/projects";
 
 // localStorage key for editor persistence
 const STORAGE_KEY = "rgm_editor_state_v4";
@@ -77,11 +86,11 @@ export function EditorProvider({ children }) {
    * Editor actions:
    * - Memoized to keep stable references (prevents unnecessary rerenders)
    * - Each action uses setState(prev => next) for safe updates
-   * - Asset CRUD is delegated to per-asset modules
+   * - Asset and project CRUD are delegated to their respective modules
    *
    * Note:
    * - setState is stable in React, so empty deps is fine here.
-   * - Delegated asset functions must rely on the provided setState callback.
+   * - Delegated functions must rely on the provided setState callback.
    */
   const actions = useMemo(
     () => ({
@@ -125,27 +134,18 @@ export function EditorProvider({ children }) {
       },
 
       // -------------------------------------------------
-      // Project-mode actions
+      // Project-mode navigation actions (simple enough to stay inline)
       // -------------------------------------------------
 
-      /**
-       * selectProjectNode
-       * Sets the active node selection for the project tree.
-       */
+      /** Sets the active node selection for the project tree. */
       selectProjectNode(node) {
         setState((prev) => ({
           ...prev,
-          project: {
-            ...prev.project,
-            selectedNode: node,
-          },
+          project: { ...prev.project, selectedNode: node },
         }));
       },
 
-      /**
-       * toggleProjectExpanded
-       * Toggles a tree expansion key in the project sidebar.
-       */
+      /** Toggles a tree expansion key in the project sidebar. */
       toggleProjectExpanded(key) {
         setState((prev) => ({
           ...prev,
@@ -159,95 +159,39 @@ export function EditorProvider({ children }) {
         }));
       },
 
-      /**
-       * createProject
-       * Creates a new project with default pools, acts, and empty characters.
-       */
-      createProject() {
-        setState((prev) => {
-          const id = crypto.randomUUID();
+      // -------------------------------------------------
+      // Project actions (delegated to /project module)
+      // -------------------------------------------------
 
-          const newProject = {
-            id,
-            name: "New Project",
-            pools: { cards: [], relics: [], potions: [], enemies: [] },
-            acts: {
-              1: { basics: [], elites: [], bosses: [], events: [] },
-              2: { basics: [], elites: [], bosses: [], events: [] },
-              3: { basics: [], elites: [], bosses: [], events: [] },
-            },
-            characterIds: [],
-          };
-
-          return {
-            ...prev,
-            mode: "project",
-            project: {
-              ...prev.project,
-              projects: {
-                byId: { ...prev.project.projects.byId, [id]: newProject },
-                allIds: [id, ...prev.project.projects.allIds],
-              },
-              selectedNode: { kind: "project", projectId: id },
-              expanded: {
-                ...prev.project.expanded,
-                [`project:${id}`]: true,
-                [`project:${id}:pools`]: true,
-                [`project:${id}:characters`]: true,
-                [`project:${id}:acts`]: false,
-              },
-            },
-          };
-        });
-      },
+      /** Projects */
+      createProject(name)                        { createProject(setState, name); },
+      createCharacter(projectId, name)           { createCharacter(setState, projectId, name); },
+      togglePoolAsset(projectId, poolType, id)   { togglePoolAsset(setState, projectId, poolType, id); },
+      toggleActEnemy(projectId, act, role, id)   { toggleActEnemy(setState, projectId, act, role, id); },
 
       // -------------------------------------------------
       // Asset actions (delegated to /assets modules)
       // -------------------------------------------------
 
       /** Cards */
-      createCard(name) {
-        createCard(setState, name);
-      },
-      updateSelectedCard(patch) {
-        updateSelectedCard(setState, patch);
-      },
-      deleteSelectedCard() {
-        deleteSelectedCard(setState);
-      },
+      createCard(name)              { createCard(setState, name); },
+      updateSelectedCard(patch)     { updateSelectedCard(setState, patch); },
+      deleteSelectedCard()          { deleteSelectedCard(setState); },
 
       /** Relics */
-      createRelic(name) {
-        createRelic(setState, name);
-      },
-      updateSelectedRelic(patch) {
-        updateSelectedRelic(setState, patch);
-      },
-      deleteSelectedRelic() {
-        deleteSelectedRelic(setState);
-      },
+      createRelic(name)             { createRelic(setState, name); },
+      updateSelectedRelic(patch)    { updateSelectedRelic(setState, patch); },
+      deleteSelectedRelic()         { deleteSelectedRelic(setState); },
 
       /** Potions */
-      createPotion(name) {
-        createPotion(setState, name);
-      },
-      updateSelectedPotion(patch) {
-        updateSelectedPotion(setState, patch);
-      },
-      deleteSelectedPotion() {
-        deleteSelectedPotion(setState);
-      },
+      createPotion(name)            { createPotion(setState, name); },
+      updateSelectedPotion(patch)   { updateSelectedPotion(setState, patch); },
+      deleteSelectedPotion()        { deleteSelectedPotion(setState); },
 
       /** Enemies */
-      createEnemy(name) {
-        createEnemy(setState, name);
-      },
-      updateSelectedEnemy(patch) {
-        updateSelectedEnemy(setState, patch);
-      },
-      deleteSelectedEnemy() {
-        deleteSelectedEnemy(setState);
-      },
+      createEnemy(name)             { createEnemy(setState, name); },
+      updateSelectedEnemy(patch)    { updateSelectedEnemy(setState, patch); },
+      deleteSelectedEnemy()         { deleteSelectedEnemy(setState); },
     }),
     []
   );

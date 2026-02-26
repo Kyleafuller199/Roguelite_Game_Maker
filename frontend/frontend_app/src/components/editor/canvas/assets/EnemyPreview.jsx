@@ -24,10 +24,10 @@ export default function EnemyPreview({ selected }) {
       <div style={{ marginBottom: 12 }}>
         <div style={canvasEntityName}>{identity.name ?? "Unnamed Enemy"}</div>
         <div style={canvasEntityMeta}>
-          {identity.enemyType ?? "basic"} • Act {identity.act ?? 1}
+          {identity.type ?? "basic"}
         </div>
         <div style={canvasEntityMeta}>
-          HP {identity.maxHealth ?? "?"} • Block {identity.startingBlock ?? 0}
+          HP {identity.startingHealth ?? "?"} • Block {identity.startingBlock ?? 0}
         </div>
       </div>
 

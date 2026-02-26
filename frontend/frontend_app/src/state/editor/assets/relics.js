@@ -1,6 +1,8 @@
+import { makeId } from "@/utils/makeId";
+
 export function createRelic(setState, name) {
   setState((prev) => {
-    const id = `relic_${Date.now()}`;
+    const id = makeId("relic");
 
     const newRelic = {
       id,

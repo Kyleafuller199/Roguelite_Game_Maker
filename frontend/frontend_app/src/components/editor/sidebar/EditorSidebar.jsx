@@ -23,6 +23,7 @@ import CollapsibleSection from "@/components/editor/shared/CollapsibleSection";
 import SidebarItem from "@/components/editor/shared/SidebarItem";
 import ProjectSidebar from "@/components/editor/sidebar/ProjectSidebar";
 import NewAssetModal from "@/components/editor/sidebar/modal/NewAssetModal";
+import NewProjectModal from "@/components/editor/sidebar/modal/NewProjectModal";
 import {
   sidebarContainer,
   stickySection,
@@ -88,8 +89,9 @@ export default function EditorSidebar() {
   // Hover tracking for sticky-section buttons
   const [hoveredBtn, setHoveredBtn] = useState(null);
 
-  // New Asset modal visibility
+  // Modal visibility
   const [modalOpen, setModalOpen] = useState(false);
+  const [projectModalOpen, setProjectModalOpen] = useState(false);
 
   /**
    * Derive flat arrays from normalised state.
@@ -143,7 +145,7 @@ export default function EditorSidebar() {
         <button
           onMouseEnter={() => setHoveredBtn("action")}
           onMouseLeave={() => setHoveredBtn(null)}
-          onClick={() => isAssets && setModalOpen(true)}
+          onClick={() => isAssets ? setModalOpen(true) : setProjectModalOpen(true)}
           style={sidebarButtonStyle(false, hoveredBtn === "action")}
         >
           {isAssets ? "+ New Asset" : "+ New Project"}
@@ -197,7 +199,7 @@ export default function EditorSidebar() {
         )}
       </div>
 
-      {/* ── New Asset modal (portal — renders outside sidebar overflow) ── */}
+      {/* ── Modals (portals — render outside sidebar overflow) ── */}
       <NewAssetModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -207,6 +209,11 @@ export default function EditorSidebar() {
           potion: actions.createPotion,
           enemy:  actions.createEnemy,
         }}
+      />
+      <NewProjectModal
+        isOpen={projectModalOpen}
+        onClose={() => setProjectModalOpen(false)}
+        onCreate={actions.createProject}
       />
 
     </div>

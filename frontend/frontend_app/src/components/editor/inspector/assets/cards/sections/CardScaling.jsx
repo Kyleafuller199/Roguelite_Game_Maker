@@ -8,14 +8,13 @@ import { useMemo } from "react";
 import Label from "../../../shared/Label";
 import InspectorSection from "../../../shared/InspectorSection";
 import clampNumber from "../../../shared/clampNumber";
+import { makeId } from "@/utils/makeId";
 
 const SCALING_TRIGGERS = [
   "timesPlayedThisCombat", "cardsPlayedThisTurn", "cardsInHand",
   "turnsElapsed", "energySpentThisTurn", "missingHp",
 ];
 const OPERATIONS = ["add"];
-
-function makeId(prefix) { return `${prefix}_${crypto.randomUUID()}`; }
 
 const actionBtnStyle = {
   padding: "2px 8px", fontSize: 12,

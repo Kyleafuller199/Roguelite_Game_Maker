@@ -7,13 +7,12 @@
 import { useMemo } from "react";
 import Label from "../../../shared/Label";
 import InspectorSection from "../../../shared/InspectorSection";
+import { makeId } from "@/utils/makeId";
 
 const RELIC_EVENTS = [
   "startOfCombat", "startOfTurn", "endOfTurn", "endOfCombat",
   "cardPlayed", "cardDrawn", "damageTaken",
 ];
-
-function makeId(prefix = "trigger") { return `${prefix}_${crypto.randomUUID()}`; }
 
 function effectSummary(eff) {
   const type = eff.effectType ?? "effect";

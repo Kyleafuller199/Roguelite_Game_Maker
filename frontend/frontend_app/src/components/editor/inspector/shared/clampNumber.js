@@ -13,7 +13,7 @@
  * @param {number} max - Maximum allowed value
  * @returns {number} A valid number within [min, max]
  */
-export default function clampNumber(value, min, max) {
+export default function clampNumber(value, min, max = Infinity) {
   // Convert string input -> number (e.g., from <input type="number" />).
   const n = Number(value);
 

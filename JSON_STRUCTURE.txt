@@ -1,0 +1,316 @@
+================================================================================
+  ROGUELITE GAME MAKER — JSON STRUCTURE REFERENCE
+================================================================================
+  This file documents the JSON shape for every asset type and for projects.
+  All data lives in editor state (localStorage key: rgm_editor_state_v4).
+
+  GLOBAL ASSETS are stored under state.assets.*
+  PROJECT DATA  is stored under state.project.*
+
+  Assets are stored in normalised form:
+    { byId: { [id]: object }, allIds: [id, id, ...] }
+
+  Projects reference global assets by ID — never by copying the full object.
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+  CARD
+────────────────────────────────────────────────────────────────────────────────
+
+{
+  "id":         "card_<uuid>",               // unique identifier
+  "name":       "Strike",                    // display name
+  "type":       "Attack",                    // Attack | Skill | Power | Curse
+  "rarity":     "Common",                    // Common | Uncommon | Rare | Curse
+  "cost":       1,                           // energy cost, 0–9
+
+  // Boolean rule flags (all default to false / absent)
+  "unplayable": false,
+  "ethereal":   false,
+  "exhaust":    false,
+  "innate":     false,
+  "retain":     false,
+
+  // Effects — what the card does when played
+  "effects": [
+    {
+      "id":         "eff_<uuid>",
+      "effectType": "damage",
+      // Supported types:
+      //   damage | block | heal | draw | gainEnergy
+      //   weak | vulnerable | frail | strength | dexterity
+
+      "baseValue":  6,                       // numeric magnitude
+
+      // "target" is present only when effectType requires it:
+      "target": "selectedEnemy",
+      // Options: selectedEnemy | randomEnemy | allEnemies | self
+
+      // "repeat" is present only when effectType supports it:
+      "repeat": 1                            // times the effect fires, 1–99
+    }
+  ],
+
+  // Scaling rules — modify an effect's value based on a game condition
+  "scaling": [
+    {
+      "id":                "scale_<uuid>",
+      "appliesToEffectId": "eff_<uuid>",     // which effect this scales
+      "basedOn":           "timesPlayedThisCombat",
+      // Triggers:
+      //   timesPlayedThisCombat | cardsPlayedThisTurn | cardsInHand
+      //   turnsElapsed | energySpentThisTurn | missingHp
+
+      "operation":         "add",            // currently only "add"
+      "amountPerUnit":     1,                // value added per unit of trigger
+      "cap":               null              // optional max cap (null = uncapped)
+    }
+  ]
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  RELIC
+────────────────────────────────────────────────────────────────────────────────
+
+{
+  "id":      "relic_<uuid>",                 // unique identifier
+  "imageId": "",                             // asset image reference (V1)
+
+  "identity": {
+    "name":   "Burning Blood",
+    "rarity": "Starter"
+    // Rarities: Common | Uncommon | Rare | Boss | Shop | Starter
+  },
+
+  // Effects — what the relic does when a trigger fires
+  "effects": [
+    {
+      "id":         "eff_<uuid>",
+      "effectType": "heal",
+      // Types: damage | block | heal | draw | gainEnergy
+      //        weak | vulnerable | frail | strength | dexterity
+
+      "baseValue":  6,
+
+      // "target" present only when effectType requires it:
+      "target": "self",
+      // Options: selectedEnemy | randomEnemy | allEnemies | self
+
+      // "repeat" present only when effectType supports it:
+      "repeat": 1
+    }
+  ],
+
+  // Triggers — specify when effects fire
+  "triggers": [
+    {
+      "id":        "trg_<uuid>",
+      "event":     "endOfCombat",
+      // Events:
+      //   startOfCombat | startOfTurn | endOfTurn | endOfCombat
+      //   cardPlayed | cardDrawn | damageTaken
+
+      "effectIds": ["eff_<uuid>"]            // IDs from the effects array above
+    }
+  ]
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  POTION
+────────────────────────────────────────────────────────────────────────────────
+
+{
+  "id":       "potion_<uuid>",               // unique identifier
+  "imageId":  "",                            // asset image reference (V1)
+  "imageUrl": "",                            // legacy V1 field
+
+  "identity": {
+    "name":       "Fire Potion",
+    "rarity":     "Common",                  // Common | Uncommon | Rare | Shop
+    "useContext": "anyTime"
+    // Use contexts: anyTime | combatOnly | outOfCombatOnly
+  },
+
+  // Effects — applied when the potion is consumed
+  "effects": [
+    {
+      "id":         "eff_<uuid>",
+      "effectType": "damage",
+      // Types: damage | block | heal | draw | gainEnergy
+      //        weak | vulnerable | frail | strength | dexterity
+
+      "baseValue": 20,
+
+      // "target" present only when effectType requires it:
+      "target": "selectedEnemy",
+      // Options: selectedEnemy | randomEnemy | allEnemies | self
+
+      // "repeat" present only when effectType supports it:
+      "repeat": 1
+    }
+  ]
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  ENEMY
+────────────────────────────────────────────────────────────────────────────────
+
+  NOTE: The "act" an enemy appears in is determined by project pool assignment
+  (see PROJECT → acts below), NOT by a field on the enemy itself.
+
+{
+  "id":       "enemy_<uuid>",                // unique identifier
+  "imageUrl": "",                            // asset image reference (V1)
+
+  "identity": {
+    "name":           "Cultist",
+    "type":           "basic",              // basic | elite | boss
+    //   Determines which section of the enemy pool the enemy appears in.
+    //   Act assignment is set per-project, not here.
+    "startingHealth": 40,                   // HP at start of combat
+    "startingBlock":  0                     // Block at start of combat
+  },
+
+  // Moves — the actions this enemy can take during combat
+  "moves": [
+    {
+      "id":   "move_<uuid>",
+      "name": "Slash",
+
+      "effects": [
+        {
+          "id":         "eff_<uuid>",
+          "effectType": "damage",
+          // Types: damage | block | heal | draw | gainEnergy
+          //        weak | vulnerable | frail | strength | dexterity
+
+          "baseValue": 6,
+
+          // "target" present only when effectType requires it:
+          "target": "player",
+          // Enemy effect targets:
+          //   player | self | selectedEnemy | randomEnemy | allEnemies
+
+          // "repeat" present only when effectType supports it:
+          "repeat": 1
+        }
+      ]
+    }
+  ],
+
+  // Behavior — how the enemy decides which move to use each turn
+  "behavior": {
+    "behaviorType": "cycle",               // cycle | custom
+    "cycleOrder":   ["move_<uuid>", "move_<uuid>"]
+    // Ordered list of move IDs. In "cycle" mode the enemy repeats
+    // this sequence each combat.
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  PROJECT
+────────────────────────────────────────────────────────────────────────────────
+
+  A project composes global assets into a playable game.
+  All values are references to global asset IDs — never copies.
+
+{
+  "id":   "project_<uuid>",                  // unique identifier
+  "name": "My Roguelite",
+
+  // pools — the set of assets available to drop in this game.
+  // Cards/relics/potions are flat ID lists.
+  // Enemy pool assignment is done per-act below (pools.enemies is reserved).
+  "pools": {
+    "cards":   ["card_id_1", "card_id_2"],   // global card IDs
+    "relics":  ["relic_id_1"],               // global relic IDs
+    "potions": ["potion_id_1"],              // global potion IDs
+    "enemies": []                            // reserved; acts drive enemy placement
+  },
+
+  // acts — enemies assigned to each act by encounter role.
+  // Only enemies whose identity.type matches the role key are valid here.
+  "acts": {
+    "1": {
+      "basics": ["enemy_id_1"],              // basic-type enemies for act 1
+      "elites": [],                          // elite-type enemies for act 1
+      "bosses": [],                          // boss-type enemies for act 1
+      "events": []                           // reserved for future event system
+    },
+    "2": {
+      "basics": [],
+      "elites": [],
+      "bosses": [],
+      "events": []
+    },
+    "3": {
+      "basics": [],
+      "elites": [],
+      "bosses": [],
+      "events": []
+    }
+  },
+
+  "characterIds": ["char_id_1"]             // IDs of characters in this project
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  CHARACTER  (belongs to a project)
+────────────────────────────────────────────────────────────────────────────────
+
+  Characters are stored alongside projects in state.project.characters.
+  Each character belongs to exactly one project (via projectId).
+
+{
+  "id":        "char_<uuid>",                // unique identifier
+  "projectId": "<project_uuid>",             // owning project
+
+  "name": "Ironclad",
+
+  // The relic the character starts every run with.
+  // null = no starting relic.
+  "startingRelicId": "relic_id | null",
+
+  // The deck the character starts every run with.
+  // Each entry references a global card ID and specifies how many copies.
+  "startingDeck": [
+    { "cardId": "card_id_1", "count": 5 }
+  ],
+
+  // Character-specific pool overrides.
+  // Empty arrays = inherit the parent project's pools.
+  "pools": {
+    "cards":  [],
+    "relics": []
+  }
+}
+
+
+================================================================================
+  EFFECT TYPE REFERENCE
+================================================================================
+
+  The following effectType values are supported across cards, relics, potions,
+  and enemy moves. "requiresTarget" and "supportsRepeat" indicate whether those
+  fields are present on the effect object.
+
+  effectType        requiresTarget   supportsRepeat
+  ─────────────────────────────────────────────────
+  damage            yes              yes
+  block             yes              yes
+  heal              yes              yes
+  draw              no               yes
+  gainEnergy        no               yes
+  weak              yes              yes
+  vulnerable        yes              yes
+  frail             yes              yes
+  strength          yes              yes
+  dexterity         yes              yes
+
+================================================================================

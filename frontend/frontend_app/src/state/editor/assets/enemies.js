@@ -1,15 +1,16 @@
+import { makeId } from "@/utils/makeId";
+
 export function createEnemy(setState, name) {
   setState((prev) => {
-    const id = `enemy_${Date.now()}`;
+    const id = makeId("enemy");
 
     const newEnemy = {
       id,
       imageUrl: "", // V1 (same idea as card/relic/potion)
       identity: {
         name: name || "New Enemy",
-        enemyType: "basic", // basic | elite | boss
-        act: 1,
-        maxHealth: 40,
+        type: "basic", // basic | elite | boss — matches EnemyIdentity inspector
+        startingHealth: 40,
         startingBlock: 0,
       },
       moves: [],

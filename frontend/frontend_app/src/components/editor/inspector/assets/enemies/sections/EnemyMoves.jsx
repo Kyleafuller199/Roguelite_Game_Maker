@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import Label from "../../../shared/Label";
 import clampNumber from "../../../shared/clampNumber";
 import InspectorSection from "../../../shared/InspectorSection";
+import { makeId } from "@/utils/makeId";
 
 const EFFECT_CONFIG = {
   damage: { label: "Damage", requiresTarget: true, supportsRepeat: true },
@@ -32,10 +33,6 @@ const ENEMY_TARGETS = [
   { value: "randomEnemy", label: "Random Enemy" },
   { value: "allEnemies", label: "All Enemies" },
 ];
-
-function makeId(prefix) {
-  return `${prefix}_${crypto.randomUUID()}`;
-}
 
 function normalizeEffectForType(effect, nextType) {
   const cfg = EFFECT_CONFIG[nextType] ?? EFFECT_CONFIG.damage;

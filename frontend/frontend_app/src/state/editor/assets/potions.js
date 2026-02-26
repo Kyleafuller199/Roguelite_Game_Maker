@@ -1,6 +1,8 @@
+import { makeId } from "@/utils/makeId";
+
 export function createPotion(setState, name) {
   setState((prev) => {
-    const id = `potion_${Date.now()}`;
+    const id = makeId("potion");
 
     const newPotion = {
       id,

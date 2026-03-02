@@ -59,6 +59,7 @@ export const initialState = {
           type: "Attack",
           rarity: "Common",
           cost: 1,
+          imageUrl: "",
         },
         card_2: {
           id: "card_2",
@@ -66,7 +67,9 @@ export const initialState = {
           type: "Skill",
           rarity: "Common",
           cost: 1,
+          imageUrl: "",
         },
+
       },
       allIds: ["card_basic_strike", "card_2"],
     },
@@ -80,14 +83,14 @@ export const initialState = {
       byId: {
         relic_ancient_coin: {
           id: "relic_ancient_coin",
-          imageId: "",
+          imageUrl: "",
           identity: { name: "Ancient Coin", rarity: "Rare" },
           effects: [],
           triggers: [],
         },
         relic_burning_blood: {
           id: "relic_burning_blood",
-          imageId: "",
+          imageUrl: "",
           identity: { name: "Burning Blood", rarity: "Starter" },
           effects: [],
           triggers: [],
@@ -105,8 +108,7 @@ export const initialState = {
       byId: {
         potion_fire: {
           id: "potion_fire",
-          imageId: "",
-          imageUrl: "", // V1 — will likely become imageId only
+          imageUrl: "",
           identity: {
             name: "Fire Potion",
             rarity: "Common",
@@ -116,7 +118,6 @@ export const initialState = {
         },
         potion_strength: {
           id: "potion_strength",
-          imageId: "",
           imageUrl: "",
           identity: {
             name: "Strength Potion",
@@ -245,11 +246,13 @@ export const initialState = {
 
           /**
            * Optional character-specific pools.
-           * Empty = inherits project-level pools.
+           * Empty arrays = inherits project-level pools.
+           * Non-empty arrays extend (not replace) the project pools.
            */
           pools: {
             cards: [],
             relics: [],
+            potions: [],
           },
         },
       },

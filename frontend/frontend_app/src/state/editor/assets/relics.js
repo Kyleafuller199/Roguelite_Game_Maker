@@ -6,7 +6,7 @@ export function createRelic(setState, name) {
 
     const newRelic = {
       id,
-      imageId: "",
+      imageUrl: "",
       identity: {
         name: name || "New Relic",
         rarity: "Common",

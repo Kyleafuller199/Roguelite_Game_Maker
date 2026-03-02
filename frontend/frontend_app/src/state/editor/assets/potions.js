@@ -6,7 +6,6 @@ export function createPotion(setState, name) {
 
     const newPotion = {
       id,
-      imageId: "",
       imageUrl: "",
       identity: {
         name: name || "New Potion",

@@ -3,7 +3,7 @@ import { makeId } from "@/utils/makeId";
 export function createCard(setState, name) {
   setState((prev) => {
     const id = makeId("card");
-    const newCard = { id, name: name || "New Card", type: "Attack", rarity: "Common", cost: 1 };
+    const newCard = { id, name: name || "New Card", type: "Attack", rarity: "Common", cost: 1, imageUrl: "" };
 
     return {
       ...prev,

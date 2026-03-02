@@ -34,7 +34,14 @@ import { createEnemy, updateSelectedEnemy, deleteSelectedEnemy } from "@/state/e
 // Project action delegates
 import {
   createProject,
+  deleteProject,
+  updateProject,
   createCharacter,
+  deleteCharacter,
+  updateCharacter,
+  setCharacterStartingRelic,
+  toggleCharacterDeckCard,
+  setCharacterDeckCardCount,
   togglePoolAsset,
   toggleActEnemy,
 } from "@/state/editor/project/projects";
@@ -164,10 +171,19 @@ export function EditorProvider({ children }) {
       // -------------------------------------------------
 
       /** Projects */
-      createProject(name)                        { createProject(setState, name); },
-      createCharacter(projectId, name)           { createCharacter(setState, projectId, name); },
-      togglePoolAsset(projectId, poolType, id)   { togglePoolAsset(setState, projectId, poolType, id); },
-      toggleActEnemy(projectId, act, role, id)   { toggleActEnemy(setState, projectId, act, role, id); },
+      createProject(name)                                      { createProject(setState, name); },
+      deleteProject(projectId)                                 { deleteProject(setState, projectId); },
+      updateProject(projectId, patch)                          { updateProject(setState, projectId, patch); },
+      createCharacter(projectId, name)                         { createCharacter(setState, projectId, name); },
+      deleteCharacter(projectId, characterId)                  { deleteCharacter(setState, projectId, characterId); },
+      togglePoolAsset(projectId, poolType, id)                 { togglePoolAsset(setState, projectId, poolType, id); },
+      toggleActEnemy(projectId, act, role, id)                 { toggleActEnemy(setState, projectId, act, role, id); },
+
+      /** Characters */
+      updateCharacter(characterId, patch)                      { updateCharacter(setState, characterId, patch); },
+      setCharacterStartingRelic(characterId, relicId)          { setCharacterStartingRelic(setState, characterId, relicId); },
+      toggleCharacterDeckCard(characterId, cardId)             { toggleCharacterDeckCard(setState, characterId, cardId); },
+      setCharacterDeckCardCount(characterId, cardId, count)    { setCharacterDeckCardCount(setState, characterId, cardId, count); },
 
       // -------------------------------------------------
       // Asset actions (delegated to /assets modules)

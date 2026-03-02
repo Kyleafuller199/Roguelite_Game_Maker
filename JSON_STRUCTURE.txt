@@ -11,6 +11,10 @@
     { byId: { [id]: object }, allIds: [id, id, ...] }
 
   Projects reference global assets by ID — never by copying the full object.
+
+  IMAGE FIELDS (v1):
+  All asset types use a single flat "imageUrl" field. The old "imageId" field
+  on relics/potions has been removed. New assets default to imageUrl: "".
 ================================================================================
 
 
@@ -19,11 +23,12 @@
 ────────────────────────────────────────────────────────────────────────────────
 
 {
-  "id":         "card_<uuid>",               // unique identifier
-  "name":       "Strike",                    // display name
-  "type":       "Attack",                    // Attack | Skill | Power | Curse
-  "rarity":     "Common",                    // Common | Uncommon | Rare | Curse
-  "cost":       1,                           // energy cost, 0–9
+  "id":       "card_<uuid>",               // unique identifier
+  "name":     "Strike",                    // display name
+  "type":     "Attack",                    // Attack | Skill | Power | Curse
+  "rarity":   "Common",                    // Common | Uncommon | Rare | Curse
+  "cost":     1,                           // energy cost, 0–9
+  "imageUrl": "",                          // image URL (v1 — same field across all assets)
 
   // Boolean rule flags (all default to false / absent)
   "unplayable": false,
@@ -41,14 +46,14 @@
       //   damage | block | heal | draw | gainEnergy
       //   weak | vulnerable | frail | strength | dexterity
 
-      "baseValue":  6,                       // numeric magnitude
+      "baseValue":  6,                     // numeric magnitude
 
       // "target" is present only when effectType requires it:
       "target": "selectedEnemy",
       // Options: selectedEnemy | randomEnemy | allEnemies | self
 
       // "repeat" is present only when effectType supports it:
-      "repeat": 1                            // times the effect fires, 1–99
+      "repeat": 1                          // times the effect fires, 1–99
     }
   ],
 
@@ -56,15 +61,15 @@
   "scaling": [
     {
       "id":                "scale_<uuid>",
-      "appliesToEffectId": "eff_<uuid>",     // which effect this scales
+      "appliesToEffectId": "eff_<uuid>",   // which effect this scales
       "basedOn":           "timesPlayedThisCombat",
       // Triggers:
       //   timesPlayedThisCombat | cardsPlayedThisTurn | cardsInHand
       //   turnsElapsed | energySpentThisTurn | missingHp
 
-      "operation":         "add",            // currently only "add"
-      "amountPerUnit":     1,                // value added per unit of trigger
-      "cap":               null              // optional max cap (null = uncapped)
+      "operation":     "add",              // currently only "add"
+      "amountPerUnit": 1,                  // value added per unit of trigger
+      "cap":           null                // optional max cap (null = uncapped)
     }
   ]
 }
@@ -75,8 +80,8 @@
 ────────────────────────────────────────────────────────────────────────────────
 
 {
-  "id":      "relic_<uuid>",                 // unique identifier
-  "imageId": "",                             // asset image reference (V1)
+  "id":       "relic_<uuid>",              // unique identifier
+  "imageUrl": "",                          // image URL (v1 — replaces old imageId)
 
   "identity": {
     "name":   "Burning Blood",
@@ -92,7 +97,7 @@
       // Types: damage | block | heal | draw | gainEnergy
       //        weak | vulnerable | frail | strength | dexterity
 
-      "baseValue":  6,
+      "baseValue": 6,
 
       // "target" present only when effectType requires it:
       "target": "self",
@@ -112,7 +117,7 @@
       //   startOfCombat | startOfTurn | endOfTurn | endOfCombat
       //   cardPlayed | cardDrawn | damageTaken
 
-      "effectIds": ["eff_<uuid>"]            // IDs from the effects array above
+      "effectIds": ["eff_<uuid>"]          // IDs from the effects array above
     }
   ]
 }
@@ -123,13 +128,12 @@
 ────────────────────────────────────────────────────────────────────────────────
 
 {
-  "id":       "potion_<uuid>",               // unique identifier
-  "imageId":  "",                            // asset image reference (V1)
-  "imageUrl": "",                            // legacy V1 field
+  "id":       "potion_<uuid>",             // unique identifier
+  "imageUrl": "",                          // image URL (v1 — imageId removed)
 
   "identity": {
     "name":       "Fire Potion",
-    "rarity":     "Common",                  // Common | Uncommon | Rare | Shop
+    "rarity":     "Common",                // Common | Uncommon | Rare | Shop
     "useContext": "anyTime"
     // Use contexts: anyTime | combatOnly | outOfCombatOnly
   },
@@ -163,16 +167,16 @@
   (see PROJECT → acts below), NOT by a field on the enemy itself.
 
 {
-  "id":       "enemy_<uuid>",                // unique identifier
-  "imageUrl": "",                            // asset image reference (V1)
+  "id":       "enemy_<uuid>",              // unique identifier
+  "imageUrl": "",                          // image URL (v1 — consistent with all assets)
 
   "identity": {
     "name":           "Cultist",
-    "type":           "basic",              // basic | elite | boss
+    "type":           "basic",             // basic | elite | boss
     //   Determines which section of the enemy pool the enemy appears in.
     //   Act assignment is set per-project, not here.
-    "startingHealth": 40,                   // HP at start of combat
-    "startingBlock":  0                     // Block at start of combat
+    "startingHealth": 40,                  // HP at start of combat
+    "startingBlock":  0                    // Block at start of combat
   },
 
   // Moves — the actions this enemy can take during combat
@@ -220,43 +224,33 @@
   All values are references to global asset IDs — never copies.
 
 {
-  "id":   "project_<uuid>",                  // unique identifier
+  "id":   "project_<uuid>",                // unique identifier
   "name": "My Roguelite",
 
-  // pools — the set of assets available to drop in this game.
+  // pools — the set of assets available to drop during a run.
   // Cards/relics/potions are flat ID lists.
   // Enemy pool assignment is done per-act below (pools.enemies is reserved).
   "pools": {
-    "cards":   ["card_id_1", "card_id_2"],   // global card IDs
-    "relics":  ["relic_id_1"],               // global relic IDs
-    "potions": ["potion_id_1"],              // global potion IDs
-    "enemies": []                            // reserved; acts drive enemy placement
+    "cards":   ["card_id_1", "card_id_2"], // global card IDs
+    "relics":  ["relic_id_1"],             // global relic IDs
+    "potions": ["potion_id_1"],            // global potion IDs
+    "enemies": []                          // reserved; acts drive enemy placement
   },
 
   // acts — enemies assigned to each act by encounter role.
   // Only enemies whose identity.type matches the role key are valid here.
   "acts": {
     "1": {
-      "basics": ["enemy_id_1"],              // basic-type enemies for act 1
-      "elites": [],                          // elite-type enemies for act 1
-      "bosses": [],                          // boss-type enemies for act 1
-      "events": []                           // reserved for future event system
+      "basics": ["enemy_id_1"],            // basic-type enemies for act 1
+      "elites": [],                        // elite-type enemies for act 1
+      "bosses": [],                        // boss-type enemies for act 1
+      "events": []                         // reserved for future event system
     },
-    "2": {
-      "basics": [],
-      "elites": [],
-      "bosses": [],
-      "events": []
-    },
-    "3": {
-      "basics": [],
-      "elites": [],
-      "bosses": [],
-      "events": []
-    }
+    "2": { "basics": [], "elites": [], "bosses": [], "events": [] },
+    "3": { "basics": [], "elites": [], "bosses": [], "events": [] }
   },
 
-  "characterIds": ["char_id_1"]             // IDs of characters in this project
+  "characterIds": ["char_id_1"]            // IDs of characters in this project
 }
 
 
@@ -268,8 +262,8 @@
   Each character belongs to exactly one project (via projectId).
 
 {
-  "id":        "char_<uuid>",                // unique identifier
-  "projectId": "<project_uuid>",             // owning project
+  "id":        "char_<uuid>",              // unique identifier
+  "projectId": "<project_uuid>",           // owning project
 
   "name": "Ironclad",
 
@@ -283,11 +277,58 @@
     { "cardId": "card_id_1", "count": 5 }
   ],
 
-  // Character-specific pool overrides.
-  // Empty arrays = inherit the parent project's pools.
+  // Character-specific pool extensions.
+  // Empty arrays = use the parent project's pool as-is.
+  // Non-empty = these IDs are ADDED to the project pool (additive, never override).
   "pools": {
-    "cards":  [],
-    "relics": []
+    "cards":   [],
+    "relics":  [],
+    "potions": []
+  }
+}
+
+
+────────────────────────────────────────────────────────────────────────────────
+  RUN PAYLOAD  (built by payload.js → sent to game state manager)
+────────────────────────────────────────────────────────────────────────────────
+
+  buildRunPayload() resolves all ID references into full asset objects.
+  This is the shape the game state manager receives when a run is started.
+
+{
+  "projectId":   "project_<uuid>",
+  "projectName": "My Roguelite",
+
+  // The character selected for this run (defaults to first in project)
+  "character": {
+    "id":   "char_<uuid>",
+    "name": "Ironclad",
+
+    // Full relic object (or null)
+    "startingRelic": { ...relic },
+
+    // Starting deck — full card objects with copy count
+    "startingDeck": [
+      { "card": { ...card }, "count": 5 }
+    ]
+  },
+
+  // Full resolved asset objects available to drop during the run
+  // (project pool + any character-specific extensions, de-duped)
+  "cardPool":   [{ ...card }, ...],
+  "relicPool":  [{ ...relic }, ...],
+  "potionPool": [{ ...potion }, ...],
+
+  // Acts with full enemy objects per encounter role
+  "acts": {
+    "1": {
+      "basics": [{ ...enemy }, ...],
+      "elites": [],
+      "bosses": [],
+      "events": []
+    },
+    "2": { ... },
+    "3": { ... }
   }
 }
 

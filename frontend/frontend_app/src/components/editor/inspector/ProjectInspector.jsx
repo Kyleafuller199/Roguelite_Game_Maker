@@ -2,26 +2,39 @@
  * ProjectInspector.jsx
  *
  * Inspector panel for project mode.
- * Routes to the correct pool inspector based on the selected project tree node.
+ * Routes to the correct inspector based on the selected project tree node kind.
  *
  * Supported node kinds:
- * - "pool" → renders the matching pool inspector (cards/relics/potions/enemies)
- * - others → shows an empty-state prompt
+ * - "project"   → ProjectNodeInspector  (overview + Start Run)
+ * - "pool"      → pool inspector        (cards / relics / potions / enemies)
+ * - "character" → CharacterInspector    (starting relic, starting deck)
  *
  * @param {object} state   - Full editor state
  * @param {object} actions - Editor actions
  */
 
-import CardPoolInspector from "@/components/editor/inspector/project/pools/CardPoolInspector";
-import RelicPoolInspector from "@/components/editor/inspector/project/pools/RelicPoolInspector";
-import PotionPoolInspector from "@/components/editor/inspector/project/pools/PotionPoolInspector";
-import EnemyPoolInspector from "@/components/editor/inspector/project/pools/EnemyPoolInspector";
+import CardPoolInspector    from "@/components/editor/inspector/project/pools/CardPoolInspector";
+import RelicPoolInspector   from "@/components/editor/inspector/project/pools/RelicPoolInspector";
+import PotionPoolInspector  from "@/components/editor/inspector/project/pools/PotionPoolInspector";
+import EnemyPoolInspector   from "@/components/editor/inspector/project/pools/EnemyPoolInspector";
+import CharacterInspector   from "@/components/editor/inspector/project/CharacterInspector";
+import ProjectNodeInspector from "@/components/editor/inspector/project/ProjectNodeInspector";
 import {
   COLOR_SIDEBAR_BG,
   COLOR_TEXT_MAIN,
   COLOR_TEXT_SECONDARY,
   sectionHeaderTitle,
 } from "@/components/editor/shared/sidebarStyles";
+
+const deleteBtnStyle = {
+  padding: "2px 8px",
+  fontSize: 12,
+  background: "transparent",
+  border: "1px solid rgba(255,255,255,0.2)",
+  borderRadius: 4,
+  color: COLOR_TEXT_SECONDARY,
+  cursor: "pointer",
+};
 
 const POOL_INSPECTORS = {
   cards:   CardPoolInspector,
@@ -67,11 +80,25 @@ function EmptyState({ message }) {
   );
 }
 
-export default function ProjectInspector({ state, actions }) {
-  const { selectedNode, projects } = state.project;
+function InspectorShell({ title, headerAction, children }) {
+  return (
+    <div style={rootStyle}>
+      <div style={{ ...stickyHeaderStyle, justifyContent: "space-between" }}>
+        <span style={sectionHeaderTitle}>{title}</span>
+        {headerAction}
+      </div>
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
-  if (!selectedNode || selectedNode.kind !== "pool") {
-    return <EmptyState message="Select a pool to configure it." />;
+export default function ProjectInspector({ state, actions }) {
+  const { selectedNode, projects, characters } = state.project;
+
+  if (!selectedNode) {
+    return <EmptyState message="Select a project node to inspect it." />;
   }
 
   const project = projects.byId[selectedNode.projectId];
@@ -79,26 +106,65 @@ export default function ProjectInspector({ state, actions }) {
     return <EmptyState message="Project not found." />;
   }
 
-  const PoolInspector = POOL_INSPECTORS[selectedNode.pool];
-  if (!PoolInspector) {
-    return <EmptyState message="Unknown pool type." />;
+  // ── "project" node — overview + Start Run ──────────────────
+  if (selectedNode.kind === "project") {
+    function handleDeleteProject() {
+      const ok = window.confirm(`Delete "${project.name ?? "this project"}"? This cannot be undone.`);
+      if (!ok) return;
+      actions.deleteProject(project.id);
+    }
+
+    return (
+      <InspectorShell
+        title={project.name}
+        headerAction={
+          <button onClick={handleDeleteProject} style={deleteBtnStyle}>Delete</button>
+        }
+      >
+        <ProjectNodeInspector project={project} state={state} actions={actions} />
+      </InspectorShell>
+    );
   }
 
-  return (
-    <div style={rootStyle}>
+  // ── "pool" node — pool asset toggles ───────────────────────
+  if (selectedNode.kind === "pool") {
+    const PoolInspector = POOL_INSPECTORS[selectedNode.pool];
+    if (!PoolInspector) return <EmptyState message="Unknown pool type." />;
 
-      {/* Sticky header */}
-      <div style={stickyHeaderStyle}>
-        <span style={sectionHeaderTitle}>
-          {POOL_LABELS[selectedNode.pool]}
-        </span>
-      </div>
-
-      {/* Scrollable pool content */}
-      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+    return (
+      <InspectorShell title={POOL_LABELS[selectedNode.pool]}>
         <PoolInspector project={project} state={state} actions={actions} />
-      </div>
+      </InspectorShell>
+    );
+  }
 
-    </div>
-  );
+  // ── "character" node — starting relic + starting deck ──────
+  if (selectedNode.kind === "character") {
+    const character = characters.byId[selectedNode.characterId];
+    if (!character) return <EmptyState message="Character not found." />;
+
+    function handleDelete() {
+      const ok = window.confirm(`Delete "${character.name ?? "this character"}"? This cannot be undone.`);
+      if (!ok) return;
+      actions.deleteCharacter(project.id, character.id);
+    }
+
+    return (
+      <InspectorShell
+        title={character.name ?? "Character"}
+        headerAction={
+          <button onClick={handleDelete} style={deleteBtnStyle}>Delete</button>
+        }
+      >
+        <CharacterInspector
+          character={character}
+          project={project}
+          state={state}
+          actions={actions}
+        />
+      </InspectorShell>
+    );
+  }
+
+  return <EmptyState message="Select a project node to inspect it." />;
 }

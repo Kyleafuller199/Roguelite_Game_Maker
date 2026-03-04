@@ -18,6 +18,7 @@
  */
 
 import InspectorSection from "@/components/editor/inspector/shared/InspectorSection";
+import ImagePicker from "@/components/editor/inspector/shared/ImagePicker";
 import PoolRow from "@/components/editor/inspector/project/PoolRow";
 import Label from "@/components/editor/inspector/shared/Label";
 import {
@@ -174,6 +175,15 @@ export default function CharacterInspector({ character, project, state, actions 
           onChange={(e) => actions.updateCharacter(character.id, { name: e.target.value })}
           placeholder="Character name"
           style={{ width: "100%", padding: 10, marginBottom: 12 }}
+        />
+      </InspectorSection>
+
+      {/* ── Sprite ────────────────────────────────────────────── */}
+      <InspectorSection title="Sprite">
+        <ImagePicker
+          folder="playable_characters"
+          value={character.imageUrl ?? ""}
+          onChange={(file) => actions.updateCharacter(character.id, { imageUrl: file })}
         />
       </InspectorSection>
 

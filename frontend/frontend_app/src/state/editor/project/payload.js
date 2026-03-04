@@ -58,7 +58,10 @@ export function buildRunPayload(state, projectId, characterId = null) {
   const deckCardIds = (character.startingDeck ?? []).map((e) => e.cardId);
   const allCardIds  = [...new Set([...cardPoolIds, ...deckCardIds])];
   const cardMap     = Object.fromEntries(
-    allCardIds.filter((id) => cards.byId[id]).map((id) => [id, cards.byId[id]])
+    allCardIds.filter((id) => cards.byId[id]).map((id) => {
+      const { imageId: _i, ...card } = cards.byId[id];
+      return [id, { imageUrl: "", ...card }];
+    })
   );
 
   // Relics: pool + starting relic if set
@@ -67,11 +70,17 @@ export function buildRunPayload(state, projectId, characterId = null) {
     ...(character.startingRelicId ? [character.startingRelicId] : []),
   ])];
   const relicMap = Object.fromEntries(
-    allRelicIds.filter((id) => relics.byId[id]).map((id) => [id, relics.byId[id]])
+    allRelicIds.filter((id) => relics.byId[id]).map((id) => {
+      const { imageId: _i, ...relic } = relics.byId[id];
+      return [id, { imageUrl: "", ...relic }];
+    })
   );
 
   const potionMap = Object.fromEntries(
-    potionPoolIds.filter((id) => potions.byId[id]).map((id) => [id, potions.byId[id]])
+    potionPoolIds.filter((id) => potions.byId[id]).map((id) => {
+      const { imageId: _i, ...potion } = potions.byId[id];
+      return [id, { imageUrl: "", ...potion }];
+    })
   );
 
   // ── Acts + enemy map ─────────────────────────────────────────────────────

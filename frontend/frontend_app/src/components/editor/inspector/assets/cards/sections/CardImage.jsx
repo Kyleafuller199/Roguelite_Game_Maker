@@ -11,7 +11,7 @@ export default function CardImage({ selected, update }) {
   return (
     <InspectorSection title="Image">
       <ImagePicker
-        folder="card logos"
+        folder="cards"
         value={selected.imageUrl ?? ""}
         onChange={(file) => update({ imageUrl: file })}
       />

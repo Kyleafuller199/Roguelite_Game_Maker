@@ -3,9 +3,8 @@
  *
  * Builds the "start run" payload from editor state.
  *
- * The payload is a fully resolved object tree — ID references are expanded
- * into full asset objects. This is what the game state manager consumes to
- * initialise a run.
+ * Shape: fully normalized — each asset defined once in its map,
+ * everything else (pools, acts, deck, relic) uses ID references only.
  *
  * buildRunPayload(state, projectId, characterId?)
  * - characterId defaults to the project's first character if omitted.
@@ -16,25 +15,14 @@
  * - An empty character pool means "use the project pool as-is".
  */
 
-/**
- * Resolves an array of asset IDs into full asset objects.
- * Silently skips IDs that don't resolve in byId.
- */
-function resolveIds(ids, byId) {
-  return (ids ?? []).map((id) => byId[id]).filter(Boolean);
-}
-
-/**
- * Merges projectIds + characterIds into a de-duped list of full asset objects.
- * Project order is preserved; character-only additions are appended after.
- */
-function mergePool(projectIds, characterIds, byId) {
+/** Returns a de-duped array of IDs that exist in byId. */
+function mergePoolIds(projectIds, characterIds, byId) {
   const seen = new Set();
   const result = [];
   for (const id of [...(projectIds ?? []), ...(characterIds ?? [])]) {
     if (!seen.has(id) && byId[id]) {
       seen.add(id);
-      result.push(byId[id]);
+      result.push(id);
     }
   }
   return result;
@@ -46,7 +34,7 @@ function mergePool(projectIds, characterIds, byId) {
  * @param {object}  state         - Full editor state
  * @param {string}  projectId     - ID of the project to start
  * @param {string}  [characterId] - Character to play; defaults to first in project
- * @returns {object|null}         - Resolved run payload, or null on failure
+ * @returns {object|null}         - Normalized run payload, or null on failure
  */
 export function buildRunPayload(state, projectId, characterId = null) {
   const project = state.project.projects.byId[projectId];
@@ -60,31 +48,48 @@ export function buildRunPayload(state, projectId, characterId = null) {
   const character = state.project.characters.byId[charId];
   if (!character) return null;
 
-  // Resolve starting relic (null if none assigned)
-  const startingRelic = character.startingRelicId
-    ? (relics.byId[character.startingRelicId] ?? null)
-    : null;
+  // ── Pools (ID arrays, de-duped) ─────────────────────────────────────────
+  const cardPoolIds   = mergePoolIds(project.pools.cards,   character.pools?.cards,   cards.byId);
+  const relicPoolIds  = mergePoolIds(project.pools.relics,  character.pools?.relics,  relics.byId);
+  const potionPoolIds = mergePoolIds(project.pools.potions, character.pools?.potions, potions.byId);
 
-  // Resolve starting deck — expand each { cardId, count } into { card, count }
-  const startingDeck = (character.startingDeck ?? [])
-    .map(({ cardId, count }) => {
-      const card = cards.byId[cardId];
-      return card ? { card, count } : null;
-    })
-    .filter(Boolean);
+  // ── Asset maps (each asset defined once) ────────────────────────────────
+  // Cards: pool + any starting deck cards not already in the pool
+  const deckCardIds = (character.startingDeck ?? []).map((e) => e.cardId);
+  const allCardIds  = [...new Set([...cardPoolIds, ...deckCardIds])];
+  const cardMap     = Object.fromEntries(
+    allCardIds.filter((id) => cards.byId[id]).map((id) => [id, cards.byId[id]])
+  );
 
-  // Merged pools: project pool extended by any character-specific additions
-  const cardPool   = mergePool(project.pools.cards,   character.pools?.cards,   cards.byId);
-  const relicPool  = mergePool(project.pools.relics,  character.pools?.relics,  relics.byId);
-  const potionPool = mergePool(project.pools.potions, character.pools?.potions, potions.byId);
+  // Relics: pool + starting relic if set
+  const allRelicIds = [...new Set([
+    ...relicPoolIds,
+    ...(character.startingRelicId ? [character.startingRelicId] : []),
+  ])];
+  const relicMap = Object.fromEntries(
+    allRelicIds.filter((id) => relics.byId[id]).map((id) => [id, relics.byId[id]])
+  );
 
-  // Acts: resolve enemy IDs → full enemy objects per encounter role
+  const potionMap = Object.fromEntries(
+    potionPoolIds.filter((id) => potions.byId[id]).map((id) => [id, potions.byId[id]])
+  );
+
+  // ── Acts + enemy map ─────────────────────────────────────────────────────
   const acts = {};
+  const enemyMap = {};
   for (const [actNum, actData] of Object.entries(project.acts ?? {})) {
+    const allIds = [
+      ...(actData.basics ?? []),
+      ...(actData.elites ?? []),
+      ...(actData.bosses ?? []),
+    ];
+    for (const id of allIds) {
+      if (enemies.byId[id]) enemyMap[id] = enemies.byId[id];
+    }
     acts[actNum] = {
-      basics: resolveIds(actData.basics, enemies.byId),
-      elites: resolveIds(actData.elites, enemies.byId),
-      bosses: resolveIds(actData.bosses, enemies.byId),
+      basics: (actData.basics ?? []).filter((id) => enemies.byId[id]),
+      elites: (actData.elites ?? []).filter((id) => enemies.byId[id]),
+      bosses: (actData.bosses ?? []).filter((id) => enemies.byId[id]),
       events: actData.events ?? [],
     };
   }
@@ -93,14 +98,19 @@ export function buildRunPayload(state, projectId, characterId = null) {
     projectId:   project.id,
     projectName: project.name,
     character: {
-      id:           character.id,
-      name:         character.name,
-      startingRelic,
-      startingDeck,
+      id:               character.id,
+      name:             character.name,
+      imageUrl:         character.imageUrl ?? "",
+      startingRelicId:  character.startingRelicId ?? null,
+      startingDeck:     (character.startingDeck ?? []).filter((e) => cards.byId[e.cardId]),
     },
-    cardPool,
-    relicPool,
-    potionPool,
+    cardMap,
+    relicMap,
+    potionMap,
+    enemyMap,
+    cardPool:   cardPoolIds,
+    relicPool:  relicPoolIds,
+    potionPool: potionPoolIds,
     acts,
   };
 }

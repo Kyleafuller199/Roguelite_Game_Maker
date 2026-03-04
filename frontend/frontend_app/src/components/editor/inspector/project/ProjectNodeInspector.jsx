@@ -69,13 +69,21 @@ export default function ProjectNodeInspector({ project, state, actions }) {
   if (!firstChar) hints.push("Add at least one character");
   else if (!hasDeck) hints.push("Character needs a starting deck");
 
-  function handleStartRun() {
+  async function handleStartRun() {
     const payload = buildRunPayload(state, project.id);
     if (!payload) { setStatus("error"); return; }
 
-    // TODO: POST payload to game state manager endpoint when ready
-    console.log("[Start Run] Payload →", JSON.stringify(payload, null, 2));
-    setStatus("sent");
+    try {
+      const res = await fetch("http://localhost:8000/api/start-run/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Server error");
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
@@ -125,12 +133,12 @@ export default function ProjectNodeInspector({ project, state, actions }) {
 
         {status === "sent" && (
           <div style={{ marginTop: 8, fontSize: 12, color: "#5cb85c", textAlign: "center" }}>
-            Payload logged — awaiting game state manager endpoint.
+            run_config.json written — ready for the game viewer.
           </div>
         )}
         {status === "error" && (
           <div style={{ marginTop: 8, fontSize: 12, color: "#d9534f", textAlign: "center" }}>
-            Failed to build payload. Check project configuration.
+            Failed — check project config or make sure Django is running.
           </div>
         )}
       </InspectorSection>

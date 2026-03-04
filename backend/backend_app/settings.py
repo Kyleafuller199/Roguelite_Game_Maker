@@ -25,7 +25,10 @@ SECRET_KEY = 'django-insecure-x-pa1#=!%z$teox83k2o)yz-9v56u8=#g8h@mpfw3wg#(fx)=+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Path to the game's asset directory
+GAME_ASSETS_DIR = BASE_DIR.parent / 'roguelite_map_generator' / 'assets'
 
 
 # Application definition
@@ -42,6 +45,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'backend_app.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

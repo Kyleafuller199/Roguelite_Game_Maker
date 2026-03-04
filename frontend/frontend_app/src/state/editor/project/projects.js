@@ -57,6 +57,7 @@ export function createCharacter(setState, projectId, name) {
       id,
       projectId,
       name: name || "New Character",
+      imageUrl: "",
       startingRelicId: null,
       startingDeck: [],
       pools: { cards: [], relics: [], potions: [] },

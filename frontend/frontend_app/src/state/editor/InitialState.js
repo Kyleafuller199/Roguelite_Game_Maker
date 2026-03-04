@@ -235,6 +235,7 @@ export const initialState = {
           id: "c1",
           projectId: "p1",
           name: "Hero",
+          imageUrl: "",
 
           // References global relic
           startingRelicId: "relic_burning_blood",

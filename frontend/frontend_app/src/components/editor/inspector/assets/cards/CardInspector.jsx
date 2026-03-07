@@ -10,7 +10,7 @@
  *   function (`update`) down to each section.
  *
  * Data Flow:
- * - `selected` is the active carc asset being edited.
+ * - `selected` is the active card asset being edited.
  * - `update` applies partial patches to the selected card in editor state.
  */
 

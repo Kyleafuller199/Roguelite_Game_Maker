@@ -24,7 +24,7 @@ export default function PotionInspector({ selected, update }) {
       {/* Basic identifying fields (name, rarity, etc.) */}
       <PotionIdentity selected={selected} update={update} />
 
-      {/* Visual reference for the potion (V1: url; later: imageId from asset library) */}
+      {/* Visual reference */}
       <PotionImage selected={selected} update={update} />
 
       {/* Effect list / behavior (what the potion does when used) */}

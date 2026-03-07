@@ -25,7 +25,7 @@ export default function RelicInspector({ selected, update }) {
       {/* Basic identifying fields (name, rarity, etc.) */}
       <RelicIdentity selected={selected} update={update} />
 
-      {/* Visual reference (V1: url; later: imageId from asset library) */}
+      {/* Visual reference */}
       <RelicImage selected={selected} update={update} />
 
       {/* Effect list (what the relic does) */}

@@ -17,17 +17,20 @@ import { useEffect, useState } from "react";
 const API_BASE = "http://localhost:8000";
 
 export default function ImagePicker({ folder, value, onChange }) {
-  const [files, setFiles] = useState([]);
-  const [error, setError] = useState(false);
+  const [files, setFiles]     = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState(false);
 
   useEffect(() => {
     if (!folder) return;
     setError(false);
+    setLoading(true);
     setFiles([]);
     fetch(`${API_BASE}/api/assets/list/?folder=${encodeURIComponent(folder)}`)
       .then((r) => r.json())
       .then((data) => setFiles(data.files ?? []))
-      .catch(() => setError(true));
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   }, [folder]);
 
   function thumbUrl(filename) {
@@ -38,6 +41,14 @@ export default function ImagePicker({ folder, value, onChange }) {
     return (
       <div style={{ fontSize: 13, color: "#e57c3a", padding: "8px 0" }}>
         Could not reach backend — make sure Django is running on port 8000.
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{ fontSize: 13, opacity: 0.5, padding: "8px 0" }}>
+        Loading...
       </div>
     );
   }

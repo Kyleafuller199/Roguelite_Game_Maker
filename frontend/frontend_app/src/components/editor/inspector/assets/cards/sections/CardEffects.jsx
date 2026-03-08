@@ -33,6 +33,7 @@ function normalizeEffectForType(effect, nextType) {
   if (cfg.requiresTarget && !next.target) next.target = "selectedEnemy";
   if (cfg.supportsRepeat && (!next.repeat || next.repeat < 1)) next.repeat = 1;
   if (next.baseValue == null) next.baseValue = 1;
+  if (!next.trigger) next.trigger = "onPlay";
   return next;
 }
 
@@ -73,6 +74,14 @@ export default function CardEffects({ selected, update }) {
                   <div style={{ fontWeight: 700, marginBottom: 10 }}>Effect</div>
                   <button onClick={() => removeEffect(eff.id)} style={{ ...actionBtnStyle, cursor: "pointer" }}>Remove</button>
                 </div>
+
+                <Label>Trigger</Label>
+                <select value={eff.trigger ?? "onPlay"} onChange={(e) => patchEffect(eff.id, { trigger: e.target.value })} style={{ width: "100%", padding: 10, marginBottom: 12 }}>
+                  <option value="onPlay">On Play</option>
+                  <option value="onDraw">On Draw</option>
+                  <option value="onDiscard">On Discard</option>
+                  <option value="onExhaust">On Exhaust</option>
+                </select>
 
                 <Label>Type</Label>
                 <select value={eff.effectType} onChange={(e) => setEffectType(eff.id, e.target.value)} style={{ width: "100%", padding: 10, marginBottom: 12 }}>

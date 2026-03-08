@@ -47,7 +47,6 @@ export default function PotionIdentity({ selected, update }) {
       >
         <option value="anyTime">Any Time</option>
         <option value="combatOnly">Combat Only</option>
-        <option value="outOfCombatOnly">Out of Combat Only</option>
       </select>
     </InspectorSection>
   );

@@ -85,9 +85,11 @@ export default function EditorCanvas() {
   }
 
   return (
-    <div style={canvasContainer}>
-      <div style={{ ...canvasSectionTitle, marginBottom: 12, fontSize: 20 }}>Live Preview</div>
-      <Preview selected={selected} />
+    <div style={{ ...canvasContainer, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ ...canvasSectionTitle, marginBottom: 12, fontSize: 20, flexShrink: 0 }}>Live Preview</div>
+      <div style={{ flex: 1, minHeight: 0 }}>
+        <Preview selected={selected} />
+      </div>
     </div>
   );
 }

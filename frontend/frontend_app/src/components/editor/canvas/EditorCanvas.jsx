@@ -9,7 +9,7 @@
  *
  * Current behavior:
  * - Asset mode: shows live preview for selected asset
- * - Project mode: placeholder (to be implemented)
+ * - Project mode: delegates to ProjectCanvas
  */
 
 import { useEditor } from "@/state/editor/useEditor";
@@ -18,6 +18,8 @@ import CardPreview from "@/components/editor/canvas/assets/CardPreview";
 import RelicPreview from "@/components/editor/canvas/assets/RelicPreview";
 import PotionPreview from "@/components/editor/canvas/assets/PotionPreview";
 import EnemyPreview from "@/components/editor/canvas/assets/EnemyPreview";
+
+import ProjectCanvas from "@/components/editor/canvas/ProjectCanvas";
 
 import {
   canvasContainer,
@@ -40,13 +42,8 @@ export default function EditorCanvas() {
   const { state } = useEditor();
   const { mode, entityType, selectedId } = state;
 
-  // Placeholder until project mode canvas is implemented.
-  if (mode !== "assets") {
-    return (
-      <div style={canvasContainer}>
-        <div style={{ ...canvasSectionTitle, marginBottom: 0 }}>Live Preview</div>
-      </div>
-    );
+  if (mode === "project") {
+    return <ProjectCanvas />;
   }
 
   // Asset mode requires a selection to preview.

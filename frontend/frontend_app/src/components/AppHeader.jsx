@@ -31,7 +31,7 @@ export default function AppHeader({ title }) {
   return (
     <div
       style={{
-        height: 56,
+        height: 48,
         display: "flex",
         alignItems: "center",
         padding: "0 16px",

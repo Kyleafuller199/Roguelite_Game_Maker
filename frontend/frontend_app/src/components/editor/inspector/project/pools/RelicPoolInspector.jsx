@@ -2,11 +2,11 @@
  * RelicPoolInspector.jsx
  *
  * Lists all global relics grouped by rarity.
- * Click a row to toggle that relic into/out of the project's relic pool.
+ * Click a row to toggle that relic into/out of the character's relic pool.
  *
- * @param {object} project - The active project object
- * @param {object} state   - Full editor state (for global asset lists)
- * @param {object} actions - Editor actions
+ * @param {object} character - The active character object
+ * @param {object} state     - Full editor state (for global asset lists)
+ * @param {object} actions   - Editor actions
  */
 
 import InspectorSection from "@/components/editor/inspector/shared/InspectorSection";
@@ -16,10 +16,11 @@ import { COLOR_TEXT_SECONDARY } from "@/components/editor/shared/sidebarStyles";
 // Canonical display order for relic rarities
 const RARITIES = ["Common", "Uncommon", "Rare", "Boss", "Shop"];
 
-export default function RelicPoolInspector({ project, state, actions }) {
+export default function RelicPoolInspector({ character, state, actions }) {
+  // Starter relics are for starting loadouts only — excluded from reward pools
   const allRelics = state.assets.relics.allIds
     .map((id) => state.assets.relics.byId[id])
-    .filter(Boolean);
+    .filter((r) => r && r.identity?.rarity !== "Starter");
 
   if (allRelics.length === 0) {
     return (
@@ -29,7 +30,7 @@ export default function RelicPoolInspector({ project, state, actions }) {
     );
   }
 
-  const poolIds = new Set(project.pools.relics ?? []);
+  const poolIds = new Set(character.relicPool ?? []);
 
   const knownGroups = RARITIES.map((rarity) => ({
     rarity,
@@ -51,7 +52,7 @@ export default function RelicPoolInspector({ project, state, actions }) {
               key={relic.id}
               label={relic.identity?.name ?? relic.name ?? "Unnamed Relic"}
               inPool={poolIds.has(relic.id)}
-              onToggle={() => actions.togglePoolAsset(project.id, "relics", relic.id)}
+              onToggle={() => actions.toggleCharacterPoolAsset(character.id, "relics", relic.id)}
             />
           ))}
         </InspectorSection>

@@ -54,23 +54,21 @@ const countInput = {
 
 /**
  * RelicSelector
- * Shows all relics in the project pool.
+ * Shows all Starter relics from global assets.
  * Exactly one can be selected as the starting relic; clicking again deselects.
  */
-function RelicSelector({ character, project, state, actions }) {
-  const poolRelicIds = project.pools?.relics ?? [];
+function RelicSelector({ character, state, actions }) {
+  const relics = state.assets.relics.allIds
+    .map((id) => state.assets.relics.byId[id])
+    .filter((r) => r && r.identity?.rarity === "Starter");
 
-  if (poolRelicIds.length === 0) {
+  if (relics.length === 0) {
     return (
       <div style={emptyHint}>
-        No relics in the project pool yet. Add relics via the Relic Pool inspector.
+        No Starter relics yet. Set a relic's rarity to "Starter" in Assets mode.
       </div>
     );
   }
-
-  const relics = poolRelicIds
-    .map((id) => state.assets.relics.byId[id])
-    .filter(Boolean);
 
   function handleToggle(relicId) {
     const next = character.startingRelicId === relicId ? null : relicId;
@@ -93,24 +91,22 @@ function RelicSelector({ character, project, state, actions }) {
 
 /**
  * DeckBuilder
- * Shows all cards in the project pool.
+ * Shows all Starter cards from global assets.
  * Cards already in the starting deck show a count stepper.
  * Cards not in the deck show a "+" toggle row to add them (with count 1).
  */
-function DeckBuilder({ character, project, state, actions }) {
-  const poolCardIds = project.pools?.cards ?? [];
+function DeckBuilder({ character, state, actions }) {
+  const cards = state.assets.cards.allIds
+    .map((id) => state.assets.cards.byId[id])
+    .filter((c) => c && c.rarity === "Starter");
 
-  if (poolCardIds.length === 0) {
+  if (cards.length === 0) {
     return (
       <div style={emptyHint}>
-        No cards in the project pool yet. Add cards via the Card Pool inspector.
+        No Starter cards yet. Set a card's rarity to "Starter" in Assets mode.
       </div>
     );
   }
-
-  const cards = poolCardIds
-    .map((id) => state.assets.cards.byId[id])
-    .filter(Boolean);
 
   const deckMap = Object.fromEntries(
     (character.startingDeck ?? []).map((e) => [e.cardId, e.count])
@@ -164,7 +160,7 @@ function DeckBuilder({ character, project, state, actions }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function CharacterInspector({ character, project, state, actions }) {
+export default function CharacterInspector({ character, state, actions }) {
   return (
     <>
       {/* ── Identity ──────────────────────────────────────────── */}
@@ -191,7 +187,6 @@ export default function CharacterInspector({ character, project, state, actions 
       <InspectorSection title="Starting Relic">
         <RelicSelector
           character={character}
-          project={project}
           state={state}
           actions={actions}
         />
@@ -201,7 +196,6 @@ export default function CharacterInspector({ character, project, state, actions 
       <InspectorSection title="Starting Deck">
         <DeckBuilder
           character={character}
-          project={project}
           state={state}
           actions={actions}
         />

@@ -10,23 +10,10 @@
  * - characterId defaults to the project's first character if omitted.
  * - Returns null if the project is invalid or has no usable character.
  *
- * Pool merge semantics:
- * - Character pools EXTEND the project pool (additive, de-duped by asset ID).
- * - An empty character pool means "use the project pool as-is".
+ * Pool ownership:
+ * - cardPool / relicPool come directly from the character (class-specific)
+ * - potionPool comes from the project (shared across all characters)
  */
-
-/** Returns a de-duped array of IDs that exist in byId. */
-function mergePoolIds(projectIds, characterIds, byId) {
-  const seen = new Set();
-  const result = [];
-  for (const id of [...(projectIds ?? []), ...(characterIds ?? [])]) {
-    if (!seen.has(id) && byId[id]) {
-      seen.add(id);
-      result.push(id);
-    }
-  }
-  return result;
-}
 
 /**
  * buildRunPayload
@@ -48,10 +35,10 @@ export function buildRunPayload(state, projectId, characterId = null) {
   const character = state.project.characters.byId[charId];
   if (!character) return null;
 
-  // ── Pools (ID arrays, de-duped) ─────────────────────────────────────────
-  const cardPoolIds   = mergePoolIds(project.pools.cards,   character.pools?.cards,   cards.byId);
-  const relicPoolIds  = mergePoolIds(project.pools.relics,  character.pools?.relics,  relics.byId);
-  const potionPoolIds = mergePoolIds(project.pools.potions, character.pools?.potions, potions.byId);
+  // ── Pools (ID arrays, filtered to existing assets) ───────────────────────
+  const cardPoolIds   = (character.cardPool  ?? []).filter((id) => cards.byId[id]);
+  const relicPoolIds  = (character.relicPool ?? []).filter((id) => relics.byId[id]);
+  const potionPoolIds = (project.pools.potions ?? []).filter((id) => potions.byId[id]);
 
   // ── Asset maps (each asset defined once) ────────────────────────────────
   // Cards: pool + any starting deck cards not already in the pool

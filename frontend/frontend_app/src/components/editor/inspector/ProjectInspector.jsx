@@ -5,9 +5,10 @@
  * Routes to the correct inspector based on the selected project tree node kind.
  *
  * Supported node kinds:
- * - "project"   → ProjectNodeInspector  (overview + Start Run)
- * - "pool"      → pool inspector        (cards / relics / potions / enemies)
- * - "character" → CharacterInspector    (starting relic, starting deck)
+ * - "project"       → ProjectNodeInspector  (overview + Start Run)
+ * - "pool"          → PotionPoolInspector / EnemyPoolInspector  (project-level)
+ * - "character"     → CharacterInspector    (starting relic, starting deck)
+ * - "characterPool" → CardPoolInspector / RelicPoolInspector    (per-character)
  *
  * @param {object} state   - Full editor state
  * @param {object} actions - Editor actions
@@ -36,18 +37,26 @@ const deleteBtnStyle = {
   cursor: "pointer",
 };
 
+// Project-level pool inspectors (potions, enemies)
 const POOL_INSPECTORS = {
-  cards:   CardPoolInspector,
-  relics:  RelicPoolInspector,
   potions: PotionPoolInspector,
   enemies: EnemyPoolInspector,
 };
 
 const POOL_LABELS = {
-  cards:   "Card Pool",
-  relics:  "Relic Pool",
   potions: "Potion Pool",
   enemies: "Enemy Pool",
+};
+
+// Character-level pool inspectors (cards, relics)
+const CHARACTER_POOL_INSPECTORS = {
+  cards:  CardPoolInspector,
+  relics: RelicPoolInspector,
+};
+
+const CHARACTER_POOL_LABELS = {
+  cards:  "Card Pool",
+  relics: "Relic Pool",
 };
 
 const rootStyle = {
@@ -126,7 +135,7 @@ export default function ProjectInspector({ state, actions }) {
     );
   }
 
-  // ── "pool" node — pool asset toggles ───────────────────────
+  // ── "pool" node — project-level pool (potions, enemies) ────
   if (selectedNode.kind === "pool") {
     const PoolInspector = POOL_INSPECTORS[selectedNode.pool];
     if (!PoolInspector) return <EmptyState message="Unknown pool type." />;
@@ -162,6 +171,21 @@ export default function ProjectInspector({ state, actions }) {
           state={state}
           actions={actions}
         />
+      </InspectorShell>
+    );
+  }
+
+  // ── "characterPool" node — per-character card/relic pool ───
+  if (selectedNode.kind === "characterPool") {
+    const character = characters.byId[selectedNode.characterId];
+    if (!character) return <EmptyState message="Character not found." />;
+
+    const PoolInspector = CHARACTER_POOL_INSPECTORS[selectedNode.pool];
+    if (!PoolInspector) return <EmptyState message="Unknown pool type." />;
+
+    return (
+      <InspectorShell title={`${character.name} — ${CHARACTER_POOL_LABELS[selectedNode.pool]}`}>
+        <PoolInspector character={character} state={state} actions={actions} />
       </InspectorShell>
     );
   }

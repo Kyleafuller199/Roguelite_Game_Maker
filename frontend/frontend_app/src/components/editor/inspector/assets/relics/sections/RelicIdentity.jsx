@@ -32,6 +32,7 @@ export default function RelicIdentity({ selected, update }) {
         onChange={(e) => updateIdentity({ rarity: e.target.value })}
         style={{ width: "100%", padding: 10, marginBottom: 12 }}
       >
+        <option value="Starter">Starter</option>
         <option value="Common">Common</option>
         <option value="Uncommon">Uncommon</option>
         <option value="Rare">Rare</option>

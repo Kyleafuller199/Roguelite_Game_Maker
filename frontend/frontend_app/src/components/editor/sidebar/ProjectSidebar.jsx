@@ -6,14 +6,15 @@
  * Tree structure per project:
  *   ▾ Project Name          ← clicking header only toggles expand
  *       Info                ← selects project node (name + Start Run inspector)
- *     ▾ Pools
- *         Card Pool
- *         Relic Pool
+ *     ▾ Pools               ← project-level (shared)
  *         Potion Pool
  *         Enemy Pool
  *     ▾ Characters
  *         + New Character   ← opens NewCharacterModal
- *         Character Name
+ *       ▾ Character Name
+ *             Info          ← selects character node
+ *             Card Pool     ← selects characterPool node (cards)
+ *             Relic Pool    ← selects characterPool node (relics)
  *
  * Selection state and expansion state live in EditorContext.
  */
@@ -24,17 +25,23 @@ import CollapsibleSection from "@/components/editor/shared/CollapsibleSection";
 import SidebarItem from "@/components/editor/shared/SidebarItem";
 import NewCharacterModal from "@/components/editor/sidebar/modal/NewCharacterModal";
 
-const POOLS = [
-  { key: "cards",   label: "Card Pool" },
-  { key: "relics",  label: "Relic Pool" },
+// Project-level pools (shared across characters)
+const PROJECT_POOLS = [
   { key: "potions", label: "Potion Pool" },
   { key: "enemies", label: "Enemy Pool" },
 ];
 
+// Character-level pools (per-character, class-specific)
+const CHARACTER_POOLS = [
+  { key: "cards",  label: "Card Pool" },
+  { key: "relics", label: "Relic Pool" },
+];
+
 function isNodeSelected(selectedNode, kind, projectId, extra = {}) {
   if (!selectedNode || selectedNode.kind !== kind || selectedNode.projectId !== projectId) return false;
-  if (kind === "pool")      return selectedNode.pool === extra.pool;
-  if (kind === "character") return selectedNode.characterId === extra.characterId;
+  if (kind === "pool")          return selectedNode.pool === extra.pool;
+  if (kind === "character")     return selectedNode.characterId === extra.characterId;
+  if (kind === "characterPool") return selectedNode.characterId === extra.characterId && selectedNode.pool === extra.pool;
   return true;
 }
 
@@ -74,13 +81,13 @@ export default function ProjectSidebar() {
               indent={1}
             />
 
-            {/* ── Pools sub-section ─────────────────────────── */}
+            {/* ── Pools sub-section (project-level) ─────────── */}
             <CollapsibleSection
               title="Pools"
               isOpen={poolsExpanded}
               onToggle={() => actions.toggleProjectExpanded(`project:${project.id}:pools`)}
             >
-              {POOLS.map(({ key, label }) => (
+              {PROJECT_POOLS.map(({ key, label }) => (
                 <SidebarItem
                   key={key}
                   label={label}
@@ -104,15 +111,33 @@ export default function ProjectSidebar() {
                 indent={1}
               />
 
-              {projectChars.map((char) => (
-                <SidebarItem
-                  key={char.id}
-                  label={char.name ?? "Unnamed Character"}
-                  selected={isNodeSelected(selectedNode, "character", project.id, { characterId: char.id })}
-                  onClick={() => actions.selectProjectNode({ kind: "character", projectId: project.id, characterId: char.id })}
-                  indent={1}
-                />
-              ))}
+              {projectChars.map((char) => {
+                const charExpanded = expanded[`character:${char.id}`] ?? true;
+                return (
+                  <CollapsibleSection
+                    key={char.id}
+                    title={char.name ?? "Unnamed Character"}
+                    isOpen={charExpanded}
+                    onToggle={() => actions.toggleProjectExpanded(`character:${char.id}`)}
+                  >
+                    <SidebarItem
+                      label="Info"
+                      selected={isNodeSelected(selectedNode, "character", project.id, { characterId: char.id })}
+                      onClick={() => actions.selectProjectNode({ kind: "character", projectId: project.id, characterId: char.id })}
+                      indent={1}
+                    />
+                    {CHARACTER_POOLS.map(({ key, label }) => (
+                      <SidebarItem
+                        key={key}
+                        label={label}
+                        selected={isNodeSelected(selectedNode, "characterPool", project.id, { characterId: char.id, pool: key })}
+                        onClick={() => actions.selectProjectNode({ kind: "characterPool", projectId: project.id, characterId: char.id, pool: key })}
+                        indent={1}
+                      />
+                    ))}
+                  </CollapsibleSection>
+                );
+              })}
             </CollapsibleSection>
 
           </CollapsibleSection>

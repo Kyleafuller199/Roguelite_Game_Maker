@@ -5,7 +5,7 @@
  *
  * Responsibilities:
  * - Initialize editor state (localStorage → fallback to initialState)
- * - Persist state changes to localStorage (V1 persistence)
+ * - Persist state changes to localStorage
  * - Provide stable editor actions for UI components to call
  * - Delegate asset-specific CRUD logic to /state/editor/assets/*
  * - Delegate project-specific logic to /state/editor/project/*
@@ -15,7 +15,7 @@
  * - Asset editing uses (entityType, selectedId)
  * - Project composition uses project.selectedNode + project.expanded
  *
- * Persistence (V1):
+ * Persistence:
  * - Uses localStorage as a simple client-side persistence layer.
  * - Backend persistence can later replace/augment this behavior.
  */
@@ -42,6 +42,7 @@ import {
   setCharacterStartingRelic,
   toggleCharacterDeckCard,
   setCharacterDeckCardCount,
+  toggleCharacterPoolAsset,
   togglePoolAsset,
   toggleActEnemy,
 } from "@/state/editor/project/projects";
@@ -184,6 +185,7 @@ export function EditorProvider({ children }) {
       setCharacterStartingRelic(characterId, relicId)          { setCharacterStartingRelic(setState, characterId, relicId); },
       toggleCharacterDeckCard(characterId, cardId)             { toggleCharacterDeckCard(setState, characterId, cardId); },
       setCharacterDeckCardCount(characterId, cardId, count)    { setCharacterDeckCardCount(setState, characterId, cardId, count); },
+      toggleCharacterPoolAsset(characterId, poolType, id)      { toggleCharacterPoolAsset(setState, characterId, poolType, id); },
 
       // -------------------------------------------------
       // Asset actions (delegated to /assets modules)

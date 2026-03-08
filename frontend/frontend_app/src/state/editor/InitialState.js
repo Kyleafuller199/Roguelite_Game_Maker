@@ -301,11 +301,9 @@ export const initialState = {
           imageUrl: "cultist.png",
           identity: {
             name: "Cultist",
-            enemyType: "basic",
-            act: 1,
-            maxHealth: 40,
-            startingBlock: 30,
+            type: "basic",
             startingHealth: 50,
+            startingBlock: 30,
           },
           moves: [
             {
@@ -379,6 +377,7 @@ export const initialState = {
       "project:p1:pools": true,
       "project:p1:characters": true,
       "project:p1:acts": false,
+      "character:c1": true,
     },
 
     projects: {
@@ -388,15 +387,6 @@ export const initialState = {
           name: "Demo Project",
 
           pools: {
-            cards: [
-              "card_1771487222033",
-              "card_1771487395298",
-              "card_1771487466006",
-              "card_1771554405482",
-              "card_eb2b2181-1d2e-4d5f-b808-8a284a098435",
-              "card_9a891ebb-46f7-4501-9064-4588b1a6325d",
-            ],
-            relics: ["relic_1771486391539"],
             potions: [
               "potion_1771488136617",
               "potion_1771488167978",
@@ -458,10 +448,15 @@ export const initialState = {
             { cardId: "card_1771487395298", count: 1 },
             { cardId: "card_eb2b2181-1d2e-4d5f-b808-8a284a098435", count: 5 },
           ],
-          pools: {
-            cards: [],
-            relics: [],
-          },
+          cardPool: [
+            "card_1771487222033",
+            "card_1771487395298",
+            "card_1771487466006",
+            "card_1771554405482",
+            "card_eb2b2181-1d2e-4d5f-b808-8a284a098435",
+            "card_9a891ebb-46f7-4501-9064-4588b1a6325d",
+          ],
+          relicPool: ["relic_1771486391539"],
         },
       },
       allIds: ["c1"],

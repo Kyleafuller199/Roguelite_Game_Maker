@@ -270,7 +270,7 @@ def run_interactive(graph, icons):
                                     pool = monsters.get("basic",[])
                                     sprite = random.choice(pool) if pool else None
                                     if sprite:
-                                        active_monster = Monster(sprite, enemy_data["hp"])
+                                        active_monster = Monster(sprite, enemy_data["identity"]["startingHealth"])
                                     else:
                                         active_monster = None
                                 else:

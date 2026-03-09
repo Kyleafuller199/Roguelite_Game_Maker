@@ -224,7 +224,7 @@ export const initialState = {
         potion_1771488136617: {
           id: "potion_1771488136617",
           imageUrl: "flame-potion.png",
-          identity: { name: "Flame Potion", rarity: "Common", useContext: "combatOnly" },
+          identity: { name: "Fire Potion", rarity: "Common", useContext: "combatOnly" },
           effects: [
             {
               id: "eff_c4b7d994-db22-432e-b4c5-4c597638b421",
@@ -239,7 +239,7 @@ export const initialState = {
         potion_1771488167978: {
           id: "potion_1771488167978",
           imageUrl: "regen-potion.png",
-          identity: { name: "Regen Potion", rarity: "Uncommon", useContext: "anyTime" },
+          identity: { name: "Heal Potion", rarity: "Common", useContext: "anyTime" },
           effects: [
             {
               id: "eff_66b0a37e-4ef9-4847-828f-f59afe72c86d",
@@ -254,7 +254,7 @@ export const initialState = {
         "potion_93cebb76-2f10-4933-969c-b308e1e21847": {
           id: "potion_93cebb76-2f10-4933-969c-b308e1e21847",
           imageUrl: "block-potion.png",
-          identity: { name: "Block Potion", rarity: "Uncommon", useContext: "combatOnly" },
+          identity: { name: "Block Potion", rarity: "Common", useContext: "combatOnly" },
           effects: [
             {
               id: "eff_6f7dd938-a5f7-4b99-a256-855142b3267e",
@@ -268,13 +268,20 @@ export const initialState = {
 
         "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657": {
           id: "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657",
-          imageUrl: "life-potion.png",
-          identity: { name: "Life Potion", rarity: "Rare", useContext: "combatOnly" },
+          imageUrl: "block-heal-potion.png",
+          identity: { name: "Block & Heal Potion", rarity: "Uncommon", useContext: "combatOnly" },
           effects: [
             {
               id: "eff_3c4a492c-5fb1-4e67-ab47-c7bde9280eb0",
+              effectType: "block",
+              baseValue: 8,
+              target: "self",
+              repeat: 1,
+            },
+            {
+              id: "eff_block-heal-potion-heal",
               effectType: "heal",
-              baseValue: 999,
+              baseValue: 8,
               target: "self",
               repeat: 1,
             },

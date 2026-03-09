@@ -16,14 +16,21 @@ export default function ProjectOverviewPreview() {
   const project = projects.byId[selectedNode.projectId];
   if (!project) return null;
 
-  const cardCount   = (project.pools.cards   ?? []).length;
-  const relicCount  = (project.pools.relics  ?? []).length;
-  const potionCount = (project.pools.potions ?? []).length;
-  const enemyCount  = (project.pools.enemies ?? []).length;
-
   const projectChars = (project.characterIds ?? [])
     .map((id) => characters.byId[id])
     .filter(Boolean);
+  const firstChar = projectChars[0] ?? null;
+
+  const cardCount   = (firstChar?.cardPool  ?? []).length;
+  const relicCount  = (firstChar?.relicPool ?? []).length;
+  const potionCount = (project.pools.potions ?? []).length;
+
+  // Derive enemy count from act assignments (union across all acts/roles)
+  const actEnemyIds = new Set();
+  Object.values(project.acts ?? {}).forEach((act) => {
+    [...(act.basics ?? []), ...(act.elites ?? []), ...(act.bosses ?? [])].forEach((id) => actEnemyIds.add(id));
+  });
+  const enemyCount = actEnemyIds.size;
 
   const summaryItems = [
     { label: "Cards",    count: cardCount },

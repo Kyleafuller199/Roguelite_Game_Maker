@@ -77,6 +77,12 @@ export default function ProjectNodeInspector({ project, state, actions }) {
     .filter(Boolean);
 
   const firstChar = characters[0] ?? null;
+
+  const actEnemyCount = new Set(
+    Object.values(project.acts ?? {}).flatMap((act) => [
+      ...(act.basics ?? []), ...(act.elites ?? []), ...(act.bosses ?? []),
+    ])
+  ).size;
   const hasDeck   = (firstChar?.startingDeck?.length ?? 0) > 0;
   const canStart  = !!firstChar && hasDeck;
 
@@ -129,9 +135,10 @@ export default function ProjectNodeInspector({ project, state, actions }) {
         <div style={{ marginBottom: 4 }}>
           {[
             ["Characters",      characters.length],
-            ["Cards in pool",   project.pools?.cards?.length    ?? 0],
-            ["Relics in pool",  project.pools?.relics?.length   ?? 0],
-            ["Potions in pool", project.pools?.potions?.length  ?? 0],
+            ["Cards in pool",   firstChar?.cardPool?.length    ?? 0],
+            ["Relics in pool",  firstChar?.relicPool?.length   ?? 0],
+            ["Potions in pool", project.pools?.potions?.length ?? 0],
+            ["Enemies in pool", actEnemyCount],
           ].map(([label, count]) => (
             <div key={label} style={statRow}>
               <span>{label}</span>

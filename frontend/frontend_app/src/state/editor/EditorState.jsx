@@ -29,6 +29,44 @@ import { EditorContext } from "@/state/editor/editorContext";
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 const SESSION_LS_KEY = "rgm_session_key";
 
+/**
+ * mergeWithInitial
+ * Deep-merges saved state with initialState so that:
+ * - User-created assets/projects/characters are preserved from saved state
+ * - Seed items (IDs that exist in initialState) always use initialState data
+ *   so stale saved state never corrupts seed assets (wrong filenames, missing fields)
+ */
+function mergeByIdMap(initMap, savedMap) {
+  return {
+    // savedMap first so user-created items are included,
+    // then initialState spreads ON TOP so seed IDs always win
+    byId: { ...(savedMap?.byId ?? {}), ...initMap.byId },
+    // Keep saved allIds (preserves user ordering + user-created IDs)
+    // but fall back to initialState if nothing saved
+    allIds: savedMap?.allIds ?? initMap.allIds,
+  };
+}
+
+function mergeWithInitial(saved) {
+  const s = saved ?? {};
+  return {
+    ...initialState,
+    ...s,
+    assets: {
+      cards:   mergeByIdMap(initialState.assets.cards,   s.assets?.cards),
+      relics:  mergeByIdMap(initialState.assets.relics,  s.assets?.relics),
+      potions: mergeByIdMap(initialState.assets.potions, s.assets?.potions),
+      enemies: mergeByIdMap(initialState.assets.enemies, s.assets?.enemies),
+    },
+    project: {
+      ...initialState.project,
+      ...(s.project ?? {}),
+      projects:   mergeByIdMap(initialState.project.projects,   s.project?.projects),
+      characters: mergeByIdMap(initialState.project.characters, s.project?.characters),
+    },
+  };
+}
+
 function getSessionKey() {
   let key = localStorage.getItem(SESSION_LS_KEY);
   if (!key) {
@@ -74,17 +112,7 @@ export function EditorProvider({ children }) {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return initialState;
-
-      const parsed = JSON.parse(raw);
-
-      // Shallow merge top-level + explicit merges for nested branches
-      // so schema additions continue to get defaults.
-      return {
-        ...initialState,
-        ...parsed,
-        assets: { ...initialState.assets, ...(parsed.assets ?? {}) },
-        project: { ...initialState.project, ...(parsed.project ?? {}) },
-      };
+      return mergeWithInitial(JSON.parse(raw));
     } catch {
       return initialState;
     }
@@ -110,12 +138,7 @@ export function EditorProvider({ children }) {
       .then((r) => r.json())
       .then((data) => {
         if (data.state) {
-          setState({
-            ...initialState,
-            ...data.state,
-            assets: { ...initialState.assets, ...(data.state.assets ?? {}) },
-            project: { ...initialState.project, ...(data.state.project ?? {}) },
-          });
+          setState(mergeWithInitial(data.state));
         }
       })
       .catch(() => {});

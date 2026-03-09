@@ -228,7 +228,12 @@ export default function PoolPreview() {
     const potions = poolIds.map((id) => state.assets.potions.byId[id]).filter(Boolean);
     grid = <PotionPoolGrid potions={potions} />;
   } else if (poolType === "enemies") {
-    const enemies = poolIds.map((id) => state.assets.enemies.byId[id]).filter(Boolean);
+    // Derive enemies from act assignments (union across all acts/roles)
+    const actEnemyIds = new Set();
+    Object.values(project.acts ?? {}).forEach((act) => {
+      [...(act.basics ?? []), ...(act.elites ?? []), ...(act.bosses ?? [])].forEach((id) => actEnemyIds.add(id));
+    });
+    const enemies = [...actEnemyIds].map((id) => state.assets.enemies.byId[id]).filter(Boolean);
     grid = <EnemyPoolGrid enemies={enemies} />;
   }
 

@@ -25,6 +25,18 @@ import { useEffect, useMemo, useState } from "react";
 import { initialState } from "@/state/editor/initialState";
 import { EditorContext } from "@/state/editor/editorContext";
 
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
+const SESSION_LS_KEY = "rgm_session_key";
+
+function getSessionKey() {
+  let key = localStorage.getItem(SESSION_LS_KEY);
+  if (!key) {
+    key = crypto.randomUUID();
+    localStorage.setItem(SESSION_LS_KEY, key);
+  }
+  return key;
+}
+
 // Asset action delegates (kept separate for scalability)
 import { createCard, updateSelectedCard, deleteSelectedCard } from "@/state/editor/assets/cards";
 import { createRelic, updateSelectedRelic, deleteSelectedRelic } from "@/state/editor/assets/relics";
@@ -78,9 +90,7 @@ export function EditorProvider({ children }) {
   });
 
   /**
-   * Persistence:
-   * - Save the entire editor state on any change.
-   * - If localStorage errors (quota, privacy mode), silently ignore.
+   * Persistence: localStorage (fast, immediate)
    */
   useEffect(() => {
     try {
@@ -88,6 +98,40 @@ export function EditorProvider({ children }) {
     } catch {
       // Ignore persistence errors (e.g., storage quota exceeded)
     }
+  }, [state]);
+
+  /**
+   * Persistence: backend (on mount, load saved state from server)
+   * Falls back silently to whatever localStorage already provided.
+   */
+  useEffect(() => {
+    fetch(`${API_BASE}/api/state/?session=${getSessionKey()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.state) {
+          setState({
+            ...initialState,
+            ...data.state,
+            assets: { ...initialState.assets, ...(data.state.assets ?? {}) },
+            project: { ...initialState.project, ...(data.state.project ?? {}) },
+          });
+        }
+      })
+      .catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * Persistence: backend (debounced save on every state change)
+   */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetch(`${API_BASE}/api/state/?session=${getSessionKey()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state),
+      }).catch(() => {});
+    }, 1000);
+    return () => clearTimeout(t);
   }, [state]);
 
   /**

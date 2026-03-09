@@ -51,6 +51,21 @@ function startBtnStyle(disabled, hovered) {
   };
 }
 
+function exportBtnStyle(disabled) {
+  return {
+    width: "100%",
+    padding: "8px 0",
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: 500,
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 8,
+    cursor: disabled ? "not-allowed" : "pointer",
+    background: "transparent",
+    color: disabled ? "#555" : "#aaa",
+  };
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ProjectNodeInspector({ project, state, actions }) {
@@ -68,6 +83,16 @@ export default function ProjectNodeInspector({ project, state, actions }) {
   const hints = [];
   if (!firstChar) hints.push("Add at least one character");
   else if (!hasDeck) hints.push("Character needs a starting deck");
+
+  function handleExport() {
+    const payload = buildRunPayload(state, project.id);
+    if (!payload) { setStatus("error"); return; }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "run_config.json"; a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function handleStartRun() {
     const payload = buildRunPayload(state, project.id);
@@ -129,6 +154,14 @@ export default function ProjectNodeInspector({ project, state, actions }) {
           style={startBtnStyle(!canStart, hovered)}
         >
           Start Run
+        </button>
+
+        <button
+          disabled={!canStart}
+          onClick={handleExport}
+          style={exportBtnStyle(!canStart)}
+        >
+          Export run_config.json
         </button>
 
         {status === "sent" && (

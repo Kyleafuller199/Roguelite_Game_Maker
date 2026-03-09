@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,10 +26,13 @@ SECRET_KEY = 'django-insecure-x-pa1#=!%z$teox83k2o)yz-9v56u8=#g8h@mpfw3wg#(fx)=+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '104.245.247.16', '*']
 
-# Path to the game's asset directory
-GAME_ASSETS_DIR = BASE_DIR.parent / 'roguelite_map_generator' / 'assets'
+# Path to the game's asset directory — override with GAME_ASSETS_DIR env var on VPS
+GAME_ASSETS_DIR = Path(os.environ.get(
+    'GAME_ASSETS_DIR',
+    str(BASE_DIR.parent / 'roguelite_map_generator' / 'assets')
+))
 
 
 # Application definition
@@ -40,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'backend_app',
 ]
 
 MIDDLEWARE = [

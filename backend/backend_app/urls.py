@@ -20,6 +20,7 @@ from backend_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/state/', views.editor_state),
     path('api/assets/list/', views.list_assets),
     path('api/assets/file/', views.serve_asset),
     path('api/start-run/', views.start_run),

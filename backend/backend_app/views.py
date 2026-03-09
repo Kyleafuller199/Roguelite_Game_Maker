@@ -8,6 +8,8 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from backend_app.models import EditorSnapshot
+
 ASSETS_DIR = settings.GAME_ASSETS_DIR
 
 
@@ -50,6 +52,37 @@ def serve_asset(request):
     mime_type, _ = mimetypes.guess_type(str(full_path))
     with open(full_path, 'rb') as f:
         return HttpResponse(f.read(), content_type=mime_type or 'image/png')
+
+
+@csrf_exempt
+def editor_state(request):
+    """
+    GET  /api/state/?session=<uuid>  — return saved editor state (or null)
+    POST /api/state/?session=<uuid>  — save editor state blob
+    """
+    session_key = request.GET.get('session', '')
+    if not session_key:
+        return HttpResponseBadRequest('Missing session key')
+
+    if request.method == 'GET':
+        try:
+            snap = EditorSnapshot.objects.get(session_key=session_key)
+            return JsonResponse({'state': snap.state})
+        except EditorSnapshot.DoesNotExist:
+            return JsonResponse({'state': None})
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return HttpResponseBadRequest('Invalid JSON')
+        EditorSnapshot.objects.update_or_create(
+            session_key=session_key,
+            defaults={'state': data},
+        )
+        return JsonResponse({'status': 'ok'})
+
+    return HttpResponse(status=405)
 
 
 @csrf_exempt

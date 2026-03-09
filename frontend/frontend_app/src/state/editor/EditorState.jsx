@@ -21,6 +21,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import { initialState } from "@/state/editor/initialState";
 import { EditorContext } from "@/state/editor/editorContext";
@@ -31,7 +32,7 @@ const SESSION_LS_KEY = "rgm_session_key";
 function getSessionKey() {
   let key = localStorage.getItem(SESSION_LS_KEY);
   if (!key) {
-    key = crypto.randomUUID();
+    key = uuidv4();
     localStorage.setItem(SESSION_LS_KEY, key);
   }
   return key;

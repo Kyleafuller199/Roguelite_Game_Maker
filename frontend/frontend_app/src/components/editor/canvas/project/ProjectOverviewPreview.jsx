@@ -7,7 +7,7 @@
 import { useEditor } from "@/state/editor/useEditor";
 import { canvasContainer, canvasSectionTitle, COLOR_TEXT_SECONDARY } from "../canvasStyles";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 export default function ProjectOverviewPreview() {
   const { state } = useEditor();

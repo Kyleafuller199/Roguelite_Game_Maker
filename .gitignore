@@ -1,5 +1,7 @@
 venv/
 *.pyc
+__pycache__/
 node_modules/
 .DS_Store
 roguelite_map_generator/run_config.json
+roguelite_map_generator/output/

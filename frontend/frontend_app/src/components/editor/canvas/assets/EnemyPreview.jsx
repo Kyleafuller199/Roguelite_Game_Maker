@@ -5,7 +5,7 @@
  * Description: name → [type | hp | block] tag bar → divider → moves in cycle order
  */
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 const TYPE_COLOR = {
   basic: "#888888",

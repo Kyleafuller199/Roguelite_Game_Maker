@@ -4,7 +4,7 @@
  * Layout: large image floating above a description box (name, rarity, usability, effects)
  */
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 const RARITY_COLOR = {
   Common:   "#888888",

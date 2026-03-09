@@ -26,7 +26,7 @@
   "id":       "card_<uuid>",               // unique identifier
   "name":     "Strike",                    // display name
   "type":     "Attack",                    // Attack | Skill | Power | Curse
-  "rarity":   "Common",                    // Common | Uncommon | Rare | Curse
+  "rarity":   "Starter",                    // Starter | Common | Uncommon | Rare | Curse
   "cost":     1,                           // energy cost, 0–9
   "imageUrl": "",                          // image URL (v1 — same field across all assets)
 
@@ -227,14 +227,11 @@
   "id":   "project_<uuid>",                // unique identifier
   "name": "My Roguelite",
 
-  // pools — the set of assets available to drop during a run.
-  // Cards/relics/potions are flat ID lists.
-  // Enemy pool assignment is done per-act below (pools.enemies is reserved).
+  // pools — assets shared across all characters in this project.
+  // Cards and relics live on individual characters (class-specific reward pools).
   "pools": {
-    "cards":   ["card_id_1", "card_id_2"], // global card IDs
-    "relics":  ["relic_id_1"],             // global relic IDs
-    "potions": ["potion_id_1"],            // global potion IDs
-    "enemies": []                          // reserved; acts drive enemy placement
+    "potions": ["potion_id_1"],            // global potion IDs (shared reward pool)
+    "enemies": ["enemy_id_1"]             // global enemy IDs (placed per-act below)
   },
 
   // acts — enemies assigned to each act by encounter role.
@@ -277,14 +274,11 @@
     { "cardId": "card_id_1", "count": 5 }
   ],
 
-  // Character-specific pool extensions.
-  // Empty arrays = use the parent project's pool as-is.
-  // Non-empty = these IDs are ADDED to the project pool (additive, never override).
-  "pools": {
-    "cards":   [],
-    "relics":  [],
-    "potions": []
-  }
+  // Per-character reward pools (class-specific — separate from the project pools).
+  // Only non-Starter cards/relics belong here (Starter items go in startingDeck /
+  // startingRelicId instead and are never in reward pools).
+  "cardPool":  ["card_id_1", "card_id_2"], // global card IDs available as rewards
+  "relicPool": ["relic_id_1"]              // global relic IDs available as rewards
 }
 
 
@@ -301,20 +295,28 @@
 
   // The character selected for this run (defaults to first in project)
   "character": {
-    "id":   "char_<uuid>",
-    "name": "Ironclad",
+    "id":              "char_<uuid>",
+    "name":            "Ironclad",
+    "imageUrl":        "",
+    "startingRelicId": "relic_id | null",  // ID reference; look up in relicMap
 
-    // Full relic object (or null)
-    "startingRelic": { ...relic },
-
-    // Starting deck — full card objects with copy count
+    // Starting deck — card ID references with copy count; look up in cardMap
     "startingDeck": [
-      { "card": { ...card }, "count": 5 }
+      { "cardId": "card_id_1", "count": 5 }
     ]
   },
 
-  // Full resolved asset objects available to drop during the run
-  // (project pool + any character-specific extensions, de-duped)
+  // Flat asset maps — each asset object defined once, keyed by ID.
+  // Includes pool assets plus any extras referenced by startingDeck / startingRelicId.
+  "cardMap":   { "card_id_1": { ...card } },
+  "relicMap":  { "relic_id_1": { ...relic } },
+  "potionMap": { "potion_id_1": { ...potion } },
+  "enemyMap":  { "enemy_id_1": { ...enemy } },
+
+
+  // Full resolved asset objects available to drop during the run.
+  // cardPool / relicPool come from the character (class-specific).
+  // potionPool comes from the project (shared across characters).
   "cardPool":   [{ ...card }, ...],
   "relicPool":  [{ ...relic }, ...],
   "potionPool": [{ ...potion }, ...],

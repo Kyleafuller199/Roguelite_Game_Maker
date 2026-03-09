@@ -49,6 +49,7 @@ export default function CardIdentitySection({ selected, update }) {
         onChange={(e) => update({ rarity: e.target.value })}
         style={{ width: "100%", padding: 10 }}
       >
+        <option value="Starter">Starter</option>
         <option value="Common">Common</option>
         <option value="Uncommon">Uncommon</option>
         <option value="Rare">Rare</option>

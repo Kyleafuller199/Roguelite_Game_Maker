@@ -4,7 +4,7 @@
  * Potion identity section.
  *
  * JSON Shape Controlled Here:
- * potion = { name, rarity, useCase }
+ * potion = { name, rarity, useContext }
  */
 
 

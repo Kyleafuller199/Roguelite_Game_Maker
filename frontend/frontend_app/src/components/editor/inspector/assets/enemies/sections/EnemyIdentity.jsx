@@ -11,7 +11,7 @@ import Label from "../../../shared/Label";
 import InspectorSection from "../../../shared/InspectorSection";
 import clampNumber from "../../../shared/clampNumber";
 
-export default function RelicIdentity({ selected, update }) {
+export default function EnemyIdentity({ selected, update }) {
   const identity = selected.identity ?? {};
 
   function patchIdentity(patch) {

@@ -6,6 +6,10 @@
  * Mirrors the pattern used by /assets modules:
  * - Each function receives setState and operates via setState(prev => next)
  * - No direct state reads; always derive from prev inside setState
+ *
+ * Pool ownership:
+ * - Projects own: potions, enemies (shared across all characters)
+ * - Characters own: cardPool, relicPool (per-character, class-specific)
  */
 
 import { makeId } from "@/utils/makeId";
@@ -17,7 +21,7 @@ export function createProject(setState, name) {
     const newProject = {
       id,
       name: name || "New Project",
-      pools: { cards: [], relics: [], potions: [], enemies: [] },
+      pools: { potions: [], enemies: [] },
       acts: {
         1: { basics: [], elites: [], bosses: [], events: [] },
         2: { basics: [], elites: [], bosses: [], events: [] },
@@ -60,7 +64,8 @@ export function createCharacter(setState, projectId, name) {
       imageUrl: "",
       startingRelicId: null,
       startingDeck: [],
-      pools: { cards: [], relics: [], potions: [] },
+      cardPool: [],
+      relicPool: [],
     };
 
     return {
@@ -82,6 +87,10 @@ export function createCharacter(setState, projectId, name) {
           allIds: [...prev.project.characters.allIds, id],
         },
         selectedNode: { kind: "character", projectId, characterId: id },
+        expanded: {
+          ...prev.project.expanded,
+          [`character:${id}`]: true,
+        },
       },
     };
   });
@@ -305,6 +314,43 @@ export function setCharacterDeckCardCount(setState, characterId, cardId, count) 
   });
 }
 
+/**
+ * toggleCharacterPoolAsset
+ * Adds or removes an asset from a character's cardPool or relicPool.
+ * poolType: "cards" → character.cardPool | "relics" → character.relicPool
+ */
+export function toggleCharacterPoolAsset(setState, characterId, poolType, assetId) {
+  setState((prev) => {
+    const character = prev.project.characters.byId[characterId];
+    if (!character) return prev;
+
+    const key = poolType === "cards" ? "cardPool" : "relicPool";
+    const pool = character[key] ?? [];
+    const newPool = pool.includes(assetId)
+      ? pool.filter((id) => id !== assetId)
+      : [...pool, assetId];
+
+    return {
+      ...prev,
+      project: {
+        ...prev.project,
+        characters: {
+          ...prev.project.characters,
+          byId: {
+            ...prev.project.characters.byId,
+            [characterId]: { ...character, [key]: newPool },
+          },
+        },
+      },
+    };
+  });
+}
+
+/**
+ * togglePoolAsset
+ * Adds or removes an asset from a project pool.
+ * Handles "potions" and "enemies" only — cards/relics live on characters.
+ */
 export function togglePoolAsset(setState, projectId, poolType, assetId) {
   setState((prev) => {
     const project = prev.project.projects.byId[projectId];

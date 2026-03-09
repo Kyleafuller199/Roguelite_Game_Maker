@@ -12,11 +12,21 @@ const API_BASE = "http://localhost:8000";
 
 // ── Shared colour tables ──────────────────────────────────────────────────────
 
-const RARITY_COLOR = {
+const CARD_RARITY_COLOR = {
   Common:   "#888888",
   Uncommon: "#4a90e2",
   Rare:     "#f0c030",
-  Starter:  "#a0522d",
+  Curse:    "#8b4fa8",
+  Starter:  "#888888", // same as Common
+};
+
+const RELIC_RARITY_COLOR = {
+  Common:   "#888888",
+  Uncommon: "#4a90e2",
+  Rare:     "#f0c030",
+  Boss:     "#a0522d",
+  Shop:     "#4a8840",
+  Starter:  "#a0522d", // same as Boss
 };
 
 const TYPE_COLOR = {
@@ -116,8 +126,8 @@ function MiniCard({ card, count }) {
   const effects     = card.effects ?? [];
   const scaling     = card.scaling ?? [];
   const activeRules = ["unplayable", "ethereal", "exhaust", "innate", "retain"].filter((r) => card[r]);
-  const rarityColor = RARITY_COLOR[rarity] ?? "#888";
-  const typeColor   = TYPE_COLOR[type]     ?? "#888";
+  const rarityColor = CARD_RARITY_COLOR[rarity] ?? "#888";
+  const typeColor   = TYPE_COLOR[type]          ?? "#888";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -255,7 +265,7 @@ function RelicDisplay({ relic }) {
   const rarity      = relic.identity?.rarity ?? relic.rarity ?? "Common";
   const effects     = relic.effects  ?? [];
   const triggers    = relic.triggers ?? [];
-  const rarityColor = RARITY_COLOR[rarity] ?? "#888";
+  const rarityColor = RELIC_RARITY_COLOR[rarity] ?? "#888";
   const effectById  = new Map(effects.map((e) => [e.id, e]));
 
   const triggerLines = triggers.map((trg) => ({

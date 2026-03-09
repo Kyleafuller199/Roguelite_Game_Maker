@@ -6,7 +6,7 @@ export function createEnemy(setState, name) {
 
     const newEnemy = {
       id,
-      imageUrl: "", // V1 (same idea as card/relic/potion)
+      imageUrl: "",
       identity: {
         name: name || "New Enemy",
         type: "basic", // basic | elite | boss — matches EnemyIdentity inspector

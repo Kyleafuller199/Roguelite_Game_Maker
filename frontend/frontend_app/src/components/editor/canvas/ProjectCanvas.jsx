@@ -2,44 +2,50 @@
  * ProjectCanvas.jsx
  * Live preview panel for project mode.
  * Routes to the correct preview based on the selected project tree node.
+ *
+ * kind="project"       → ProjectOverviewPreview
+ * kind="pool"          → PoolPreview  (project-level: potions, enemies)
+ * kind="characterPool" → PoolPreview  (character-level: cards, relics)
+ * kind="character"     → CharacterPreview
  */
 
 import { useEditor } from "@/state/editor/useEditor";
-import CharacterPreview from "@/components/editor/canvas/project/CharacterPreview";
-import { canvasContainer, canvasSectionTitle, COLOR_TEXT_SECONDARY } from "./canvasStyles";
+import CharacterPreview       from "@/components/editor/canvas/project/CharacterPreview";
+import PoolPreview            from "@/components/editor/canvas/project/PoolPreview";
+import ProjectOverviewPreview from "@/components/editor/canvas/project/ProjectOverviewPreview";
+import { canvasContainer, COLOR_TEXT_SECONDARY } from "./canvasStyles";
 
 export default function ProjectCanvas() {
   const { state } = useEditor();
   const { selectedNode, characters } = state.project;
 
-  const containerStyle = {
-    ...canvasContainer,
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-  };
-
   if (!selectedNode) {
     return (
-      <div style={containerStyle}>
-        <div style={{ ...canvasSectionTitle, fontSize: 20, marginBottom: 0 }}>Live Preview</div>
+      <div style={canvasContainer}>
+        <div style={{ fontSize: 13, color: COLOR_TEXT_SECONDARY }}>Select a project node to preview it.</div>
       </div>
     );
+  }
+
+  if (selectedNode.kind === "project") {
+    return <ProjectOverviewPreview />;
+  }
+
+  if (selectedNode.kind === "pool" || selectedNode.kind === "characterPool") {
+    return <PoolPreview />;
   }
 
   if (selectedNode.kind === "character") {
     const character = characters.byId[selectedNode.characterId];
     if (!character) {
       return (
-        <div style={containerStyle}>
+        <div style={canvasContainer}>
           <div style={{ fontSize: 13, color: COLOR_TEXT_SECONDARY }}>Character not found.</div>
         </div>
       );
     }
-
     return (
-      <div style={containerStyle}>
-        <div style={{ ...canvasSectionTitle, fontSize: 20, marginBottom: 12, flexShrink: 0 }}>Live Preview</div>
+      <div style={{ ...canvasContainer, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div style={{ flex: 1, minHeight: 0 }}>
           <CharacterPreview character={character} state={state} />
         </div>
@@ -47,10 +53,9 @@ export default function ProjectCanvas() {
     );
   }
 
-  // Project node, pool nodes — no preview yet
   return (
-    <div style={containerStyle}>
-      <div style={{ ...canvasSectionTitle, fontSize: 20, marginBottom: 0 }}>Live Preview</div>
+    <div style={canvasContainer}>
+      <div style={{ fontSize: 13, color: COLOR_TEXT_SECONDARY }}>Select a project node to preview it.</div>
     </div>
   );
 }

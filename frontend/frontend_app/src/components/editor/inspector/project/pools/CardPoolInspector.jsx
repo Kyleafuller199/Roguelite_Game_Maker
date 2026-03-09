@@ -2,11 +2,11 @@
  * CardPoolInspector.jsx
  *
  * Lists all global cards grouped by rarity.
- * Click a row to toggle that card into/out of the project's card pool.
+ * Click a row to toggle that card into/out of the character's card pool.
  *
- * @param {object} project - The active project object
- * @param {object} state   - Full editor state (for global asset lists)
- * @param {object} actions - Editor actions
+ * @param {object} character - The active character object
+ * @param {object} state     - Full editor state (for global asset lists)
+ * @param {object} actions   - Editor actions
  */
 
 import InspectorSection from "@/components/editor/inspector/shared/InspectorSection";
@@ -16,10 +16,11 @@ import { COLOR_TEXT_SECONDARY } from "@/components/editor/shared/sidebarStyles";
 // Canonical display order for card rarities
 const RARITIES = ["Common", "Uncommon", "Rare", "Curse"];
 
-export default function CardPoolInspector({ project, state, actions }) {
+export default function CardPoolInspector({ character, state, actions }) {
+  // Starter cards are for starting decks only — excluded from reward pools
   const allCards = state.assets.cards.allIds
     .map((id) => state.assets.cards.byId[id])
-    .filter(Boolean);
+    .filter((c) => c && c.rarity !== "Starter");
 
   if (allCards.length === 0) {
     return (
@@ -29,7 +30,7 @@ export default function CardPoolInspector({ project, state, actions }) {
     );
   }
 
-  const poolIds = new Set(project.pools.cards ?? []);
+  const poolIds = new Set(character.cardPool ?? []);
 
   // Group cards into rarity buckets; unknown rarities collected at the end
   const knownGroups = RARITIES.map((rarity) => ({
@@ -52,7 +53,7 @@ export default function CardPoolInspector({ project, state, actions }) {
               key={card.id}
               label={card.name ?? "Unnamed Card"}
               inPool={poolIds.has(card.id)}
-              onToggle={() => actions.togglePoolAsset(project.id, "cards", card.id)}
+              onToggle={() => actions.toggleCharacterPoolAsset(character.id, "cards", card.id)}
             />
           ))}
         </InspectorSection>

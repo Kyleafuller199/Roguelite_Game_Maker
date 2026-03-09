@@ -3,7 +3,7 @@
  * Root component — configures React Router and maps URL paths to pages.
  */
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Root from "@/pages/Root";
 import Auth from "@/pages/Auth";
@@ -23,7 +23,7 @@ function App() {
     <BrowserRouter>
       {/* Routes defines the mapping between paths and components */}
       <Routes>
-        <Route path="/" element={<Root />} />
+        <Route path="/" element={<Navigate to="/editor" replace />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/editor" element={<Editor />} />

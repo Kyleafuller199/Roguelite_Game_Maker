@@ -16,10 +16,10 @@ import { NavLink } from "react-router-dom";
  * Shared structure should match Sidebar navigation.
  */
 const NAV_ITEMS = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Editor", path: "/editor" },
-  { label: "Test", path: "/test" },
-  { label: "Play", path: "/play" },
+//  { label: "Dashboard", path: "/dashboard" },
+//  { label: "Editor", path: "/editor" },
+// { label: "Test", path: "/test" },
+//  { label: "Play", path: "/play" },
 ];
 
 /**

@@ -238,13 +238,13 @@ export const initialState = {
 
         potion_1771488167978: {
           id: "potion_1771488167978",
-          imageUrl: "regen-potion.png",
-          identity: { name: "Heal Potion", rarity: "Common", useContext: "anyTime" },
+          imageUrl: "life-potion.png",
+          identity: { name: "Life Potion", rarity: "Rare", useContext: "anyTime" },
           effects: [
             {
               id: "eff_66b0a37e-4ef9-4847-828f-f59afe72c86d",
               effectType: "heal",
-              baseValue: 8,
+              baseValue: 999,
               target: "self",
               repeat: 1,
             },
@@ -268,8 +268,8 @@ export const initialState = {
 
         "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657": {
           id: "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657",
-          imageUrl: "block-heal-potion.png",
-          identity: { name: "Block & Heal Potion", rarity: "Uncommon", useContext: "combatOnly" },
+          imageUrl: "regen-potion.png",
+          identity: { name: "Parry Potion", rarity: "Uncommon", useContext: "combatOnly" },
           effects: [
             {
               id: "eff_3c4a492c-5fb1-4e67-ab47-c7bde9280eb0",
@@ -308,7 +308,7 @@ export const initialState = {
           imageUrl: "cultist.png",
           identity: {
             name: "Cultist",
-            type: "basic",
+            type: "elite",
             startingHealth: 50,
             startingBlock: 30,
           },
@@ -359,8 +359,51 @@ export const initialState = {
             startingHealth: 40,
             startingBlock: 0,
           },
-          moves: [],
-          behavior: { behaviorType: "cycle", cycleOrder: [] },
+          moves: [
+            {
+              id: "move_slime_tackle",
+              name: "Tackle",
+              effects: [
+                {
+                  id: "eff_slime_tackle_dmg",
+                  effectType: "damage",
+                  baseValue: 5,
+                  target: "player",
+                  repeat: 1,
+                },
+              ],
+            },
+            {
+              id: "move_slime_goo",
+              name: "Goo",
+              effects: [
+                {
+                  id: "eff_slime_goo_weak",
+                  effectType: "weak",
+                  baseValue: 1,
+                  target: "player",
+                  repeat: 1,
+                },
+              ],
+            },
+            {
+              id: "move_slime_slam",
+              name: "Slam",
+              effects: [
+                {
+                  id: "eff_slime_slam_dmg",
+                  effectType: "damage",
+                  baseValue: 8,
+                  target: "player",
+                  repeat: 1,
+                },
+              ],
+            },
+          ],
+          behavior: {
+            behaviorType: "cycle",
+            cycleOrder: ["move_slime_tackle", "move_slime_goo", "move_slime_tackle", "move_slime_slam"],
+          },
         },
       },
       allIds: [
@@ -408,29 +451,20 @@ export const initialState = {
 
           acts: {
             1: {
-              basics: [
-                "enemy_1771490203678",
-                "enemy_a69783db-f913-4ab1-8b4a-fff313c87298",
-              ],
-              elites: [],
+              basics: ["enemy_a69783db-f913-4ab1-8b4a-fff313c87298"],
+              elites: ["enemy_1771490203678"],
               bosses: [],
               events: [],
             },
             2: {
-              basics: [
-                "enemy_1771490203678",
-                "enemy_a69783db-f913-4ab1-8b4a-fff313c87298",
-              ],
-              elites: [],
+              basics: ["enemy_a69783db-f913-4ab1-8b4a-fff313c87298"],
+              elites: ["enemy_1771490203678"],
               bosses: [],
               events: [],
             },
             3: {
-              basics: [
-                "enemy_1771490203678",
-                "enemy_a69783db-f913-4ab1-8b4a-fff313c87298",
-              ],
-              elites: [],
+              basics: ["enemy_a69783db-f913-4ab1-8b4a-fff313c87298"],
+              elites: ["enemy_1771490203678"],
               bosses: [],
               events: [],
             },

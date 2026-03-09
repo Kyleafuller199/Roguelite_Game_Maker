@@ -19,11 +19,11 @@ CLASS_COLORS = {
     "Dark": (60, 40, 60)
 }
 
-UI_PANEL_HEIGHT = 300
+UI_PANEL_HEIGHT = 250
 FADE_DURATION = 300
-
 CARD_WIDTH = 160
 CARD_HEIGHT = 220
+
 # ---------------- CARD ----------------
 class Card:
     def __init__(self, card_data):
@@ -34,14 +34,20 @@ class Card:
         self.cost = card_data["cost"]
         self.effects = card_data.get("effects", [])
         self.image = None
-        if card_data.get("imageUrl"):
-            path = os.path.join("assets", "cards", card_data["imageUrl"])
+
+        # Load image from assets/playable_cards or your chosen folder
+        image_url = card_data.get("imageUrl")
+        if image_url:
+
+            path = os.path.join("assets", "cards", image_url)  # <- change "cards" to match your folder
             if os.path.exists(path):
                 try:
-                    img = pygame.image.load(path).convert_alpha()
-                    self.image = img
-                except:
+                    self.image = pygame.image.load(path).convert_alpha()
+                except Exception as e:
+                    print(f"Failed to load card image {path}: {e}")
                     self.image = None
+            else:
+                print(f"Card image not found: {path}")
 
 # ---------------- PLAYER ----------------
 class Player:
@@ -87,18 +93,23 @@ class Player:
     def start_combat(self, run_config):
         self.deck = []
         self.hand = []
+
         card_map = run_config["cardMap"]
         starting_deck = run_config["character"]["startingDeck"]
+
         for entry in starting_deck:
             card_id = entry["cardId"]
             count = entry["count"]
             if card_id in card_map:
                 for _ in range(count):
                     self.deck.append(Card(card_map[card_id]))
+
         while len(self.deck) < 10:
             card_id = random.choice(run_config["cardPool"])
             self.deck.append(Card(card_map[card_id]))
+
         random.shuffle(self.deck)
+
         for _ in range(min(self.max_hand_size,len(self.deck))):
             self.draw_card()
 
@@ -107,20 +118,20 @@ class Player:
             self.hand.append(self.deck.pop(0))
 
     def draw_cards(self, screen, rect, next_button_rect=None):
-        slot_w, slot_h = CARD_WIDTH, CARD_HEIGHT
         padding = 12
-        hand_width = len(self.hand) * (slot_w + padding) - padding
-        start_x = rect.x
-        if hand_width + rect.x > rect.right:
-            start_x = rect.right - hand_width
-        y = rect.y
+        card_count = len(self.hand)
+        max_hand_width = rect.width - 220
+        slot_w = min(CARD_WIDTH, (max_hand_width - (card_count - 1) * padding) // max(1, card_count))
+        slot_h = CARD_HEIGHT
+        # start X shifted right to avoid deck button
+        start_x = rect.x + 140
+        y = rect.y + 20
 
         font_small = pygame.font.SysFont(None, 22)
         font_medium = pygame.font.SysFont(None, 26, bold=True)
 
         for i, card in enumerate(self.hand):
             r = pygame.Rect(start_x + i * (slot_w + padding), y, slot_w, slot_h)
-            # background
             pygame.draw.rect(screen, (50, 50, 50), r)
             pygame.draw.rect(screen, (200, 200, 200), r, 2)
 
@@ -134,7 +145,7 @@ class Player:
             screen.blit(name_text, (r.x + 40, r.y + 2))
 
             # image
-            img_height = slot_h - 120
+            img_height = slot_h - 130
             img_width = slot_w - 12
             if card.image:
                 img = pygame.transform.smoothscale(card.image, (img_width, img_height))
@@ -202,21 +213,8 @@ def load_monsters():
                 monster_dict[t].append(img)
     return monster_dict
 
-# ---------------- ICON LOADER ----------------
-def load_icons():
-    icons = {}
-    icon_dir = os.path.join("assets","icons")
-    ICON_SIZE = (48, 48)  # small enough to fit map nicely
-    for f in os.listdir(icon_dir):
-        if f.lower().endswith((".png",".jpg",".jpeg")):
-            name = os.path.splitext(f)[0]
-            img = pygame.image.load(os.path.join(icon_dir,f)).convert_alpha()
-            img = pygame.transform.smoothscale(img, ICON_SIZE)  # resize
-            icons[name] = img
-    return icons
-
 # ---------------- INTERACTIVE ----------------
-def run_interactive(graph, icons_pygame):
+def run_interactive(graph, icons):
     pygame.init()
     run_config = load_run_config()
     project_name = run_config.get("projectName","Roguelite Viewer")
@@ -224,42 +222,35 @@ def run_interactive(graph, icons_pygame):
     screen = pygame.display.set_mode((MAP_WIDTH,MAP_HEIGHT))
     pygame.display.set_caption(project_name)
     clock = pygame.time.Clock()
-    font_small = pygame.font.SysFont(None,32)
-    font_large = pygame.font.SysFont(None,48)
 
-    # Load icons including parchment
-    icons = load_icons()
-    parchment = icons.get("parchment")
-    if parchment:
+    # load parchment for map
+    parchment_path = os.path.join(ICONS_DIR, "parchment.png")
+    if os.path.exists(parchment_path):
+        parchment = pygame.image.load(parchment_path).convert_alpha()
         parchment = pygame.transform.smoothscale(parchment,(MAP_WIDTH,MAP_HEIGHT))
+    else:
+        print("Warning: parchment.png not found in icons folder")
+        parchment = pygame.Surface((MAP_WIDTH,MAP_HEIGHT))
+        parchment.fill((30,30,30))
 
-    # Player sprite
+    scene_backgrounds = preload_scene_backgrounds()
+    monsters = load_monsters()
+
     PLAYER_DIR = os.path.join("assets","playable_characters")
     json_image = run_config["character"].get("imageUrl")
     sprite_path = os.path.join(PLAYER_DIR,json_image)
     sprite = pygame.image.load(sprite_path).convert_alpha()
     sprite = pygame.transform.smoothscale(sprite,(300,300))
     player = Player(sprite,"Red")
+
     player.deck_logo = player.generate_deck_logo("Red")
-    player.start_combat(run_config)
 
-    # UI
-    ui_rect = pygame.Rect(0, MAP_HEIGHT - UI_PANEL_HEIGHT, MAP_WIDTH, UI_PANEL_HEIGHT)
+    # UI rects
+    ui_rect = pygame.Rect(0, MAP_HEIGHT-UI_PANEL_HEIGHT, MAP_WIDTH, UI_PANEL_HEIGHT)
+    hand_start_rect = pygame.Rect(0, MAP_HEIGHT-UI_PANEL_HEIGHT, MAP_WIDTH, UI_PANEL_HEIGHT)
+    deck_rect = pygame.Rect(20, MAP_HEIGHT-UI_PANEL_HEIGHT+30, 96, 96)
+    next_button = pygame.Rect(MAP_WIDTH-160, MAP_HEIGHT-UI_PANEL_HEIGHT+50, 140, 50)
 
-    # Deck on left
-    deck_rect = pygame.Rect(20, MAP_HEIGHT - UI_PANEL_HEIGHT + 30, 96, 96)
-
-    # Next button on right
-    next_button = pygame.Rect(MAP_WIDTH - 140, MAP_HEIGHT - UI_PANEL_HEIGHT + 40, 120, 50)
-
-    # Hand in middle
-    hand_start_rect = pygame.Rect(deck_rect.right + 20, MAP_HEIGHT - UI_PANEL_HEIGHT + 20,
-                                  next_button.left - deck_rect.right - 40, CARD_HEIGHT + 60)
-    # Backgrounds and monsters
-    scene_backgrounds = preload_scene_backgrounds()
-    monsters = load_monsters()
-
-    # Game state
     current_node = next(n for n in graph.nodes.values() if n.type=="start")
     game_state = "map"
     fade_alpha = 0
@@ -305,69 +296,72 @@ def run_interactive(graph, icons_pygame):
                                         active_monster = None
                                 else:
                                     active_monster = None
-                            pool = scene_backgrounds.get(node.type,[])
-                            active_scene_background = random.choice(pool) if pool else None
-                            fade_direction="out"
-                            fade_start_time=pygame.time.get_ticks()
-                            next_state="scene"
+                                pool = scene_backgrounds.get(node.type,[])
+                                active_scene_background = random.choice(pool) if pool else None
+                                fade_direction="out"
+                                fade_start_time=pygame.time.get_ticks()
+                                next_state="scene"
+                            else:
+                                active_monster=None
+                                pool = scene_backgrounds.get(node.type,[])
+                                active_scene_background = random.choice(pool) if pool else None
+                                fade_direction="out"
+                                fade_start_time=pygame.time.get_ticks()
+                                next_state="scene"
                             break
                 elif game_state=="scene":
+                    if deck_rect.collidepoint(mx,my):
+                        player.draw_card()
+                    else:
+                        slot_w, slot_h = CARD_WIDTH, CARD_HEIGHT
+                        padding = 12
+                        hand_width = len(player.hand)*(slot_w+padding)-padding
+                        start_x = hand_start_rect.x + 100
+                        y = hand_start_rect.y + 20
+                        for i,card in enumerate(player.hand):
+                            r = pygame.Rect(start_x+i*(slot_w+padding),y,slot_w,slot_h)
+                            if r.collidepoint(mx,my):
+                                player.hand.pop(i)
+                                break
                     if next_button.collidepoint(mx,my):
                         fade_direction="out"
                         fade_start_time=pygame.time.get_ticks()
                         next_state="map"
-                    elif deck_rect.collidepoint(mx,my):
-                        player.draw_card()
-                    else:
-                        slot_w, slot_h = CARD_WIDTH, CARD_HEIGHT
-                        padding = 10
-                        start_x = deck_rect.right + 20
-                        end_x = next_button.left - 20
-                        hand_width = len(player.hand)*(slot_w+padding)-padding
-                        if hand_width + start_x > end_x:
-                            start_x = end_x - hand_width
-                        y = deck_rect.y
-                        for i,card in enumerate(player.hand):
-                            r = pygame.Rect(start_x+i*(slot_w+padding), y, slot_w, slot_h)
-                            if r.collidepoint(mx,my):
-                                player.hand.pop(i)
-                                break
 
         # ---------------- DRAW ----------------
         screen.fill((0,0,0))
         if game_state=="map":
-            if parchment:
-                screen.blit(parchment,(0,0))
+            screen.blit(parchment,(0,0))
             visible_nodes = [current_node]+[graph.nodes[nid] for nid in current_node.connections]
             for node in visible_nodes:
                 for tid in node.connections:
                     if graph.nodes[tid] in visible_nodes:
                         pygame.draw.line(screen, LINE_COLOR,(node.x,node.y),(graph.nodes[tid].x,graph.nodes[tid].y),LINE_WIDTH)
             for node in visible_nodes:
-                icon = icons.get(node.type)
-                if icon:
-                    w,h = icon.get_size()
-                    screen.blit(icon,(node.x-w//2,node.y-h//2))
+                icon = icons[node.type]
+                icon_w, icon_h = 48, 48
+                icon_scaled = pygame.transform.smoothscale(icon, (icon_w, icon_h))
+                screen.blit(icon_scaled, (node.x-icon_w//2, node.y-icon_h//2))
         elif game_state=="scene":
             if active_scene_background:
                 screen.blit(active_scene_background,(0,0))
             pygame.draw.rect(screen,(50,30,10),ui_rect)
-            player.draw(screen, MAP_WIDTH//3, MAP_HEIGHT-UI_PANEL_HEIGHT-150)
+            player_y = MAP_HEIGHT - UI_PANEL_HEIGHT - 150
+            monster_y = player_y
+            player.draw(screen, MAP_WIDTH//3, player_y)
             if active_monster:
-                active_monster.draw(screen, MAP_WIDTH*2//3, MAP_HEIGHT-UI_PANEL_HEIGHT-150)
+                active_monster.draw(screen, MAP_WIDTH*2//3, monster_y)
+            player.draw_cards(screen, hand_start_rect)
             screen.blit(player.deck_logo,(deck_rect.x,deck_rect.y))
-            count_text = font_small.render(f"{len(player.deck)}", True, (255,255,255))
-            screen.blit(count_text,(deck_rect.x+deck_rect.width//2-count_text.get_width()//2,
-                                     deck_rect.y+deck_rect.height+2))
+            deck_count_text = pygame.font.SysFont(None,22).render(f"{len(player.deck)}", True, (255,255,255))
+            text_x = deck_rect.x + (deck_rect.width - deck_count_text.get_width())//2
+            text_y = deck_rect.y + deck_rect.height + 5
+            screen.blit(deck_count_text,(text_x,text_y))
             pygame.draw.rect(screen,(110,80,40),next_button)
             pygame.draw.rect(screen,(220,190,140),next_button,3)
-            t = font_small.render("Next",True,(255,255,255))
+            t = pygame.font.SysFont(None,32).render("Next",True,(255,255,255))
             screen.blit(t,(next_button.x+(next_button.width-t.get_width())//2,
                            next_button.y+(next_button.height-t.get_height())//2))
-            # draw hand
-            hand_start_rect = pygame.Rect(deck_rect.right+20, MAP_HEIGHT-UI_PANEL_HEIGHT+10,
-                                          next_button.left-(deck_rect.right+40), UI_PANEL_HEIGHT-20)
-            player.draw_cards(screen, hand_start_rect, next_button)
 
         # ---------------- FADE ----------------
         if fade_direction:

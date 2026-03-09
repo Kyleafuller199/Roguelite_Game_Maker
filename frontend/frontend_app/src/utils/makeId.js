@@ -14,6 +14,8 @@
  *   makeId("eff")     → "eff_550e8400-e29b-..."
  *   makeId("project") → "project_550e8400-e29b-..."
  */
+import { v4 as uuidv4 } from "uuid";
+
 export function makeId(prefix) {
-  return `${prefix}_${crypto.randomUUID()}`;
+  return `${prefix}_${uuidv4()}`;
 }

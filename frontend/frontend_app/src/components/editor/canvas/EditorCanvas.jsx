@@ -12,6 +12,7 @@
  * - Project mode: delegates to ProjectCanvas
  */
 
+import { useEffect } from "react";
 import { useEditor } from "@/state/editor/useEditor";
 
 import CardPreview from "@/components/editor/canvas/assets/CardPreview";
@@ -20,6 +21,20 @@ import PotionPreview from "@/components/editor/canvas/assets/PotionPreview";
 import EnemyPreview from "@/components/editor/canvas/assets/EnemyPreview";
 
 import ProjectCanvas from "@/components/editor/canvas/ProjectCanvas";
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
+
+function usePreloadAssetImages(assets) {
+  useEffect(() => {
+    const urls = [
+      ...Object.values(assets.cards.byId).map(c => c.imageUrl ? `${API_BASE}/api/assets/file/?path=cards/${c.imageUrl}` : null),
+      ...Object.values(assets.relics.byId).map(r => r.imageUrl ? `${API_BASE}/api/assets/file/?path=relics/${r.imageUrl}` : null),
+      ...Object.values(assets.potions.byId).map(p => p.imageUrl ? `${API_BASE}/api/assets/file/?path=potions/${p.imageUrl}` : null),
+      ...Object.values(assets.enemies.byId).map(e => e.imageUrl ? `${API_BASE}/api/assets/file/?path=monsters/${e.identity?.type ?? "basic"}/${e.imageUrl}` : null),
+    ].filter(Boolean);
+    urls.forEach(url => { const img = new Image(); img.src = url; });
+  }, [assets]); // re-run after backend state loads
+}
 
 import {
   canvasContainer,
@@ -41,6 +56,7 @@ const PREVIEWS = {
 export default function EditorCanvas() {
   const { state } = useEditor();
   const { mode, entityType, selectedId } = state;
+  usePreloadAssetImages(state.assets);
 
   if (mode === "project") {
     return <ProjectCanvas />;
@@ -84,7 +100,7 @@ export default function EditorCanvas() {
   return (
     <div style={{ ...canvasContainer, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ ...canvasSectionTitle, marginBottom: 12, fontSize: 20, flexShrink: 0 }}>Live Preview</div>
-      <div style={{ flex: 1, minHeight: 0 }}>
+      <div key={selectedId} style={{ flex: 1, minHeight: 0, animation: "fadeIn 0.15s ease" }}>
         <Preview selected={selected} />
       </div>
     </div>

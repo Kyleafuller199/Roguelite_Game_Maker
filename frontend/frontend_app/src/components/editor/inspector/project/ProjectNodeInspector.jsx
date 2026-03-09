@@ -74,7 +74,7 @@ export default function ProjectNodeInspector({ project, state, actions }) {
     if (!payload) { setStatus("error"); return; }
 
     try {
-      const res = await fetch("http://localhost:8000/api/start-run/", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE ?? "http://localhost:8000"}/api/start-run/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

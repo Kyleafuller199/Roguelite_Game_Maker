@@ -41,7 +41,7 @@ export const initialState = {
           id: "card_1771487222033",
           name: "Strike",
           type: "Attack",
-          rarity: "Common",
+          rarity: "Starter",
           cost: 1,
           imageUrl: "strike.png",
           effects: [
@@ -59,7 +59,7 @@ export const initialState = {
           id: "card_1771487395298",
           name: "Bash",
           type: "Attack",
-          rarity: "Uncommon",
+          rarity: "Starter",
           cost: 2,
           imageUrl: "bash.png",
           effects: [
@@ -138,7 +138,7 @@ export const initialState = {
           id: "card_eb2b2181-1d2e-4d5f-b808-8a284a098435",
           name: "Defend",
           type: "Skill",
-          rarity: "Common",
+          rarity: "Starter",
           cost: 1,
           imageUrl: "defend.png",
           effects: [
@@ -192,7 +192,7 @@ export const initialState = {
         relic_1771486391539: {
           id: "relic_1771486391539",
           imageUrl: "burning-blood.png",
-          identity: { name: "Burning Blood", rarity: "Common" },
+          identity: { name: "Burning Blood", rarity: "Starter" },
           effects: [
             {
               id: "eff_2f057ef6-f3ef-4f09-af76-0769a2c9f1f8",

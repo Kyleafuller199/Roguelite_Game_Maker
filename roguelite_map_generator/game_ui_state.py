@@ -3,101 +3,109 @@ class UIState:
         self.player = player
         self.combat = combat
 
-        self.card_rects = []
+    # ---------------- CORE STATE ----------------
+    def get_state(self):
+        """
+        Single source of truth for frontend.
+        This replaces ALL rendering.
+        """
 
-        self.card_width = 160
-        self.card_height = 220
-        self.padding = 12
+        return {
+            "player": {
+                "health": self.player.health,
+                "max_health": self.player.max_health,
+                "hand": self._get_hand_state(),
+                "deck_count": len(self.player.deck)
+            },
+            "combat": {
+                "turn": self.combat.turn,
+                "energy": self.combat.energy,
+                "player_block": self.combat.player_block,
+                "enemy_block": self.combat.monster_block
+            },
+            "monster": self._get_monster_state(),
+            "ui": {
+                "actions": self._get_available_actions()
+            }
+        }
 
-    # ---------------- LAYOUT ----------------
-    def build_hand_layout(self, screen_rect):
-        self.card_rects = []
+    # ---------------- HAND STATE ----------------
+    def _get_hand_state(self):
+        hand_state = []
 
-        hand = self.player.hand
-        count = len(hand)
+        for i, card in enumerate(self.player.hand):
+            hand_state.append({
+                "index": i,
+                "id": card.id,
+                "name": card.name,
+                "type": card.type,
+                "rarity": card.rarity,
+                "cost": card.cost,
+                "effects": card.effects
+            })
 
-        if count == 0:
-            return
+        return hand_state
 
-        max_width = screen_rect.width - 220
-        slot_w = min(
-            self.card_width,
-            (max_width - (count - 1) * self.padding) // max(1, count)
-        )
+    # ---------------- MONSTER STATE ----------------
+    def _get_monster_state(self):
+        monster = self.combat.monster
 
-        start_x = screen_rect.x + 140
-        y = screen_rect.y + 20
+        if not monster:
+            return None
 
-        for i in range(count):
-            self.card_rects.append(
-                pygame.Rect(
-                    start_x + i * (slot_w + self.padding),
-                    y,
-                    slot_w,
-                    self.card_height
-                )
-            )
+        return {
+            "id": getattr(monster, "id", None),
+            "health": monster.health,
+            "max_health": monster.max_health,
+            "intent": self.combat.get_enemy_move()["id"]
+            if hasattr(self.combat, "get_enemy_move") else None
+        }
 
-    # ---------------- CLICK HANDLER ----------------
-    def handle_click(self, mx, my):
-        for i, rect in enumerate(self.card_rects):
-            if rect.collidepoint(mx, my):
-                card = self.player.hand[i]
+    # ---------------- ACTIONS ----------------
+    def _get_available_actions(self):
+        return {
+            "can_play_cards": self.combat.turn == "player",
+            "can_end_turn": self.combat.turn == "player"
+        }
 
-                success = self.combat.play_card(card)
+    # ---------------- INPUT HANDLING ----------------
+    def play_card(self, card_index):
+        """
+        Called from frontend when a card is clicked.
+        """
 
-                if success:
-                    self.player.hand.pop(i)
-                    return "card_played"
+        if self.combat.turn != "player":
+            return {"success": False, "reason": "not_player_turn"}
 
-                return "blocked"
+        if card_index < 0 or card_index >= len(self.player.hand):
+            return {"success": False, "reason": "invalid_card"}
 
-        return "empty"
+        card = self.player.hand[card_index]
 
-    # ---------------- TURN END ----------------
+        success = self.combat.play_card(card)
+
+        if not success:
+            return {"success": False, "reason": "not_enough_energy"}
+
+        self.player.hand.pop(card_index)
+
+        return {
+            "success": True,
+            "state": self.get_state()
+        }
+
+    # ---------------- TURN CONTROL ----------------
     def end_turn(self):
+        """
+        Ends player turn and triggers enemy logic.
+        """
+
+        if self.combat.turn != "player":
+            return {"success": False, "reason": "not_player_turn"}
+
         self.combat.end_player_turn()
 
-    # ---------------- DRAW ----------------
-    def draw_hand(self, screen):
-        font_small = pygame.font.SysFont(None, 22)
-        font_medium = pygame.font.SysFont(None, 26, bold=True)
-
-        for i, rect in enumerate(self.card_rects):
-            if i >= len(self.player.hand):
-                continue
-
-            card = self.player.hand[i]
-
-            pygame.draw.rect(screen, (50, 50, 50), rect)
-            pygame.draw.rect(screen, (200, 200, 200), rect, 2)
-
-            pygame.draw.circle(screen, (255, 255, 0), (rect.x + 18, rect.y + 18), 16)
-            cost_text = font_small.render(str(card.cost), True, (0, 0, 0))
-            screen.blit(cost_text, (rect.x + 12, rect.y + 10))
-
-            name_text = font_medium.render(card.name, True, (255, 255, 255))
-            screen.blit(name_text, (rect.x + 40, rect.y + 2))
-
-            img_height = rect.height - 130
-            img_width = rect.width - 12
-
-            if card.image:
-                img = pygame.transform.smoothscale(card.image, (img_width, img_height))
-                screen.blit(img, (rect.x + 4, rect.y + 40))
-
-            type_y = rect.y + 40 + img_height + 4
-            type_text = font_small.render(
-                f"{card.type} | {card.rarity}",
-                True,
-                (200, 200, 0)
-            )
-            screen.blit(type_text, (rect.x + 4, type_y))
-
-            for ei, eff in enumerate(card.effects):
-                eff_text = font_small.render(
-                    f"{eff['effectType']} {eff.get('baseValue', '')}",
-                    True,
-                    (180, 255, 180)
-                )
-                screen.blit(eff_text, (rect.x + 4, type_y + 22 + ei * 18))
+        return {
+            "success": True,
+            "state": self.get_state()
+        }

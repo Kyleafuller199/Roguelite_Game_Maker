@@ -1,4 +1,3 @@
-import pygame
 import random
 import os
 import json
@@ -39,69 +38,53 @@ class Monster:
         self.max_health = data["identity"]["startingHealth"]
         self.health = self.max_health
 
-    def draw(self, screen, x, y):
-        w, h = self.sprite.get_size()
-        screen.blit(self.sprite, (x - w // 2, y - h // 2))
 
-        bar_w, bar_h = 140, 18
-        ratio = self.health / self.max_health
+# ---------------- GAME STATE DRIVER ----------------
+class GameState:
+    def __init__(self, run_config):
+        self.run_config = run_config
 
-        pygame.draw.rect(screen, (80, 80, 80), (x - bar_w // 2, y - 20, bar_w, bar_h))
-        pygame.draw.rect(screen, (50, 200, 50), (x - bar_w // 2, y - 20, int(bar_w * ratio), bar_h))
-        pygame.draw.rect(screen, (0, 0, 0), (x - bar_w // 2, y - 20, bar_w, bar_h), 2)
+        self.player = None
+        self.combat = None
+        self.ui = None
+        self.monster = None
 
+        self.game_state = "map"
+        self.current_node = None
 
-# ---------------- MAIN LOOP ----------------
-def run_interactive(graph, icons):
-    pygame.init()
+    # ---------------- INIT COMBAT ----------------
+    def start_combat(self, player_sprite, monster_sprite, monster_data):
+        self.player = Player(player_sprite)
 
-    run_config = load_run_config()
+        self.combat = Combat(
+            self.player,
+            Monster(monster_sprite, monster_data),
+            self.run_config
+        )
 
-    screen = pygame.display.set_mode((MAP_WIDTH, MAP_HEIGHT))
-    clock = pygame.time.Clock()
+        self.ui = UIState(self.player, self.combat)
 
-    player_sprite = pygame.image.load(
-        os.path.join("assets", "playable_characters", run_config["character"]["imageUrl"])
-    ).convert_alpha()
+        self.combat.start_player_turn()
 
-    player = Player(player_sprite)
+        self.game_state = "scene"
 
-    combat = None
-    ui = None
-    active_monster = None
+    # ---------------- INPUT HANDLING ----------------
+    def click(self, x, y, hand_index=None):
+        if self.game_state != "scene":
+            return None
 
-    game_state = "map"
-    current_node = next(n for n in graph.nodes.values() if n.type == "start")
+        if hand_index is not None:
+            return self.ui.play_card(hand_index)
 
-    while True:
-        clock.tick(60)
+        return {"success": False, "reason": "no_action"}
 
-        # ---------------- INPUT ----------------
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                exit()
+    def end_turn(self):
+        if self.combat:
+            return self.ui.end_turn()
 
-            if e.type == pygame.MOUSEBUTTONDOWN:
-                mx, my = pygame.mouse.get_pos()
+    # ---------------- STATE OUTPUT ----------------
+    def get_state(self):
+        if not self.ui:
+            return {"game_state": self.game_state}
 
-                if game_state == "scene" and combat:
-                    ui.handle_click(mx, my)
-
-        # ---------------- MAP ----------------
-        if game_state == "map":
-            screen.fill((0, 0, 0))
-
-        # ---------------- SCENE ----------------
-        elif game_state == "scene":
-            screen.fill((30, 30, 30))
-
-            player.draw(screen, 300, 400)
-
-            if active_monster:
-                active_monster.draw(screen, 900, 400)
-
-            ui.build_hand_layout(pygame.Rect(0, MAP_HEIGHT - 250, MAP_WIDTH, 250))
-            ui.draw_hand(screen)
-
-        pygame.display.flip()
+        return self.ui.get_state()

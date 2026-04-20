@@ -5,16 +5,12 @@ class UIState:
 
     # ---------------- CORE STATE ----------------
     def get_state(self):
-        """
-        Single source of truth for frontend.
-        This replaces ALL rendering.
-        """
-
         return {
+            "type": "combat",
             "player": {
                 "health": self.player.health,
                 "max_health": self.player.max_health,
-                "hand": self._get_hand_state(),
+                "hand": self._get_hand(),
                 "deck_count": len(self.player.deck)
             },
             "combat": {
@@ -23,89 +19,59 @@ class UIState:
                 "player_block": self.combat.player_block,
                 "enemy_block": self.combat.monster_block
             },
-            "monster": self._get_monster_state(),
-            "ui": {
-                "actions": self._get_available_actions()
+            "monster": self._get_monster(),
+            "actions": {
+                "can_play": self.combat.turn == "player",
+                "can_end_turn": self.combat.turn == "player"
             }
         }
 
-    # ---------------- HAND STATE ----------------
-    def _get_hand_state(self):
-        hand_state = []
-
-        for i, card in enumerate(self.player.hand):
-            hand_state.append({
+    # ---------------- HAND ----------------
+    def _get_hand(self):
+        return [
+            {
                 "index": i,
-                "id": card.id,
-                "name": card.name,
-                "type": card.type,
-                "rarity": card.rarity,
-                "cost": card.cost,
-                "effects": card.effects
-            })
+                "id": c.id,
+                "name": c.name,
+                "cost": c.cost,
+                "type": c.type,
+                "rarity": c.rarity,
+                "effects": c.effects
+            }
+            for i, c in enumerate(self.player.hand)
+        ]
 
-        return hand_state
+    # ---------------- MONSTER ----------------
+    def _get_monster(self):
+        m = self.combat.monster
 
-    # ---------------- MONSTER STATE ----------------
-    def _get_monster_state(self):
-        monster = self.combat.monster
-
-        if not monster:
+        if not m:
             return None
 
         return {
-            "id": getattr(monster, "id", None),
-            "health": monster.health,
-            "max_health": monster.max_health,
+            "health": m.health,
+            "max_health": m.max_health,
             "intent": self.combat.get_enemy_move()["id"]
-            if hasattr(self.combat, "get_enemy_move") else None
         }
 
-    # ---------------- ACTIONS ----------------
-    def _get_available_actions(self):
-        return {
-            "can_play_cards": self.combat.turn == "player",
-            "can_end_turn": self.combat.turn == "player"
-        }
-
-    # ---------------- INPUT HANDLING ----------------
-    def play_card(self, card_index):
-        """
-        Called from frontend when a card is clicked.
-        """
-
+    # ---------------- CARD PLAY ----------------
+    def play_card(self, index):
         if self.combat.turn != "player":
             return {"success": False, "reason": "not_player_turn"}
 
-        if card_index < 0 or card_index >= len(self.player.hand):
+        if index < 0 or index >= len(self.player.hand):
             return {"success": False, "reason": "invalid_card"}
 
-        card = self.player.hand[card_index]
+        card = self.player.hand[index]
 
-        success = self.combat.play_card(card)
-
-        if not success:
+        if not self.combat.play_card(card):
             return {"success": False, "reason": "not_enough_energy"}
 
-        self.player.hand.pop(card_index)
+        self.player.hand.pop(index)
 
-        return {
-            "success": True,
-            "state": self.get_state()
-        }
+        return {"success": True}
 
-    # ---------------- TURN CONTROL ----------------
+    # ---------------- TURN END ----------------
     def end_turn(self):
-        """
-        Ends player turn and triggers enemy logic.
-        """
-
-        if self.combat.turn != "player":
-            return {"success": False, "reason": "not_player_turn"}
-
         self.combat.end_player_turn()
-
-        return {
-            "success": True,
-            "state": self.get_state()
-        }
+        return {"success": True}

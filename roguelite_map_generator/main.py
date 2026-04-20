@@ -1,12 +1,11 @@
 from map_generator import generate_map
 from renderer import render_map
-from interactive_viewer import run_interactive
 from PIL import Image
-import pygame
 import os
-from config import ICONS_DIR, MAP_WIDTH, MAP_HEIGHT
+from config import ICONS_DIR
 
 NODE_TYPES = ["start", "battle", "rest", "treasure", "elite", "event", "boss"]
+
 
 def load_icons(loader, post_process=None):
     icons = {}
@@ -22,21 +21,22 @@ def load_icons(loader, post_process=None):
 def main():
     graph = generate_map(seed=None)
 
-    # Render printable map (PIL)
+    # ---------------- STATIC EXPORT ----------------
     icons_pil = load_icons(
         loader=lambda p: Image.open(p).convert("RGBA")
     )
     render_map(graph, icons_pil)
 
-    # Interactive map (pygame)
-    pygame.init()
-    pygame.display.set_mode((MAP_WIDTH, MAP_HEIGHT))
+    # ---------------- GAME DATA OUTPUT ----------------
+    # Instead of pygame runtime, you should export state
+    print("Map generated successfully.")
+    print("Run config / graph ready for frontend.")
 
-    icons_pygame = load_icons(
-        loader=lambda p: pygame.image.load(p).convert_alpha(),
-        post_process=lambda i: pygame.transform.smoothscale(i, (48, 48))
-    )
-    run_interactive(graph, icons_pygame)
+    # OPTIONAL: save graph for frontend
+    import json
+
+    with open("exported_graph.json", "w") as f:
+        json.dump(graph.to_dict(), f, indent=2)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,3 @@
-import pygame
-
-
 class UIState:
     def __init__(self, player, combat):
         self.player = player

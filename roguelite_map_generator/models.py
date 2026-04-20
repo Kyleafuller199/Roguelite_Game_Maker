@@ -1,19 +1,18 @@
-from dataclasses import dataclass, field
-from typing import List, Dict
-import math
-
-@dataclass
-class Node:
-    id: int
-    type: str
-    x: int
-    y: int
-    row: int
-    connections: List[int] = field(default_factory=list)
-
-    def is_clicked(self, mx, my, radius):
-        return math.hypot(self.x - mx, self.y - my) <= radius
-
-@dataclass
 class MapGraph:
-    nodes: Dict[int, Node]
+    def __init__(self, nodes):
+        self.nodes = nodes
+
+    def to_dict(self):
+        return {
+            "nodes": {
+                node_id: {
+                    "id": node.id,
+                    "type": node.type,
+                    "x": node.x,
+                    "y": node.y,
+                    "row": getattr(node, "row", None),
+                    "connections": node.connections
+                }
+                for node_id, node in self.nodes.items()
+            }
+        }

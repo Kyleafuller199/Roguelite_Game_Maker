@@ -24,4 +24,7 @@ urlpatterns = [
     path('api/assets/list/', views.list_assets),
     path('api/assets/file/', views.serve_asset),
     path('api/start-run/', views.start_run),
+    path('api/game/map/', views.get_map),
+    path('api/game/session/', views.create_session),
+    path('api/game/node/', views.enter_node),
 ]

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,6 +34,9 @@ GAME_ASSETS_DIR = Path(os.environ.get(
     'GAME_ASSETS_DIR',
     str(BASE_DIR.parent / 'roguelite_map_generator' / 'assets')
 ))
+
+# Let Django import map/combat modules directly
+sys.path.insert(0, str(BASE_DIR.parent / 'roguelite_map_generator'))
 
 
 # Application definition

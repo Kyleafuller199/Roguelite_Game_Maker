@@ -15,6 +15,7 @@
  */
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { buildRunPayload } from "@/state/editor/project/payload";
 import InspectorSection from "@/components/editor/inspector/shared/InspectorSection";
 import Label from "@/components/editor/inspector/shared/Label";
@@ -69,8 +70,9 @@ function exportBtnStyle(disabled) {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ProjectNodeInspector({ project, state, actions }) {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
-  const [status, setStatus]   = useState(null); // null | "sent" | "error"
+  const [status, setStatus]   = useState(null);
 
   const characters = (project.characterIds ?? [])
     .map((id) => state.project.characters.byId[id])
@@ -100,21 +102,11 @@ export default function ProjectNodeInspector({ project, state, actions }) {
     URL.revokeObjectURL(url);
   }
 
-  async function handleStartRun() {
+  function handleStartRun() {
     const payload = buildRunPayload(state, project.id);
     if (!payload) { setStatus("error"); return; }
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE ?? "http://localhost:8000"}/api/start-run/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Server error");
-      setStatus("sent");
-    } catch {
-      setStatus("error");
-    }
+    sessionStorage.setItem("runPayload", JSON.stringify(payload));
+    navigate("/play");
   }
 
   return (

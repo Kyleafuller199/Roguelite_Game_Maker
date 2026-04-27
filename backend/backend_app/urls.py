@@ -27,4 +27,6 @@ urlpatterns = [
     path('api/game/map/', views.get_map),
     path('api/game/session/', views.create_session),
     path('api/game/node/', views.enter_node),
+    path('api/game/play-card/', views.play_card),
+    path('api/game/end-turn/', views.end_turn),
 ]

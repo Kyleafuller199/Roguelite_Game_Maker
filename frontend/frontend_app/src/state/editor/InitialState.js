@@ -10,414 +10,469 @@
  * - Global assets are separate from project composition
  * - Projects reference assets by ID (never by object copy)
  * - Characters belong to projects but reference global assets
+ *
+ * Demo content is based on the Ironclad character from Slay the Spire
+ * and uses the sprites available in roguelite_map_generator/assets/.
  */
 
 export const initialState = {
-  /**
-   * -------------------------------------------------------
-   * EDITOR MODE STATE
-   * -------------------------------------------------------
-   */
-
   mode: "assets",
   entityType: "card",
-  selectedId: "card_1771487222033",
+  selectedId: "card_strike",
 
-  /**
-   * -------------------------------------------------------
-   * GLOBAL ASSETS (Normalized)
-   * -------------------------------------------------------
-   */
+  // ─────────────────────────────────────────────────────────────────────────
+  // GLOBAL ASSETS
+  // ─────────────────────────────────────────────────────────────────────────
 
   assets: {
-    /**
-     * -------------------------
-     * CARDS
-     * -------------------------
-     */
+
+    // ── CARDS ──────────────────────────────────────────────────────────────
     cards: {
       byId: {
-        card_1771487222033: {
-          id: "card_1771487222033",
-          name: "Strike",
-          type: "Attack",
-          rarity: "Starter",
-          cost: 1,
-          imageUrl: "strike.png",
+
+        // ── Starter ────────────────────────────────────────────────────────
+
+        card_strike: {
+          id: "card_strike", name: "Strike", type: "Attack", rarity: "Starter", cost: 1, imageUrl: "strike.png",
+          effects: [{ id: "eff_strike_dmg", effectType: "damage", baseValue: 6, target: "selectedEnemy", repeat: 1 }],
+        },
+
+        card_defend: {
+          id: "card_defend", name: "Defend", type: "Skill", rarity: "Starter", cost: 1, imageUrl: "defend.png",
+          effects: [{ id: "eff_defend_block", effectType: "block", baseValue: 5, target: "self", repeat: 1 }],
+        },
+
+        card_bash: {
+          id: "card_bash", name: "Bash", type: "Attack", rarity: "Starter", cost: 2, imageUrl: "bash.png",
           effects: [
-            {
-              id: "undefined_1de3819b-0cfd-4de2-b171-698df27e4d81",
-              effectType: "damage",
-              baseValue: 6,
-              target: "selectedEnemy",
-              repeat: 1,
-            },
+            { id: "eff_bash_dmg",  effectType: "damage",      baseValue: 8, target: "selectedEnemy", repeat: 1 },
+            { id: "eff_bash_vuln", effectType: "vulnerable",  baseValue: 2, target: "selectedEnemy", repeat: 1 },
           ],
         },
 
-        card_1771487395298: {
-          id: "card_1771487395298",
-          name: "Bash",
-          type: "Attack",
-          rarity: "Starter",
-          cost: 2,
-          imageUrl: "bash.png",
+        // ── Common Attacks ─────────────────────────────────────────────────
+
+        card_headbutt: {
+          id: "card_headbutt", name: "Headbutt", type: "Attack", rarity: "Common", cost: 1, imageUrl: "strike.png",
+          effects: [{ id: "eff_headbutt_dmg", effectType: "damage", baseValue: 9, target: "selectedEnemy", repeat: 1 }],
+        },
+
+        card_pommel_strike: {
+          id: "card_pommel_strike", name: "Pommel Strike", type: "Attack", rarity: "Common", cost: 1, imageUrl: "strike.png",
           effects: [
-            {
-              id: "undefined_d1ddb7bb-f2a8-4828-8297-fbb7fd9f0aab",
-              effectType: "damage",
-              baseValue: 8,
-              target: "selectedEnemy",
-              repeat: 1,
-            },
-            {
-              id: "undefined_9d771931-fbb3-4623-9ce6-fb77dc2a1993",
-              effectType: "vulnerable",
-              baseValue: 2,
-              target: "selectedEnemy",
-              repeat: 1,
-            },
+            { id: "eff_pommel_dmg",  effectType: "damage", baseValue: 9, target: "selectedEnemy", repeat: 1 },
+            { id: "eff_pommel_draw", effectType: "draw",   baseValue: 1, target: "self",          repeat: 1 },
           ],
         },
 
-        card_1771487466006: {
-          id: "card_1771487466006",
-          name: "Twin Strike",
-          type: "Attack",
-          rarity: "Common",
-          cost: 1,
-          imageUrl: "twin-strike.png",
+        card_wild_strike: {
+          id: "card_wild_strike", name: "Wild Strike", type: "Attack", rarity: "Common", cost: 1, imageUrl: "strike.png",
+          effects: [{ id: "eff_wild_dmg", effectType: "damage", baseValue: 12, target: "selectedEnemy", repeat: 1 }],
+        },
+
+        card_twin_strike: {
+          id: "card_twin_strike", name: "Twin Strike", type: "Attack", rarity: "Common", cost: 1, imageUrl: "twin-strike.png",
+          effects: [{ id: "eff_twin_dmg", effectType: "damage", baseValue: 5, target: "selectedEnemy", repeat: 2 }],
+        },
+
+        card_sword_boomerang: {
+          id: "card_sword_boomerang", name: "Sword Boomerang", type: "Attack", rarity: "Common", cost: 1, imageUrl: "strike.png",
+          effects: [{ id: "eff_boomerang_dmg", effectType: "damage", baseValue: 3, target: "randomEnemy", repeat: 3 }],
+        },
+
+        card_thunderclap: {
+          id: "card_thunderclap", name: "Thunderclap", type: "Attack", rarity: "Common", cost: 1, imageUrl: "bash.png",
           effects: [
-            {
-              id: "undefined_709f90da-4512-4d17-9b89-3cfd5d3dd744",
-              effectType: "damage",
-              baseValue: 5,
-              target: "selectedEnemy",
-              repeat: 2,
-            },
+            { id: "eff_thunder_dmg",  effectType: "damage",     baseValue: 4, target: "allEnemies",    repeat: 1 },
+            { id: "eff_thunder_vuln", effectType: "vulnerable", baseValue: 1, target: "selectedEnemy", repeat: 1 },
           ],
         },
 
-        card_1771554405482: {
-          id: "card_1771554405482",
-          name: "Block Pile",
-          type: "Skill",
-          rarity: "Rare",
-          cost: 1,
-          imageUrl: "block-pile.png",
+        card_clothesline: {
+          id: "card_clothesline", name: "Clothesline", type: "Attack", rarity: "Common", cost: 2, imageUrl: "bash.png",
+          effects: [
+            { id: "eff_cloth_dmg",  effectType: "damage", baseValue: 12, target: "selectedEnemy", repeat: 1 },
+            { id: "eff_cloth_weak", effectType: "weak",   baseValue: 2,  target: "selectedEnemy", repeat: 1 },
+          ],
+        },
+
+        card_reckless_charge: {
+          id: "card_reckless_charge", name: "Reckless Charge", type: "Attack", rarity: "Common", cost: 0, imageUrl: "strike.png",
+          effects: [{ id: "eff_reckless_dmg", effectType: "damage", baseValue: 7, target: "selectedEnemy", repeat: 1 }],
+        },
+
+        // ── Common Skills ──────────────────────────────────────────────────
+
+        card_shrug_it_off: {
+          id: "card_shrug_it_off", name: "Shrug It Off", type: "Skill", rarity: "Common", cost: 1, imageUrl: "defend.png",
+          effects: [
+            { id: "eff_shrug_block", effectType: "block", baseValue: 8, target: "self", repeat: 1 },
+            { id: "eff_shrug_draw",  effectType: "draw",  baseValue: 1, target: "self", repeat: 1 },
+          ],
+        },
+
+        card_true_grit: {
+          id: "card_true_grit", name: "True Grit", type: "Skill", rarity: "Common", cost: 1, imageUrl: "defend.png",
+          effects: [{ id: "eff_truegrit_block", effectType: "block", baseValue: 7, target: "self", repeat: 1 }],
+        },
+
+        card_armaments: {
+          id: "card_armaments", name: "Armaments", type: "Skill", rarity: "Common", cost: 1, imageUrl: "defend.png",
+          effects: [{ id: "eff_arm_block", effectType: "block", baseValue: 5, target: "self", repeat: 1 }],
+        },
+
+        card_flex: {
+          id: "card_flex", name: "Flex", type: "Skill", rarity: "Common", cost: 0, imageUrl: "defend.png",
+          effects: [{ id: "eff_flex_str", effectType: "strength", baseValue: 2, target: "self", repeat: 1 }],
+        },
+
+        card_seeing_red: {
+          id: "card_seeing_red", name: "Seeing Red", type: "Skill", rarity: "Common", cost: 1, imageUrl: "defend.png",
+          effects: [{ id: "eff_seered_energy", effectType: "gainEnergy", baseValue: 2, target: "self", repeat: 1 }],
+        },
+
+        // ── Uncommon / Rare ────────────────────────────────────────────────
+
+        card_inflame: {
+          id: "card_inflame", name: "Inflame", type: "Power", rarity: "Uncommon", cost: 1, imageUrl: "bash.png",
+          effects: [{ id: "eff_inflame_str", effectType: "strength", baseValue: 2, target: "self", repeat: 1 }],
+        },
+
+        card_battle_trance: {
+          id: "card_battle_trance", name: "Battle Trance", type: "Skill", rarity: "Uncommon", cost: 0, imageUrl: "defend.png",
+          effects: [{ id: "eff_trance_draw", effectType: "draw", baseValue: 3, target: "self", repeat: 1 }],
+        },
+
+        card_carnage: {
+          id: "card_carnage", name: "Carnage", type: "Attack", rarity: "Uncommon", cost: 2, imageUrl: "bash.png",
+          exhaust: true,
+          effects: [{ id: "eff_carnage_dmg", effectType: "damage", baseValue: 20, target: "selectedEnemy", repeat: 1 }],
+        },
+
+        card_pummel: {
+          id: "card_pummel", name: "Pummel", type: "Attack", rarity: "Uncommon", cost: 1, imageUrl: "strike.png",
+          exhaust: true,
+          effects: [{ id: "eff_pummel_dmg", effectType: "damage", baseValue: 2, target: "selectedEnemy", repeat: 4 }],
+        },
+
+        card_second_wind: {
+          id: "card_second_wind", name: "Second Wind", type: "Skill", rarity: "Uncommon", cost: 1, imageUrl: "defend.png",
+          effects: [{ id: "eff_sw_block", effectType: "block", baseValue: 5, target: "self", repeat: 1 }],
+        },
+
+        card_block_pile: {
+          id: "card_block_pile", name: "Block Pile", type: "Skill", rarity: "Rare", cost: 1, imageUrl: "block-pile.png",
           retain: true,
           effects: [
-            {
-              id: "eff_8f7d5601-fe82-4fc7-b890-0b91f8d482df",
-              effectType: "block",
-              baseValue: 5,
-              target: "self",
-              repeat: 1,
-            },
-            {
-              id: "eff_8c5cff9b-481f-4b63-a462-61a0b8a05038",
-              effectType: "weak",
-              baseValue: 1,
-              target: "self",
-              repeat: 1,
-            },
+            { id: "eff_bp_block", effectType: "block", baseValue: 5, target: "self",      repeat: 1 },
+            { id: "eff_bp_weak",  effectType: "weak",  baseValue: 1, target: "self",      repeat: 1 },
           ],
           scaling: [
-            {
-              id: "scale_133234da-6f74-4eed-b95f-04fe51a438ab",
-              appliesToEffectId: "eff_8f7d5601-fe82-4fc7-b890-0b91f8d482df",
-              basedOn: "cardsInHand",
-              operation: "add",
-              amountPerUnit: 5,
-              cap: null,
-            },
+            { id: "scale_bp", appliesToEffectId: "eff_bp_block", basedOn: "cardsInHand", operation: "add", amountPerUnit: 5, cap: null },
           ],
         },
 
-        "card_eb2b2181-1d2e-4d5f-b808-8a284a098435": {
-          id: "card_eb2b2181-1d2e-4d5f-b808-8a284a098435",
-          name: "Defend",
-          type: "Skill",
-          rarity: "Starter",
-          cost: 1,
-          imageUrl: "defend.png",
-          effects: [
-            {
-              id: "eff_b2ddcbb2-e493-4175-8074-e2617ee0bc63",
-              effectType: "block",
-              baseValue: 5,
-              target: "self",
-              repeat: 1,
-            },
-          ],
+        card_whirlwind: {
+          id: "card_whirlwind", name: "Whirlwind", type: "Attack", rarity: "Rare", cost: 0, imageUrl: "bash.png",
+          effects: [{ id: "eff_whirl_dmg", effectType: "damage", baseValue: 5, target: "allEnemies", repeat: 3 }],
         },
 
-        "card_9a891ebb-46f7-4501-9064-4588b1a6325d": {
-          id: "card_9a891ebb-46f7-4501-9064-4588b1a6325d",
-          name: "Injured",
-          type: "Curse",
-          rarity: "Curse",
-          cost: 1,
-          imageUrl: "injured.png",
+        // ── Curses ─────────────────────────────────────────────────────────
+
+        card_injured: {
+          id: "card_injured", name: "Injured", type: "Curse", rarity: "Curse", cost: 1, imageUrl: "injured.png",
           exhaust: true,
-          effects: [
-            {
-              id: "eff_ae2305ad-5606-44b9-8342-d57ac513f7d6",
-              effectType: "vulnerable",
-              baseValue: 1,
-              target: "self",
-              repeat: 1,
-              trigger: "onDraw",
-            },
-          ],
+          effects: [{ id: "eff_injured_vuln", effectType: "vulnerable", baseValue: 1, target: "self", repeat: 1, trigger: "onDraw" }],
         },
       },
+
       allIds: [
-        "card_1771487222033",
-        "card_1771487395298",
-        "card_1771487466006",
-        "card_1771554405482",
-        "card_eb2b2181-1d2e-4d5f-b808-8a284a098435",
-        "card_9a891ebb-46f7-4501-9064-4588b1a6325d",
+        "card_strike", "card_defend", "card_bash",
+        "card_headbutt", "card_pommel_strike", "card_wild_strike",
+        "card_twin_strike", "card_sword_boomerang", "card_thunderclap",
+        "card_clothesline", "card_reckless_charge",
+        "card_shrug_it_off", "card_true_grit", "card_armaments",
+        "card_flex", "card_seeing_red",
+        "card_inflame", "card_battle_trance", "card_carnage",
+        "card_pummel", "card_second_wind", "card_block_pile", "card_whirlwind",
+        "card_injured",
       ],
     },
 
-    /**
-     * -------------------------
-     * RELICS
-     * -------------------------
-     */
+    // ── RELICS ─────────────────────────────────────────────────────────────
     relics: {
       byId: {
-        relic_1771486391539: {
-          id: "relic_1771486391539",
+        relic_burning_blood: {
+          id: "relic_burning_blood",
           imageUrl: "burning-blood.png",
           identity: { name: "Burning Blood", rarity: "Starter" },
+          effects: [{ id: "eff_bb_heal", effectType: "heal", baseValue: 6, repeat: 1, target: "self" }],
+          triggers: [{ id: "trg_bb", event: "startOfCombat", effectIds: ["eff_bb_heal"] }],
+        },
+
+        relic_orichalcum: {
+          id: "relic_orichalcum",
+          imageUrl: "burning-blood.png",
+          identity: { name: "Orichalcum", rarity: "Uncommon" },
+          effects: [{ id: "eff_ori_block", effectType: "block", baseValue: 6, repeat: 1, target: "self" }],
+          triggers: [{ id: "trg_ori", event: "startOfTurn", effectIds: ["eff_ori_block"] }],
+        },
+
+        relic_philosophers_stone: {
+          id: "relic_philosophers_stone",
+          imageUrl: "burning-blood.png",
+          identity: { name: "Philosopher's Stone", rarity: "Boss" },
           effects: [
-            {
-              id: "eff_2f057ef6-f3ef-4f09-af76-0769a2c9f1f8",
-              effectType: "heal",
-              baseValue: 6,
-              repeat: 1,
-              target: "self",
-            },
+            { id: "eff_ps_str",  effectType: "strength", baseValue: 1, repeat: 1, target: "self" },
           ],
-          triggers: [
-            {
-              id: "trg_ec294c70-4412-4bf8-895b-7e487fa6d128",
-              event: "startOfCombat",
-              effectIds: ["eff_2f057ef6-f3ef-4f09-af76-0769a2c9f1f8"],
-            },
-          ],
+          triggers: [{ id: "trg_ps", event: "startOfCombat", effectIds: ["eff_ps_str"] }],
+        },
+
+        relic_bag_of_prep: {
+          id: "relic_bag_of_prep",
+          imageUrl: "burning-blood.png",
+          identity: { name: "Bag of Preparation", rarity: "Uncommon" },
+          effects: [{ id: "eff_bop_draw", effectType: "draw", baseValue: 2, repeat: 1, target: "self" }],
+          triggers: [{ id: "trg_bop", event: "startOfCombat", effectIds: ["eff_bop_draw"] }],
         },
       },
-      allIds: ["relic_1771486391539"],
+
+      allIds: ["relic_burning_blood", "relic_orichalcum", "relic_philosophers_stone", "relic_bag_of_prep"],
     },
 
-    /**
-     * -------------------------
-     * POTIONS
-     * -------------------------
-     */
+    // ── POTIONS ────────────────────────────────────────────────────────────
     potions: {
       byId: {
-        potion_1771488136617: {
-          id: "potion_1771488136617",
+        potion_fire: {
+          id: "potion_fire",
           imageUrl: "flame-potion.png",
           identity: { name: "Fire Potion", rarity: "Common", useContext: "combatOnly" },
-          effects: [
-            {
-              id: "eff_c4b7d994-db22-432e-b4c5-4c597638b421",
-              effectType: "damage",
-              baseValue: 20,
-              target: "selectedEnemy",
-              repeat: 1,
-            },
-          ],
+          effects: [{ id: "eff_fire_dmg", effectType: "damage", baseValue: 20, target: "selectedEnemy", repeat: 1 }],
         },
-
-        potion_1771488167978: {
-          id: "potion_1771488167978",
+        potion_life: {
+          id: "potion_life",
           imageUrl: "life-potion.png",
           identity: { name: "Life Potion", rarity: "Rare", useContext: "anyTime" },
-          effects: [
-            {
-              id: "eff_66b0a37e-4ef9-4847-828f-f59afe72c86d",
-              effectType: "heal",
-              baseValue: 999,
-              target: "self",
-              repeat: 1,
-            },
-          ],
+          effects: [{ id: "eff_life_heal", effectType: "heal", baseValue: 30, target: "self", repeat: 1 }],
         },
-
-        "potion_93cebb76-2f10-4933-969c-b308e1e21847": {
-          id: "potion_93cebb76-2f10-4933-969c-b308e1e21847",
+        potion_block: {
+          id: "potion_block",
           imageUrl: "block-potion.png",
           identity: { name: "Block Potion", rarity: "Common", useContext: "combatOnly" },
-          effects: [
-            {
-              id: "eff_6f7dd938-a5f7-4b99-a256-855142b3267e",
-              effectType: "block",
-              baseValue: 12,
-              target: "self",
-              repeat: 1,
-            },
-          ],
+          effects: [{ id: "eff_block_pot", effectType: "block", baseValue: 12, target: "self", repeat: 1 }],
         },
-
-        "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657": {
-          id: "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657",
+        potion_strength: {
+          id: "potion_strength",
           imageUrl: "regen-potion.png",
-          identity: { name: "Parry Potion", rarity: "Uncommon", useContext: "combatOnly" },
-          effects: [
-            {
-              id: "eff_3c4a492c-5fb1-4e67-ab47-c7bde9280eb0",
-              effectType: "block",
-              baseValue: 8,
-              target: "self",
-              repeat: 1,
-            },
-            {
-              id: "eff_block-heal-potion-heal",
-              effectType: "heal",
-              baseValue: 8,
-              target: "self",
-              repeat: 1,
-            },
-          ],
+          identity: { name: "Strength Potion", rarity: "Uncommon", useContext: "combatOnly" },
+          effects: [{ id: "eff_str_pot", effectType: "strength", baseValue: 3, target: "self", repeat: 1 }],
         },
       },
-      allIds: [
-        "potion_1771488136617",
-        "potion_1771488167978",
-        "potion_93cebb76-2f10-4933-969c-b308e1e21847",
-        "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657",
-      ],
+      allIds: ["potion_fire", "potion_life", "potion_block", "potion_strength"],
     },
 
-    /**
-     * -------------------------
-     * ENEMIES
-     * -------------------------
-     */
+    // ── ENEMIES ────────────────────────────────────────────────────────────
     enemies: {
       byId: {
-        enemy_1771490203678: {
-          id: "enemy_1771490203678",
-          imageUrl: "cultist.png",
-          identity: {
-            name: "Cultist",
-            type: "elite",
-            startingHealth: 50,
-            startingBlock: 30,
-          },
+
+        // ── Basics ─────────────────────────────────────────────────────────
+
+        enemy_slime: {
+          id: "enemy_slime",
+          imageUrl: "slime.png",
+          identity: { name: "Slime", type: "basic", startingHealth: 40, startingBlock: 0 },
           moves: [
             {
-              id: "move_8fc36e71-00c7-43ad-82e0-6b0b590067ab",
-              name: "Charge",
-              effects: [
-                {
-                  id: "eff_75c59a35-f133-4e4d-9e7c-73571d45ef82",
-                  effectType: "strength",
-                  baseValue: 5,
-                  target: "self",
-                  repeat: 1,
-                },
-              ],
+              id: "move_slime_tackle", name: "Tackle",
+              effects: [{ id: "eff_slime_tackle", effectType: "damage", baseValue: 5, target: "player", repeat: 1 }],
             },
             {
-              id: "move_446d0218-7935-4869-a938-785a65b2c6e9",
-              name: "Smack",
-              effects: [
-                {
-                  id: "eff_281c673c-cf85-4922-bc71-f5905e91a3c2",
-                  effectType: "damage",
-                  baseValue: 6,
-                  target: "player",
-                  repeat: 1,
-                },
-              ],
+              id: "move_slime_goo", name: "Goo",
+              effects: [{ id: "eff_slime_goo", effectType: "weak", baseValue: 1, target: "player", repeat: 1 }],
+            },
+            {
+              id: "move_slime_slam", name: "Slam",
+              effects: [{ id: "eff_slime_slam", effectType: "damage", baseValue: 8, target: "player", repeat: 1 }],
             },
           ],
-          behavior: {
-            behaviorType: "cycle",
-            cycleOrder: [
-              "move_8fc36e71-00c7-43ad-82e0-6b0b590067ab",
-              "move_446d0218-7935-4869-a938-785a65b2c6e9",
-              "move_446d0218-7935-4869-a938-785a65b2c6e9",
-            ],
-          },
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_slime_tackle", "move_slime_goo", "move_slime_tackle", "move_slime_slam"] },
         },
 
-        "enemy_a69783db-f913-4ab1-8b4a-fff313c87298": {
-          id: "enemy_a69783db-f913-4ab1-8b4a-fff313c87298",
+        enemy_jaw_worm: {
+          id: "enemy_jaw_worm",
           imageUrl: "slime.png",
-          identity: {
-            name: "Slime",
-            type: "basic",
-            startingHealth: 40,
-            startingBlock: 0,
-          },
+          identity: { name: "Jaw Worm", type: "basic", startingHealth: 42, startingBlock: 0 },
           moves: [
             {
-              id: "move_slime_tackle",
-              name: "Tackle",
+              id: "move_jw_chomp", name: "Chomp",
+              effects: [{ id: "eff_jw_chomp", effectType: "damage", baseValue: 11, target: "player", repeat: 1 }],
+            },
+            {
+              id: "move_jw_thrash", name: "Thrash",
               effects: [
-                {
-                  id: "eff_slime_tackle_dmg",
-                  effectType: "damage",
-                  baseValue: 5,
-                  target: "player",
-                  repeat: 1,
-                },
+                { id: "eff_jw_thrash_dmg",   effectType: "damage", baseValue: 7, target: "player", repeat: 1 },
+                { id: "eff_jw_thrash_block",  effectType: "block",  baseValue: 5, target: "self",   repeat: 1 },
               ],
             },
             {
-              id: "move_slime_goo",
-              name: "Goo",
-              effects: [
-                {
-                  id: "eff_slime_goo_weak",
-                  effectType: "weak",
-                  baseValue: 1,
-                  target: "player",
-                  repeat: 1,
-                },
-              ],
+              id: "move_jw_bellow", name: "Bellow",
+              effects: [{ id: "eff_jw_bellow", effectType: "strength", baseValue: 3, target: "self", repeat: 1 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_jw_chomp", "move_jw_thrash", "move_jw_chomp", "move_jw_bellow"] },
+        },
+
+        enemy_green_louse: {
+          id: "enemy_green_louse",
+          imageUrl: "slime.png",
+          identity: { name: "Green Louse", type: "basic", startingHealth: 12, startingBlock: 0 },
+          moves: [
+            {
+              id: "move_gl_bite", name: "Bite",
+              effects: [{ id: "eff_gl_bite", effectType: "damage", baseValue: 5, target: "player", repeat: 1 }],
             },
             {
-              id: "move_slime_slam",
-              name: "Slam",
+              id: "move_gl_web", name: "Spit Web",
+              effects: [{ id: "eff_gl_web", effectType: "weak", baseValue: 2, target: "player", repeat: 1 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_gl_bite", "move_gl_bite", "move_gl_web"] },
+        },
+
+        enemy_spike_slime: {
+          id: "enemy_spike_slime",
+          imageUrl: "slime.png",
+          identity: { name: "Spike Slime", type: "basic", startingHealth: 28, startingBlock: 0 },
+          moves: [
+            {
+              id: "move_ss_flame", name: "Flame Tackle",
+              effects: [{ id: "eff_ss_flame", effectType: "damage", baseValue: 8, target: "player", repeat: 1 }],
+            },
+            {
+              id: "move_ss_lunge", name: "Lunge",
               effects: [
-                {
-                  id: "eff_slime_slam_dmg",
-                  effectType: "damage",
-                  baseValue: 8,
-                  target: "player",
-                  repeat: 1,
-                },
+                { id: "eff_ss_lunge_dmg",  effectType: "damage",      baseValue: 5, target: "player", repeat: 1 },
+                { id: "eff_ss_lunge_vuln", effectType: "vulnerable",   baseValue: 1, target: "player", repeat: 1 },
               ],
             },
           ],
-          behavior: {
-            behaviorType: "cycle",
-            cycleOrder: ["move_slime_tackle", "move_slime_goo", "move_slime_tackle", "move_slime_slam"],
-          },
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_ss_flame", "move_ss_lunge", "move_ss_flame"] },
+        },
+
+        // ── Elites ─────────────────────────────────────────────────────────
+
+        enemy_cultist: {
+          id: "enemy_cultist",
+          imageUrl: "cultist.png",
+          identity: { name: "Cultist", type: "elite", startingHealth: 80, startingBlock: 0 },
+          moves: [
+            {
+              id: "move_cult_incant", name: "Incantation",
+              effects: [{ id: "eff_cult_incant", effectType: "strength", baseValue: 3, target: "self", repeat: 1 }],
+            },
+            {
+              id: "move_cult_strike", name: "Dark Strike",
+              effects: [{ id: "eff_cult_strike", effectType: "damage", baseValue: 6, target: "player", repeat: 1 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_cult_incant", "move_cult_strike", "move_cult_strike"] },
+        },
+
+        enemy_gremlin_nob: {
+          id: "enemy_gremlin_nob",
+          imageUrl: "cultist.png",
+          identity: { name: "Gremlin Nob", type: "elite", startingHealth: 82, startingBlock: 0 },
+          moves: [
+            {
+              id: "move_gn_bellow", name: "Bellow",
+              effects: [
+                { id: "eff_gn_bellow_str",  effectType: "strength", baseValue: 2, target: "self",   repeat: 1 },
+                { id: "eff_gn_bellow_weak", effectType: "weak",     baseValue: 2, target: "player", repeat: 1 },
+              ],
+            },
+            {
+              id: "move_gn_rush", name: "Rush",
+              effects: [{ id: "eff_gn_rush", effectType: "damage", baseValue: 14, target: "player", repeat: 1 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_gn_bellow", "move_gn_rush", "move_gn_rush"] },
+        },
+
+        enemy_lagavulin: {
+          id: "enemy_lagavulin",
+          imageUrl: "cultist.png",
+          identity: { name: "Lagavulin", type: "elite", startingHealth: 109, startingBlock: 8 },
+          moves: [
+            {
+              id: "move_lag_sleep", name: "Sleep",
+              effects: [],
+            },
+            {
+              id: "move_lag_siphon", name: "Siphon Soul",
+              effects: [
+                { id: "eff_lag_siphon_str", effectType: "strength", baseValue: -1, target: "player", repeat: 1 },
+              ],
+            },
+            {
+              id: "move_lag_attack", name: "Attack",
+              effects: [{ id: "eff_lag_attack", effectType: "damage", baseValue: 18, target: "player", repeat: 1 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_lag_sleep", "move_lag_sleep", "move_lag_siphon", "move_lag_attack"] },
+        },
+
+        // ── Bosses ─────────────────────────────────────────────────────────
+
+        enemy_slime_boss: {
+          id: "enemy_slime_boss",
+          imageUrl: "slime.png",
+          identity: { name: "Slime Boss", type: "boss", startingHealth: 140, startingBlock: 0 },
+          moves: [
+            {
+              id: "move_sb_slam", name: "Slam",
+              effects: [{ id: "eff_sb_slam", effectType: "damage", baseValue: 35, target: "player", repeat: 1 }],
+            },
+            {
+              id: "move_sb_split", name: "Split",
+              effects: [{ id: "eff_sb_split", effectType: "damage", baseValue: 18, target: "player", repeat: 1 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_sb_slam", "move_sb_split", "move_sb_slam"] },
+        },
+
+        enemy_hexaghost: {
+          id: "enemy_hexaghost",
+          imageUrl: "cultist.png",
+          identity: { name: "Hexaghost", type: "boss", startingHealth: 250, startingBlock: 0 },
+          moves: [
+            {
+              id: "move_hg_activate", name: "Activate",
+              effects: [],
+            },
+            {
+              id: "move_hg_inferno", name: "Inferno",
+              effects: [{ id: "eff_hg_inferno", effectType: "damage", baseValue: 6, target: "player", repeat: 6 }],
+            },
+            {
+              id: "move_hg_divider", name: "Divider",
+              effects: [{ id: "eff_hg_divider", effectType: "damage", baseValue: 4, target: "player", repeat: 3 }],
+            },
+          ],
+          behavior: { behaviorType: "cycle", cycleOrder: ["move_hg_activate", "move_hg_inferno", "move_hg_divider", "move_hg_inferno"] },
         },
       },
+
       allIds: [
-        "enemy_1771490203678",
-        "enemy_a69783db-f913-4ab1-8b4a-fff313c87298",
+        "enemy_slime", "enemy_jaw_worm", "enemy_green_louse", "enemy_spike_slime",
+        "enemy_cultist", "enemy_gremlin_nob", "enemy_lagavulin",
+        "enemy_slime_boss", "enemy_hexaghost",
       ],
     },
   },
 
-  /**
-   * -------------------------------------------------------
-   * PROJECT MODE STATE
-   * -------------------------------------------------------
-   */
+  // ─────────────────────────────────────────────────────────────────────────
+  // PROJECT MODE STATE
+  // ─────────────────────────────────────────────────────────────────────────
 
   project: {
     selectedNode: { kind: "project", projectId: "p1" },
@@ -426,7 +481,7 @@ export const initialState = {
       "project:p1": true,
       "project:p1:pools": true,
       "project:p1:characters": true,
-      "project:p1:acts": false,
+      "project:p1:acts": true,
       "character:c1": true,
     },
 
@@ -434,38 +489,34 @@ export const initialState = {
       byId: {
         p1: {
           id: "p1",
-          name: "Demo Project",
+          name: "Demo — Ironclad Run",
 
           pools: {
-            potions: [
-              "potion_1771488136617",
-              "potion_1771488167978",
-              "potion_93cebb76-2f10-4933-969c-b308e1e21847",
-              "potion_5ff3cfa1-ba2c-4b42-9df0-2b92b0b39657",
-            ],
+            potions: ["potion_fire", "potion_life", "potion_block", "potion_strength"],
             enemies: [
-              "enemy_1771490203678",
-              "enemy_a69783db-f913-4ab1-8b4a-fff313c87298",
+              "enemy_slime", "enemy_jaw_worm", "enemy_green_louse", "enemy_spike_slime",
+              "enemy_cultist", "enemy_gremlin_nob", "enemy_lagavulin",
+              "enemy_slime_boss", "enemy_hexaghost",
             ],
           },
 
           acts: {
             1: {
-              basics: ["enemy_a69783db-f913-4ab1-8b4a-fff313c87298"],
-              elites: ["enemy_1771490203678"],
-              bosses: [],
+              basics: ["enemy_slime", "enemy_jaw_worm", "enemy_green_louse", "enemy_spike_slime"],
+              elites: ["enemy_cultist", "enemy_gremlin_nob"],
+              bosses: ["enemy_slime_boss"],
               events: [],
             },
             2: {
-              basics: ["enemy_a69783db-f913-4ab1-8b4a-fff313c87298"],
-              elites: ["enemy_1771490203678"],
-              bosses: [],
+              basics: ["enemy_jaw_worm", "enemy_spike_slime"],
+              elites: ["enemy_gremlin_nob", "enemy_lagavulin"],
+              bosses: ["enemy_hexaghost"],
               events: [],
             },
             3: {
-              basics: ["enemy_a69783db-f913-4ab1-8b4a-fff313c87298"],
-              elites: ["enemy_1771490203678"],
-              bosses: [],
+              basics: ["enemy_green_louse", "enemy_slime"],
+              elites: ["enemy_cultist", "enemy_lagavulin"],
+              bosses: ["enemy_slime_boss", "enemy_hexaghost"],
               events: [],
             },
           },
@@ -481,23 +532,35 @@ export const initialState = {
         c1: {
           id: "c1",
           projectId: "p1",
-          name: "Hero",
+          name: "Ironclad",
           imageUrl: "hero.png",
-          startingRelicId: "relic_1771486391539",
+          startingRelicId: "relic_burning_blood",
+
+          // Classic Ironclad starting deck: 5 Strike, 4 Defend, 1 Bash
           startingDeck: [
-            { cardId: "card_1771487222033", count: 5 },
-            { cardId: "card_1771487395298", count: 1 },
-            { cardId: "card_eb2b2181-1d2e-4d5f-b808-8a284a098435", count: 5 },
+            { cardId: "card_strike", count: 5 },
+            { cardId: "card_defend", count: 4 },
+            { cardId: "card_bash",   count: 1 },
           ],
+
+          // Full card pool available for rewards
           cardPool: [
-            "card_1771487222033",
-            "card_1771487395298",
-            "card_1771487466006",
-            "card_1771554405482",
-            "card_eb2b2181-1d2e-4d5f-b808-8a284a098435",
-            "card_9a891ebb-46f7-4501-9064-4588b1a6325d",
+            "card_strike", "card_defend", "card_bash",
+            "card_headbutt", "card_pommel_strike", "card_wild_strike",
+            "card_twin_strike", "card_sword_boomerang", "card_thunderclap",
+            "card_clothesline", "card_reckless_charge",
+            "card_shrug_it_off", "card_true_grit", "card_armaments",
+            "card_flex", "card_seeing_red",
+            "card_inflame", "card_battle_trance", "card_carnage",
+            "card_pummel", "card_second_wind", "card_block_pile", "card_whirlwind",
           ],
-          relicPool: ["relic_1771486391539"],
+
+          relicPool: [
+            "relic_burning_blood",
+            "relic_orichalcum",
+            "relic_philosophers_stone",
+            "relic_bag_of_prep",
+          ],
         },
       },
       allIds: ["c1"],

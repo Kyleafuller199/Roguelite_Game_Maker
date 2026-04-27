@@ -85,12 +85,21 @@ export default function ProjectNodeInspector({ project, state, actions }) {
       ...(act.basics ?? []), ...(act.elites ?? []), ...(act.bosses ?? []),
     ])
   ).size;
-  const hasDeck   = (firstChar?.startingDeck?.length ?? 0) > 0;
-  const canStart  = !!firstChar && hasDeck;
+  const hasDeck        = (firstChar?.startingDeck?.length ?? 0) > 0;
+  const hasCharImg     = !!firstChar?.imageUrl;
+  const act1           = project.acts?.["1"] ?? {};
+  const act1EnemyIds   = [...(act1.basics ?? []), ...(act1.elites ?? [])];
+  const hasAct1Enemies = act1EnemyIds.length > 0;
+  const enemiesHaveImg = act1EnemyIds.every(id => !!state.assets.enemies.byId[id]?.imageUrl);
+
+  const canStart = !!firstChar && hasCharImg && hasDeck && hasAct1Enemies && enemiesHaveImg;
 
   const hints = [];
-  if (!firstChar) hints.push("Add at least one character");
-  else if (!hasDeck) hints.push("Character needs a starting deck");
+  if (!firstChar)          hints.push("Add at least one character");
+  else if (!hasCharImg)    hints.push("Character needs a sprite image");
+  else if (!hasDeck)       hints.push("Character needs a starting deck");
+  if (!hasAct1Enemies)     hints.push("Act 1 needs at least one enemy assigned");
+  else if (!enemiesHaveImg) hints.push("All Act 1 enemies need a sprite image set");
 
   function handleExport() {
     const payload = buildRunPayload(state, project.id);

@@ -121,9 +121,14 @@ export default function Play() {
 
   // Called by "← Map" during active combat — preserves game state so the
   // player can return to the same fight by clicking the red node on the map.
+  // If the fight is already over (outcome set), just clear and return normally.
   function pauseCombat() {
-    setMidCombat(true);
-    setScreen("map");
+    if (outcome) {
+      returnToMap();
+    } else {
+      setMidCombat(true);
+      setScreen("map");
+    }
   }
 
   // Called on victory, defeat, or leaving a non-combat node — clears everything.

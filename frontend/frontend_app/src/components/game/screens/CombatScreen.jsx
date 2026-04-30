@@ -11,6 +11,8 @@ export default function CombatScreen({
   outcome,
   drawCount,
   discardCount,
+  drawPile,
+  discardPile,
   onPlayCard,
   onEndTurn,
   onBack,
@@ -63,7 +65,9 @@ export default function CombatScreen({
       <div style={{
         flex: 1, position: "relative", zIndex: 2,
         display: "flex", alignItems: "flex-end",
-        padding: "0 80px 20px",
+        justifyContent: "center",
+        padding: "0 40px 20px",
+        gap: 280,
       }}>
         {/* Player — left */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -80,12 +84,10 @@ export default function CombatScreen({
           <img
             src={`${API_BASE}/api/assets/file/?path=playable_characters/${charImg}`}
             alt=""
-            style={styles.sprite}
+            style={{ ...styles.sprite, maxWidth: 360, maxHeight: 440 }}
             onError={e => { e.target.style.display = "none"; }}
           />
         </div>
-
-        <div style={{ flex: 1 }} />
 
         {/* Monster — right */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
@@ -147,8 +149,8 @@ export default function CombatScreen({
 
       {/* Hand */}
       <div style={{ ...styles.hand, position: "relative", zIndex: 2 }}>
-        <CardPile label="Draw" count={drawCount} />
-        <div style={styles.cardRow}>
+        <CardPile label="Draw" count={drawCount} cards={drawPile} />
+        <div style={{ ...styles.cardRow, justifyContent: "center" }}>
           {(player?.hand ?? []).map((card) => (
             <CombatCard
               key={card.index}
@@ -161,7 +163,7 @@ export default function CombatScreen({
             <span style={{ color: "#555", fontSize: 13, alignSelf: "center" }}>No cards in hand</span>
           )}
         </div>
-        <CardPile label="Discard" count={discardCount} faded />
+        <CardPile label="Discard" count={discardCount} cards={discardPile} faded />
         <button onClick={onEndTurn} style={styles.endTurnBtn}>
           End<br />Turn
         </button>

@@ -3,9 +3,9 @@
 export const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 export const SCENE_BG = {
-  battle:   "scenes/battle/battle.png",
-  elite:    "scenes/battle/elite.png",
-  boss:     "scenes/battle/boss.png",
+  battle:   "scenes/battle/combat.png",
+  elite:    "scenes/battle/combat.png",
+  boss:     "scenes/battle/combat.png",
   rest:     "scenes/rest/rest.png",
   treasure: "scenes/treasure/treasure.png",
   event:    "scenes/treasure/treasure.png", // placeholder until an event scene is added
@@ -42,11 +42,10 @@ export const styles = {
     borderRadius: 6, padding: "2px 8px",
   },
   sprite: {
-    maxWidth: 180, maxHeight: 220, objectFit: "contain",
+    maxWidth: 270, maxHeight: 330, objectFit: "contain",
   },
   hand: {
-    height: 160, background: "rgba(0,0,0,0.7)",
-    borderTop: "1px solid rgba(255,255,255,0.07)",
+    height: 220, background: "transparent",
     display: "flex", alignItems: "center", padding: "0 16px", gap: 10, flexShrink: 0,
   },
   cardRow: {

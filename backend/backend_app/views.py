@@ -30,12 +30,20 @@ class Card:
     changing any game logic files.
     """
     def __init__(self, data):
-        self.id      = data.get('id', '')
-        self.name    = data.get('name', '')
-        self.cost    = data.get('cost', 0)
-        self.type    = data.get('type', 'Attack')
-        self.rarity  = data.get('rarity', 'Common')
-        self.effects = data.get('effects', [])
+        self.id       = data.get('id', '')
+        self.name     = data.get('name', '')
+        self.cost     = data.get('cost', 0)
+        self.type     = data.get('type', 'Attack')
+        self.rarity   = data.get('rarity', 'Common')
+        self.effects  = data.get('effects', [])
+        self.imageUrl = data.get('imageUrl', '')
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'name': self.name, 'cost': self.cost,
+            'type': self.type, 'rarity': self.rarity,
+            'effects': self.effects, 'imageUrl': self.imageUrl,
+        }
 
 
 @require_http_methods(['GET'])
@@ -229,9 +237,8 @@ def enter_node(request):
         state = game.get_state()
         _inject_intent(game, state)
         return JsonResponse({
-            'state':         state,
-            'draw_count':    len(game.player.deck),
-            'discard_count': len(game._discard),
+            'state': state,
+            **_pile_data(game),
             'monster_info': {
                 'id':        enemy_id,
                 'name':      monster_data['identity']['name'],
@@ -286,13 +293,7 @@ def play_card(request):
     state = game.get_state()
     _inject_intent(game, state)
     outcome = _check_outcome(game)
-    return JsonResponse({
-        'result':        result,
-        'state':         state,
-        'outcome':       outcome,
-        'draw_count':    len(game.player.deck),
-        'discard_count': len(game._discard),
-    })
+    return JsonResponse({'result': result, 'state': state, 'outcome': outcome, **_pile_data(game)})
 
 
 @csrf_exempt
@@ -338,13 +339,7 @@ def end_turn(request):
     state = game.get_state()
     _inject_intent(game, state)
     outcome = _check_outcome(game)
-    return JsonResponse({
-        'result':        result,
-        'state':         state,
-        'outcome':       outcome,
-        'draw_count':    len(game.player.deck),
-        'discard_count': len(game._discard),
-    })
+    return JsonResponse({'result': result, 'state': state, 'outcome': outcome, **_pile_data(game)})
 
 
 def _patch_draw_card(game):
@@ -365,6 +360,17 @@ def _patch_draw_card(game):
         if player.deck and len(player.hand) < player.max_hand_size:
             player.hand.append(player.deck.pop(0))
     player.draw_card = draw_card
+
+
+def _pile_data(game):
+    """Returns serialized draw and discard piles for the frontend."""
+    serialize = lambda cards: [c.to_dict() for c in cards if hasattr(c, 'to_dict')]
+    return {
+        'draw_count':   len(game.player.deck),
+        'discard_count': len(game._discard),
+        'draw_pile':    serialize(game.player.deck),
+        'discard_pile': serialize(game._discard),
+    }
 
 
 def _inject_intent(game, state):

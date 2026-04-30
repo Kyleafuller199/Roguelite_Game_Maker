@@ -19,6 +19,8 @@ export default function Play() {
   const [outcome,       setOutcome]       = useState(null);
   const [drawCount,     setDrawCount]     = useState(0);
   const [discardCount,  setDiscardCount]  = useState(0);
+  const [drawPile,      setDrawPile]      = useState([]);
+  const [discardPile,   setDiscardPile]   = useState([]);
   const [screen,        setScreen]        = useState("loading");
   const [error,         setError]         = useState(
     () => sessionStorage.getItem("runPayload")
@@ -63,10 +65,12 @@ export default function Play() {
         setVisitedIds(prev => new Set([...prev, node.id]));
         setActiveNode(node);
 
-        const { state, monster_info, draw_count, discard_count } = data;
+        const { state, monster_info, draw_count, discard_count, draw_pile, discard_pile } = data;
         setGameState(state);
         if (draw_count    !== undefined) setDrawCount(draw_count);
         if (discard_count !== undefined) setDiscardCount(discard_count);
+        if (draw_pile)    setDrawPile(draw_pile);
+        if (discard_pile) setDiscardPile(discard_pile);
         if (monster_info) setMonsterInfo(monster_info);
 
         if (state.game_state === "scene") {
@@ -89,6 +93,8 @@ export default function Play() {
         setGameState(data.state);
         setDrawCount(data.draw_count ?? 0);
         setDiscardCount(data.discard_count ?? 0);
+        if (data.draw_pile)    setDrawPile(data.draw_pile);
+        if (data.discard_pile) setDiscardPile(data.discard_pile);
         if (data.outcome) setOutcome(data.outcome);
       })
       .catch(() => setError("Failed to play card."));
@@ -105,6 +111,8 @@ export default function Play() {
         setGameState(data.state);
         setDrawCount(data.draw_count ?? 0);
         setDiscardCount(data.discard_count ?? 0);
+        if (data.draw_pile)    setDrawPile(data.draw_pile);
+        if (data.discard_pile) setDiscardPile(data.discard_pile);
         if (data.outcome) setOutcome(data.outcome);
       })
       .catch(() => setError("Failed to end turn."));
@@ -118,6 +126,8 @@ export default function Play() {
     setMonsterInfo(null);
     setDrawCount(0);
     setDiscardCount(0);
+    setDrawPile([]);
+    setDiscardPile([]);
   }
 
   // ── Error ─────────────────────────────────────────────────────────────────
@@ -164,6 +174,8 @@ export default function Play() {
         outcome={outcome}
         drawCount={drawCount}
         discardCount={discardCount}
+        drawPile={drawPile}
+        discardPile={discardPile}
         onPlayCard={handlePlayCard}
         onEndTurn={handleEndTurn}
         onBack={returnToMap}

@@ -25,9 +25,10 @@ const NAV_ITEMS = [
 /**
  * AppHeader
  *
- * @param {string} title - Title displayed on the left side of the header
+ * @param {string}    title       - Title displayed on the left side of the header
+ * @param {ReactNode} rightAction - Optional element rendered to the right of nav items
  */
-export default function AppHeader({ title }) {
+export default function AppHeader({ title, rightAction }) {
   return (
     <div
       style={{
@@ -36,6 +37,8 @@ export default function AppHeader({ title }) {
         alignItems: "center",
         padding: "0 16px",
         boxSizing: "border-box",
+        backgroundColor: "#383838",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}
     >
       <h1
@@ -43,6 +46,7 @@ export default function AppHeader({ title }) {
           fontSize: 20,
           fontWeight: 600,
           margin: 0,
+          color: "#ffffff",
         }}
       >
         {title}
@@ -53,6 +57,7 @@ export default function AppHeader({ title }) {
           display: "flex",
           gap: 12,
           marginLeft: "auto",
+          alignItems: "center",
         }}
       >
         {NAV_ITEMS.map((item) => (
@@ -67,6 +72,7 @@ export default function AppHeader({ title }) {
             {item.label}
           </NavLink>
         ))}
+        {rightAction}
       </nav>
     </div>
   );

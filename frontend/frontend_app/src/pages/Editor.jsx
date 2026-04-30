@@ -14,8 +14,11 @@
  *   Right → Inspector panel
  */
 
+import { useState } from "react";
+
 import ThreeColumnLayout from "@/layouts/ThreeColumnLayout";
 import AppHeader from "@/components/AppHeader";
+import Onboarding, { shouldShowOnboarding } from "@/components/Onboarding";
 
 import { EditorProvider } from "@/state/editor/EditorState";
 import EditorSidebar from "@/components/editor/sidebar/EditorSidebar";
@@ -32,10 +35,37 @@ import EditorCanvas from "@/components/editor/canvas/EditorCanvas";
  * share the same editor state context.
  */
 export default function Editor() {
+  // Show onboarding automatically on first visit; can be reopened via the ? button
+  const [showOnboarding, setShowOnboarding] = useState(shouldShowOnboarding);
+
   return (
     <EditorProvider>
+      {showOnboarding && (
+        <Onboarding onClose={() => setShowOnboarding(false)} />
+      )}
+
       <ThreeColumnLayout
-        header={<AppHeader title="Editor" />}
+        header={
+          <AppHeader
+            title="Editor"
+            rightAction={
+              <button
+                onClick={() => setShowOnboarding(true)}
+                title="Open guide"
+                style={{
+                  background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  borderRadius: 6, color: "#888",
+                  width: 28, height: 28,
+                  cursor: "pointer", fontSize: 14,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}
+              >
+                ?
+              </button>
+            }
+          />
+        }
         left={<EditorSidebar />}
         right={<EditorInspector />}
       >

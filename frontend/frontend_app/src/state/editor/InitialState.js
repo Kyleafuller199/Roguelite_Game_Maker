@@ -300,7 +300,7 @@ export const initialState = {
 
         enemy_jaw_worm: {
           id: "enemy_jaw_worm",
-          imageUrl: "slime.png",
+          imageUrl: "jaw-worm.png",
           identity: { name: "Jaw Worm", type: "basic", startingHealth: 42, startingBlock: 0 },
           moves: [
             {
@@ -324,7 +324,7 @@ export const initialState = {
 
         enemy_green_louse: {
           id: "enemy_green_louse",
-          imageUrl: "slime.png",
+          imageUrl: "louse.png",
           identity: { name: "Green Louse", type: "basic", startingHealth: 12, startingBlock: 0 },
           moves: [
             {
@@ -341,7 +341,7 @@ export const initialState = {
 
         enemy_spike_slime: {
           id: "enemy_spike_slime",
-          imageUrl: "slime.png",
+          imageUrl: "spike-slime.png",
           identity: { name: "Spike Slime", type: "basic", startingHealth: 28, startingBlock: 0 },
           moves: [
             {
@@ -380,7 +380,7 @@ export const initialState = {
 
         enemy_gremlin_nob: {
           id: "enemy_gremlin_nob",
-          imageUrl: "cultist.png",
+          imageUrl: "gremlin-nob.png",
           identity: { name: "Gremlin Nob", type: "elite", startingHealth: 82, startingBlock: 0 },
           moves: [
             {
@@ -400,7 +400,7 @@ export const initialState = {
 
         enemy_lagavulin: {
           id: "enemy_lagavulin",
-          imageUrl: "cultist.png",
+          imageUrl: "lagavulin.png",
           identity: { name: "Lagavulin", type: "elite", startingHealth: 109, startingBlock: 8 },
           moves: [
             {
@@ -425,7 +425,7 @@ export const initialState = {
 
         enemy_slime_boss: {
           id: "enemy_slime_boss",
-          imageUrl: "slime.png",
+          imageUrl: "slime-boss.png",
           identity: { name: "Slime Boss", type: "boss", startingHealth: 140, startingBlock: 0 },
           moves: [
             {
@@ -442,7 +442,7 @@ export const initialState = {
 
         enemy_hexaghost: {
           id: "enemy_hexaghost",
-          imageUrl: "cultist.png",
+          imageUrl: "hexaghost.png",
           identity: { name: "Hexaghost", type: "boss", startingHealth: 250, startingBlock: 0 },
           moves: [
             {

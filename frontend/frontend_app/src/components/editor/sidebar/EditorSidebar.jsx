@@ -55,7 +55,7 @@ function AssetSection({
   onSelect,
   getItemLabel,
 }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <CollapsibleSection

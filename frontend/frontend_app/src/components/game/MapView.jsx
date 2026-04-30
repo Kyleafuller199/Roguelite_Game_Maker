@@ -28,7 +28,7 @@ function fy(y) {
   return MAP_H - y;
 }
 
-export default function MapView({ mapData, currentNodeId, visitedIds = new Set(), onNodeClick }) {
+export default function MapView({ mapData, currentNodeId, visitedIds = new Set(), onNodeClick, midCombatNodeId = null }) {
   if (!mapData) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#555" }}>
@@ -82,11 +82,17 @@ export default function MapView({ mapData, currentNodeId, visitedIds = new Set()
 
       {/* Nodes */}
       {nodes.map(node => {
-        const isVisited   = visitedIds.has(node.id);
-        const isCurrent   = node.id === currentNodeId;
-        const isReachable = reachableIds.has(node.id);
-        const isClickable = isReachable && !isVisited;
-        const dy          = fy(node.y);
+        const isVisited      = visitedIds.has(node.id);
+        const isCurrent      = node.id === currentNodeId;
+        const isReachable    = reachableIds.has(node.id);
+        const isMidCombat    = midCombatNodeId !== null && node.id === midCombatNodeId;
+
+        // In mid-combat mode only the paused node is clickable; otherwise normal rules apply
+        const isClickable = midCombatNodeId !== null
+          ? isMidCombat
+          : isReachable && !isVisited;
+
+        const dy = fy(node.y);
 
         return (
           <g
@@ -94,8 +100,19 @@ export default function MapView({ mapData, currentNodeId, visitedIds = new Set()
             onClick={() => isClickable && onNodeClick(node)}
             style={{ cursor: isClickable ? "pointer" : "default" }}
           >
-            {/* Glow ring on clickable nodes so the player knows what they can pick */}
-            {isClickable && (
+            {/* Red pulsing ring on the paused combat node */}
+            {isMidCombat && (
+              <circle
+                cx={node.x} cy={dy} r={38}
+                fill="none"
+                stroke="rgba(220,50,50,0.9)"
+                strokeWidth={3}
+                strokeDasharray="6 3"
+              />
+            )}
+
+            {/* Gold glow ring on normally reachable nodes */}
+            {isClickable && !isMidCombat && (
               <circle
                 cx={node.x} cy={dy} r={34}
                 fill="none"
@@ -121,7 +138,12 @@ export default function MapView({ mapData, currentNodeId, visitedIds = new Set()
               y={dy       - ICON_SIZE / 2}
               width={ICON_SIZE}
               height={ICON_SIZE}
-              opacity={isVisited ? 0.2 : isReachable || isCurrent ? 1 : 0.35}
+              opacity={
+                isVisited   ? 0.2 :
+                isMidCombat ? 1 :
+                midCombatNodeId !== null ? 0.2 :
+                isReachable || isCurrent ? 1 : 0.35
+              }
             />
 
             {/* Node type label */}

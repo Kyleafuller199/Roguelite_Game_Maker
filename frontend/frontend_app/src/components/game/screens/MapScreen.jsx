@@ -1,7 +1,7 @@
 import MapView from "@/components/game/MapView";
 import { styles } from "@/components/game/shared/gameStyles";
 
-export default function MapScreen({ mapData, currentNodeId, visitedIds, onNodeClick, onBack }) {
+export default function MapScreen({ mapData, currentNodeId, visitedIds, onNodeClick, onBack, midCombatNodeId }) {
   return (
     <div style={styles.page}>
       <div style={styles.topBar}>
@@ -14,6 +14,7 @@ export default function MapScreen({ mapData, currentNodeId, visitedIds, onNodeCl
           currentNodeId={currentNodeId}
           visitedIds={visitedIds}
           onNodeClick={onNodeClick}
+          midCombatNodeId={midCombatNodeId}
         />
       </div>
     </div>

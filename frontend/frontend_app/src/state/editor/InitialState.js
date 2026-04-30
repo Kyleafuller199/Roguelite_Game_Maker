@@ -478,11 +478,11 @@ export const initialState = {
     selectedNode: { kind: "project", projectId: "p1" },
 
     expanded: {
-      "project:p1": true,
-      "project:p1:pools": true,
-      "project:p1:characters": true,
-      "project:p1:acts": true,
-      "character:c1": true,
+      "project:p1": false,
+      "project:p1:pools": false,
+      "project:p1:characters": false,
+      "project:p1:acts": false,
+      "character:c1": false,
     },
 
     projects: {

@@ -17,6 +17,7 @@ export default function Play() {
   const [monsterInfo,   setMonsterInfo]   = useState(null);
   const [activeNode,    setActiveNode]    = useState(null);
   const [outcome,       setOutcome]       = useState(null);
+  const [midCombat,     setMidCombat]     = useState(false);
   const [drawCount,     setDrawCount]     = useState(0);
   const [discardCount,  setDiscardCount]  = useState(0);
   const [drawPile,      setDrawPile]      = useState([]);
@@ -118,7 +119,16 @@ export default function Play() {
       .catch(() => setError("Failed to end turn."));
   }
 
+  // Called by "← Map" during active combat — preserves game state so the
+  // player can return to the same fight by clicking the red node on the map.
+  function pauseCombat() {
+    setMidCombat(true);
+    setScreen("map");
+  }
+
+  // Called on victory, defeat, or leaving a non-combat node — clears everything.
   function returnToMap() {
+    setMidCombat(false);
     setScreen("map");
     setOutcome(null);
     setActiveNode(null);
@@ -128,6 +138,14 @@ export default function Play() {
     setDiscardCount(0);
     setDrawPile([]);
     setDiscardPile([]);
+  }
+
+  // Called when the player clicks the red mid-combat node to resume the fight.
+  function resumeCombat(node) {
+    if (node.id === activeNode?.id) {
+      setMidCombat(false);
+      setScreen("combat");
+    }
   }
 
   // ── Error ─────────────────────────────────────────────────────────────────
@@ -159,8 +177,9 @@ export default function Play() {
         mapData={mapData}
         currentNodeId={currentNodeId}
         visitedIds={visitedIds}
-        onNodeClick={handleNodeClick}
+        onNodeClick={midCombat ? resumeCombat : handleNodeClick}
         onBack={() => navigate("/editor")}
+        midCombatNodeId={midCombat ? activeNode?.id : null}
       />
     );
   }
@@ -178,7 +197,7 @@ export default function Play() {
         discardPile={discardPile}
         onPlayCard={handlePlayCard}
         onEndTurn={handleEndTurn}
-        onBack={returnToMap}
+        onBack={pauseCombat}
       />
     );
   }

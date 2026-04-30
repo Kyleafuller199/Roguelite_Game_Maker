@@ -28,7 +28,7 @@ import {
 /** sectionBody with gap removed — inspector form fields carry their own margins. */
 const inspectorBodyStyle = { ...sectionBody, gap: 0 };
 
-export default function InspectorSection({ title, action, children, defaultOpen = true }) {
+export default function InspectorSection({ title, action, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (

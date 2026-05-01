@@ -18,7 +18,12 @@ import { useState } from "react";
 
 import ThreeColumnLayout from "@/layouts/ThreeColumnLayout";
 import AppHeader from "@/components/AppHeader";
-import Onboarding, { shouldShowOnboarding } from "@/components/Onboarding";
+import Onboarding, { ONBOARDING_KEY } from "@/components/Onboarding";
+
+// Returns true if the user has never seen the onboarding modal
+function shouldShowOnboarding() {
+  return !localStorage.getItem(ONBOARDING_KEY);
+}
 
 import { EditorProvider } from "@/state/editor/EditorState";
 import EditorSidebar from "@/components/editor/sidebar/EditorSidebar";

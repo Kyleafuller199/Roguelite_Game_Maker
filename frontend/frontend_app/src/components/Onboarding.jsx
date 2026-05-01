@@ -1,16 +1,31 @@
+/**
+ * Onboarding.jsx
+ *
+ * 5-step first-time tutorial modal that appears when a user opens the
+ * editor for the first time. Explains assets, projects, and gameplay.
+ *
+ * Behaviour:
+ *   - Auto-shown on first visit using a localStorage flag
+ *   - Can be skipped at any step (Skip button always visible)
+ *   - Next / Back navigate between steps
+ *   - Dismissing sets localStorage so it doesn't appear again
+ *   - Reopenable at any time via the ? button in the editor header
+ */
+
 import { useState } from "react";
 
+// ── Step content ──────────────────────────────────────────────────────────────
+// Each step has a title, icon, and multi-line content string.
+// Add or edit steps here to update the onboarding flow.
 const STEPS = [
   {
     title: "Welcome to Roguelite Game Maker",
-    icon: "🎮",
     content:
       "This tool lets you design, configure, and play-test your own roguelite card game — no coding required. " +
       "In just a few steps we'll show you how everything fits together.",
   },
   {
     title: "Step 1 — Create Assets",
-    icon: "🃏",
     content:
       "Assets are the building blocks of your game. Use the editor to create:\n\n" +
       "• Cards — attacks, skills, and powers with effects like damage, block, and healing\n" +
@@ -21,7 +36,6 @@ const STEPS = [
   },
   {
     title: "Step 2 — Build a Project",
-    icon: "📋",
     content:
       "A project combines your assets into a complete playable game. Switch to Project mode in the sidebar to:\n\n" +
       "• Create a character with a starting deck and relic\n" +
@@ -31,7 +45,6 @@ const STEPS = [
   },
   {
     title: "Step 3 — Play Your Game",
-    icon: "⚔️",
     content:
       "When your project is ready, click Start Run in the project inspector. This launches the in-browser game:\n\n" +
       "• Navigate a procedurally generated map\n" +
@@ -42,7 +55,6 @@ const STEPS = [
   },
   {
     title: "You're ready to go!",
-    icon: "🚀",
     content:
       "The editor is pre-loaded with a full demo project — the Ironclad Run — so you can start playing immediately.\n\n" +
       "To try it:\n" +
@@ -53,17 +65,16 @@ const STEPS = [
   },
 ];
 
-const STORAGE_KEY = "onboarding_seen";
+// ── localStorage persistence ──────────────────────────────────────────────────
+export const ONBOARDING_KEY = "onboarding_seen";
 
-export function shouldShowOnboarding() {
-  return !localStorage.getItem(STORAGE_KEY);
-}
-
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function Onboarding({ onClose }) {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(0); // which step is currently shown
 
+  // Mark as seen and close — called by Skip or Get Started
   function dismiss() {
-    localStorage.setItem(STORAGE_KEY, "true");
+    localStorage.setItem(ONBOARDING_KEY, "true");
     onClose();
   }
 
@@ -72,12 +83,14 @@ export default function Onboarding({ onClose }) {
   const isFirst = step === 0;
 
   return (
+    // Full-screen overlay
     <div style={{
       position: "fixed", inset: 0, zIndex: 1000,
       background: "rgba(0,0,0,0.7)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: "Inter, sans-serif",
     }}>
+      {/* Modal card */}
       <div style={{
         background: "#1a1918",
         border: "1px solid rgba(255,255,255,0.1)",
@@ -91,7 +104,7 @@ export default function Onboarding({ onClose }) {
         boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
       }}>
 
-        {/* Step dots */}
+        {/* Step progress dots — active step is wider and green */}
         <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
           {STEPS.map((_, i) => (
             <div key={i} style={{
@@ -103,25 +116,23 @@ export default function Onboarding({ onClose }) {
           ))}
         </div>
 
-        {/* Icon + title */}
+        {/* Icon and title for the current step */}
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>{current.icon}</div>
+          <div style={{ fontSize: 40, marginBottom: 12 }}></div>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#e5e5e5" }}>
             {current.title}
           </h2>
         </div>
 
-        {/* Content */}
-        <p style={{
-          margin: 0, fontSize: 14, color: "#aaa",
-          lineHeight: 1.7, whiteSpace: "pre-line",
-        }}>
+        {/* Step content (multi-line, uses \n for line breaks) */}
+        <p style={{ margin: 0, fontSize: 14, color: "#aaa", lineHeight: 1.7, whiteSpace: "pre-line" }}>
           {current.content}
         </p>
 
-        {/* Buttons */}
+        {/* Navigation buttons: Skip (left) | Back | Next / Get Started */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-          {/* Skip — always visible */}
+
+          {/* Skip — always shown, dismisses without completing all steps */}
           <button
             onClick={dismiss}
             style={{
@@ -135,7 +146,7 @@ export default function Onboarding({ onClose }) {
             Skip
           </button>
 
-          {/* Back */}
+          {/* Back — hidden on first step */}
           {!isFirst && (
             <button
               onClick={() => setStep(s => s - 1)}
@@ -150,7 +161,7 @@ export default function Onboarding({ onClose }) {
             </button>
           )}
 
-          {/* Next / Get Started */}
+          {/* Next on all steps except the last; Get Started on the last */}
           <button
             onClick={isLast ? dismiss : () => setStep(s => s + 1)}
             style={{

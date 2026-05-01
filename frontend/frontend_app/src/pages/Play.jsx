@@ -1,37 +1,63 @@
+/**
+ * Play.jsx
+ *
+ * Root of the in-browser game loop. Owns all game state and decides
+ * which screen to show (map, combat, rest, treasure, event).
+ *
+ * Flow:
+ *   Editor → "Start Run" saves payload to sessionStorage → /play loads
+ *   → creates a backend game session → fetches the map → shows MapScreen
+ *   → player clicks a node → shows the appropriate screen
+ *   → combat ends / continue → back to MapScreen
+ */
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { API_BASE, styles } from "@/components/game/shared/gameStyles";
-import MapScreen     from "@/components/game/screens/MapScreen";
-import CombatScreen  from "@/components/game/screens/CombatScreen";
-import RestScreen    from "@/components/game/screens/RestScreen";
+import MapScreen      from "@/components/game/screens/MapScreen";
+import CombatScreen   from "@/components/game/screens/CombatScreen";
+import RestScreen     from "@/components/game/screens/RestScreen";
 import TreasureScreen from "@/components/game/screens/TreasureScreen";
-import EventScreen   from "@/components/game/screens/EventScreen";
+import EventScreen    from "@/components/game/screens/EventScreen";
 
 export default function Play() {
   const navigate = useNavigate();
 
+  // ── Game session & map ────────────────────────────────────────────────────
+  // sessionId ties every action to a live GameState on the backend
   const [sessionId,     setSessionId]     = useState(null);
-  const [mapData,       setMapData]       = useState(null);
-  const [gameState,     setGameState]     = useState(null);
-  const [monsterInfo,   setMonsterInfo]   = useState(null);
-  const [activeNode,    setActiveNode]    = useState(null);
-  const [outcome,       setOutcome]       = useState(null);
-  const [midCombat,     setMidCombat]     = useState(false);
+  const [mapData,       setMapData]       = useState(null);   // node graph from Kyle's generator
+
+  // ── Active combat state (returned by the backend after each action) ───────
+  const [gameState,     setGameState]     = useState(null);   // player hp, hand, monster hp, energy
+  const [monsterInfo,   setMonsterInfo]   = useState(null);   // monster name, image, folder
+  const [outcome,       setOutcome]       = useState(null);   // "victory" | "defeat" | null
+
+  // ── Draw / discard piles ──────────────────────────────────────────────────
   const [drawCount,     setDrawCount]     = useState(0);
   const [discardCount,  setDiscardCount]  = useState(0);
   const [drawPile,      setDrawPile]      = useState([]);
   const [discardPile,   setDiscardPile]   = useState([]);
-  const [screen,        setScreen]        = useState("loading");
+
+  // ── Map navigation state ──────────────────────────────────────────────────
+  const [currentNodeId, setCurrentNodeId] = useState(null);  // node the player is on
+  const [visitedIds,    setVisitedIds]    = useState(new Set()); // completed nodes
+  const [activeNode,    setActiveNode]    = useState(null);   // node currently being played
+  const [midCombat,     setMidCombat]     = useState(false);  // true when player pauses mid-fight
+
+  // ── Screen routing ────────────────────────────────────────────────────────
+  const [screen,        setScreen]        = useState("loading"); // "loading"|"map"|"combat"|"rest"|"treasure"|"event"
   const [error,         setError]         = useState(
     () => sessionStorage.getItem("runPayload")
       ? null
       : "No run payload found — go back to the editor and click Start Run."
   );
-  const [currentNodeId, setCurrentNodeId] = useState(null);
-  const [visitedIds,    setVisitedIds]    = useState(new Set());
 
-  // On mount: create a backend session then fetch the map
+  // ── On mount: create backend session + fetch map ──────────────────────────
+  // 1. POST the run payload to /api/game/session/ → get session_id
+  // 2. GET /api/game/map/ → get the node graph
+  // 3. Show the map screen
   useEffect(() => {
     const raw = sessionStorage.getItem("runPayload");
     if (!raw) return;
@@ -54,6 +80,10 @@ export default function Play() {
       .catch(() => setError("Failed to connect to the backend. Is it running?"));
   }, []);
 
+  // ── Node click: enter a map node ──────────────────────────────────────────
+  // Sends the clicked node to the backend. The backend picks an enemy,
+  // starts combat via Kyle's GameState, and returns the initial game state.
+  // Routes to the correct screen based on node type and returned game_state.
   function handleNodeClick(node) {
     fetch(`${API_BASE}/api/game/node/`, {
       method: "POST",
@@ -74,15 +104,18 @@ export default function Play() {
         if (discard_pile) setDiscardPile(discard_pile);
         if (monster_info) setMonsterInfo(monster_info);
 
-        if (state.game_state === "scene") {
-          setScreen("combat");
-        } else if (node.type === "rest")     setScreen("rest");
-        else if (node.type === "treasure")   setScreen("treasure");
-        else if (node.type === "event")      setScreen("event");
+        // "scene" = Kyle's term for active combat
+        if (state.game_state === "scene") setScreen("combat");
+        else if (node.type === "rest")      setScreen("rest");
+        else if (node.type === "treasure")  setScreen("treasure");
+        else if (node.type === "event")     setScreen("event");
       })
       .catch(() => setError("Failed to enter node."));
   }
 
+  // ── Play a card ───────────────────────────────────────────────────────────
+  // Sends the card index to the backend → Kyle's engine applies effects
+  // (damage, block, heal) → returns updated state with new hp, hand, energy
   function handlePlayCard(cardIndex) {
     fetch(`${API_BASE}/api/game/play-card/`, {
       method: "POST",
@@ -101,6 +134,9 @@ export default function Play() {
       .catch(() => setError("Failed to play card."));
   }
 
+  // ── End turn ──────────────────────────────────────────────────────────────
+  // Discards hand, runs the enemy's next move via Kyle's engine,
+  // then draws a fresh hand of 5. Returns updated state.
   function handleEndTurn() {
     fetch(`${API_BASE}/api/game/end-turn/`, {
       method: "POST",
@@ -119,19 +155,19 @@ export default function Play() {
       .catch(() => setError("Failed to end turn."));
   }
 
-  // Called by "← Map" during active combat — preserves game state so the
-  // player can return to the same fight by clicking the red node on the map.
-  // If the fight is already over (outcome set), just clear and return normally.
+  // ── Map navigation helpers ────────────────────────────────────────────────
+
+  // "← Map" mid-fight: preserves combat state, shows locked map with red node
   function pauseCombat() {
     if (outcome) {
-      returnToMap();
+      returnToMap(); // fight already over — clear everything
     } else {
       setMidCombat(true);
       setScreen("map");
     }
   }
 
-  // Called on victory, defeat, or leaving a non-combat node — clears everything.
+  // Victory / defeat / non-combat continue: clears all combat state
   function returnToMap() {
     setMidCombat(false);
     setScreen("map");
@@ -145,7 +181,7 @@ export default function Play() {
     setDiscardPile([]);
   }
 
-  // Called when the player clicks the red mid-combat node to resume the fight.
+  // Clicking the red mid-combat node resumes the paused fight
   function resumeCombat(node) {
     if (node.id === activeNode?.id) {
       setMidCombat(false);
@@ -153,7 +189,7 @@ export default function Play() {
     }
   }
 
-  // ── Error ─────────────────────────────────────────────────────────────────
+  // ── Screen rendering ──────────────────────────────────────────────────────
 
   if (error) {
     return (
@@ -164,8 +200,6 @@ export default function Play() {
     );
   }
 
-  // ── Loading ───────────────────────────────────────────────────────────────
-
   if (screen === "loading") {
     return (
       <div style={styles.center}>
@@ -174,8 +208,7 @@ export default function Play() {
     );
   }
 
-  // ── Routing ───────────────────────────────────────────────────────────────
-
+  // Map: mid-combat swaps handler so only the red node is clickable
   if (screen === "map") {
     return (
       <MapScreen

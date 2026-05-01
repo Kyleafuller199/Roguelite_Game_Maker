@@ -1,3 +1,14 @@
+/**
+ * CombatScreen.jsx
+ *
+ * Renders the full combat scene for battle, elite, and boss nodes.
+ *
+ * All game state (hp, hand, energy, monster intent) comes from the backend —
+ * this component only displays what Kyle's combat engine returns.
+ * Player actions (play card, end turn) are sent back up to Play.jsx which
+ * calls the backend and passes the updated state back down as props.
+ */
+
 import { useNavigate } from "react-router-dom";
 import { API_BASE, SCENE_BG, styles } from "@/components/game/shared/gameStyles";
 import HealthBar  from "@/components/game/shared/HealthBar";
@@ -5,34 +16,42 @@ import CardPile   from "@/components/game/shared/CardPile";
 import CombatCard, { effectDesc } from "@/components/game/shared/CombatCard";
 
 export default function CombatScreen({
-  gameState,
-  monsterInfo,
-  activeNode,
-  outcome,
+  gameState,    // full state from Kyle's GameState.get_state()
+  monsterInfo,  // name, imageUrl, folder — injected by the enter_node endpoint
+  activeNode,   // the map node type (battle / elite / boss)
+  outcome,      // "victory" | "defeat" | null
   drawCount,
   discardCount,
   drawPile,
   discardPile,
-  onPlayCard,
-  onEndTurn,
-  onBack,
+  onPlayCard,   // (cardIndex) → calls /api/game/play-card/
+  onEndTurn,    // () → calls /api/game/end-turn/
+  onBack,       // pauses combat and returns to map (or clears on victory/defeat)
 }) {
   const navigate = useNavigate();
 
+  // ── Unpack Kyle's game state ──────────────────────────────────────────────
   const combat = gameState?.combat;
-  const player = combat?.player;
-  const enemy  = combat?.monster;
-  const turn   = combat?.combat;
+  const player = combat?.player;   // { health, max_health, hand, deck_count }
+  const enemy  = combat?.monster;  // { health, max_health, intent (move id) }
+  const turn   = combat?.combat;   // { energy, player_block, enemy_block }
 
-  const sceneBg       = SCENE_BG[activeNode?.type] ?? SCENE_BG.battle;
+  // ── Scene background: switches per node type (battle / elite / boss) ──────
+  const sceneBg = SCENE_BG[activeNode?.type] ?? SCENE_BG.battle;
+
+  // ── Monster display info ──────────────────────────────────────────────────
   const monsterFolder = monsterInfo?.folder ?? "basic";
   const monsterImg    = monsterInfo?.imageUrl ?? "";
   const monsterName   = monsterInfo?.name ?? "Enemy";
 
-  const payload    = JSON.parse(sessionStorage.getItem("runPayload") ?? "{}");
-  const charImg    = payload?.character?.imageUrl ?? "";
-  const charName   = payload?.character?.name ?? "Hero";
+  // ── Player display info (from the run payload saved at Start Run) ─────────
+  const payload  = JSON.parse(sessionStorage.getItem("runPayload") ?? "{}");
+  const charImg  = payload?.character?.imageUrl ?? "";
+  const charName = payload?.character?.name ?? "Hero";
 
+  // ── Enemy intent: look up the move the enemy will use this turn ───────────
+  // intent is a move ID returned by the backend — we find the full move object
+  // from the run payload's enemyMap so we can display the name and effects
   const intentId   = enemy?.intent;
   const enemyData  = payload?.enemyMap?.[monsterInfo?.id];
   const intentMove = enemyData?.moves?.find(m => m.id === intentId) ?? null;
@@ -40,7 +59,7 @@ export default function CombatScreen({
   return (
     <div style={{ ...styles.page, position: "relative" }}>
 
-      {/* Scene background */}
+      {/* ── Scene background + dark overlay ──────────────────────────────── */}
       <img
         src={`${API_BASE}/api/assets/file/?path=${sceneBg}`}
         alt=""
@@ -48,7 +67,7 @@ export default function CombatScreen({
       />
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1 }} />
 
-      {/* Top bar */}
+      {/* ── Top bar: back button, node type, energy display ──────────────── */}
       <div style={{ ...styles.topBar, position: "relative", zIndex: 2 }}>
         <button onClick={onBack} style={styles.btn}>← Map</button>
         <span style={{ color: "#ccc", fontSize: 13, textTransform: "capitalize" }}>
@@ -61,7 +80,7 @@ export default function CombatScreen({
         </div>
       </div>
 
-      {/* Battle area */}
+      {/* ── Battle area: player left, enemy right ────────────────────────── */}
       <div style={{
         flex: 1, position: "relative", zIndex: 2,
         display: "flex", alignItems: "flex-end",
@@ -69,7 +88,8 @@ export default function CombatScreen({
         padding: "0 40px 20px",
         gap: 280,
       }}>
-        {/* Player — left */}
+
+        {/* Player: stat box (name, hp bar, block) + sprite */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <div style={styles.statBox}>
             <span style={{ fontWeight: 700 }}>{charName}</span>
@@ -89,7 +109,7 @@ export default function CombatScreen({
           />
         </div>
 
-        {/* Monster — right */}
+        {/* Enemy: stat box (name, hp bar, block, next move) + sprite */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
           <div style={styles.statBox}>
             <span style={{ fontWeight: 700 }}>{monsterName}</span>
@@ -100,6 +120,7 @@ export default function CombatScreen({
             {(turn?.enemy_block ?? 0) > 0 && (
               <span style={styles.blockBadge}>🛡 {turn.enemy_block}</span>
             )}
+            {/* Intent: shows the enemy's next move name and effects */}
             {intentMove && (
               <div style={{
                 fontSize: 11, color: "#e5a230",
@@ -126,7 +147,7 @@ export default function CombatScreen({
         </div>
       </div>
 
-      {/* Win / Lose overlay */}
+      {/* ── Victory / defeat overlay ──────────────────────────────────────── */}
       {outcome && (
         <div style={{
           position: "absolute", inset: 0, zIndex: 10,
@@ -147,9 +168,13 @@ export default function CombatScreen({
         </div>
       )}
 
-      {/* Hand */}
+      {/* ── Hand: draw pile | cards | discard pile | end turn ────────────── */}
       <div style={{ ...styles.hand, position: "relative", zIndex: 2 }}>
+
+        {/* Draw pile — click to see all cards remaining in the deck */}
         <CardPile label="Draw" count={drawCount} cards={drawPile} />
+
+        {/* Cards in hand — clicking a card calls onPlayCard → backend */}
         <div style={{ ...styles.cardRow, justifyContent: "center" }}>
           {(player?.hand ?? []).map((card) => (
             <CombatCard
@@ -163,7 +188,11 @@ export default function CombatScreen({
             <span style={{ color: "#555", fontSize: 13, alignSelf: "center" }}>No cards in hand</span>
           )}
         </div>
+
+        {/* Discard pile — click to see all played/discarded cards */}
         <CardPile label="Discard" count={discardCount} cards={discardPile} faded />
+
+        {/* End turn — discards hand, runs enemy move, draws new hand of 5 */}
         <button onClick={onEndTurn} style={styles.endTurnBtn}>
           End<br />Turn
         </button>

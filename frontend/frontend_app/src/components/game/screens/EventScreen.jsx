@@ -1,14 +1,9 @@
-import { API_BASE, SCENE_BG, styles } from "@/components/game/shared/gameStyles";
+import { SCENE_BG, styles } from "@/components/game/shared/gameStyles";
+import SceneLayout from "@/components/game/shared/SceneLayout";
 
 export default function EventScreen({ onContinue }) {
   return (
-    <div style={{ ...styles.page, position: "relative" }}>
-      <img
-        src={`${API_BASE}/api/assets/file/?path=${SCENE_BG.event}`}
-        alt=""
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}
-      />
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 1 }} />
+    <SceneLayout bgPath={SCENE_BG.event} overlayOpacity={0.6}>
       <div style={{ ...styles.center, position: "relative", zIndex: 2 }}>
         <h2 style={{ margin: 0 }}>Event</h2>
         <p style={{ color: "#aaa", fontSize: 14, maxWidth: 360, textAlign: "center" }}>
@@ -16,6 +11,6 @@ export default function EventScreen({ onContinue }) {
         </p>
         <button onClick={onContinue} style={styles.continueBtn}>Continue</button>
       </div>
-    </div>
+    </SceneLayout>
   );
 }

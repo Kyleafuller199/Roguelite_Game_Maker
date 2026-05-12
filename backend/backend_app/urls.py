@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/game/node/', views.enter_node),
     path('api/game/play-card/', views.play_card),
     path('api/game/end-turn/', views.end_turn),
+    path('api/game/add-card/', views.add_card_to_deck),
 ]

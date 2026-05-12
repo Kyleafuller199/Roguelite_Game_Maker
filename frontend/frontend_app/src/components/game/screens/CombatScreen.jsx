@@ -11,22 +11,25 @@
 
 import { useNavigate } from "react-router-dom";
 import { API_BASE, SCENE_BG, styles } from "@/components/game/shared/gameStyles";
-import HealthBar  from "@/components/game/shared/HealthBar";
-import CardPile   from "@/components/game/shared/CardPile";
+import SceneLayout   from "@/components/game/shared/SceneLayout";
+import HealthBar     from "@/components/game/shared/HealthBar";
+import CardPile      from "@/components/game/shared/CardPile";
 import CombatCard, { effectDesc } from "@/components/game/shared/CombatCard";
 
 export default function CombatScreen({
-  gameState,    // full state from Kyle's GameState.get_state()
-  monsterInfo,  // name, imageUrl, folder — injected by the enter_node endpoint
-  activeNode,   // the map node type (battle / elite / boss)
-  outcome,      // "victory" | "defeat" | null
+  gameState,      // full state from Kyle's GameState.get_state()
+  monsterInfo,    // name, imageUrl, folder — injected by the enter_node endpoint
+  activeNode,     // the map node type (battle / elite / boss)
+  outcome,        // "victory" | "defeat" | null
   drawCount,
   discardCount,
   drawPile,
   discardPile,
-  onPlayCard,   // (cardIndex) → calls /api/game/play-card/
-  onEndTurn,    // () → calls /api/game/end-turn/
-  onBack,       // pauses combat and returns to map (or clears on victory/defeat)
+  onPlayCard,     // (cardIndex) → calls /api/game/play-card/
+  onEndTurn,      // () → calls /api/game/end-turn/
+  onBack,         // pauses mid-fight and returns to map
+  onVictory,      // called when the player clicks Continue after winning
+  hasReward,      // true when the character's card pool has reward options
 }) {
   const navigate = useNavigate();
 
@@ -57,15 +60,7 @@ export default function CombatScreen({
   const intentMove = enemyData?.moves?.find(m => m.id === intentId) ?? null;
 
   return (
-    <div style={{ ...styles.page, position: "relative" }}>
-
-      {/* ── Scene background + dark overlay ──────────────────────────────── */}
-      <img
-        src={`${API_BASE}/api/assets/file/?path=${sceneBg}`}
-        alt=""
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}
-      />
-      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1 }} />
+    <SceneLayout bgPath={sceneBg} overlayOpacity={0.45}>
 
       {/* ── Top bar: back button, node type, energy display ──────────────── */}
       <div style={{ ...styles.topBar, position: "relative", zIndex: 2 }}>
@@ -162,8 +157,19 @@ export default function CombatScreen({
             {outcome === "victory" ? "The enemy has been defeated." : "You have fallen in battle."}
           </p>
           {outcome === "victory"
-            ? <button onClick={onBack} style={styles.continueBtn}>Continue</button>
-            : <button onClick={() => navigate("/editor")} style={{ ...styles.continueBtn, background: "#8a2020" }}>Back to Editor</button>
+            ? (
+              <button onClick={onVictory} style={styles.continueBtn}>
+                {hasReward ? "Choose Reward →" : "Continue"}
+              </button>
+            )
+            : (
+              <button
+                onClick={() => navigate("/editor")}
+                style={{ ...styles.continueBtn, background: "#8a2020" }}
+              >
+                Back to Editor
+              </button>
+            )
           }
         </div>
       )}
@@ -198,6 +204,6 @@ export default function CombatScreen({
         </button>
       </div>
 
-    </div>
+    </SceneLayout>
   );
 }

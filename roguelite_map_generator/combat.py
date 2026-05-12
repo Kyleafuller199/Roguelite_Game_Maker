@@ -37,7 +37,7 @@ class Combat:
         move = self.get_enemy_move()
 
         for effect in move.get("effects", []):
-            repeat = effect.get("repeat", 1)
+            repeat = int(effect.get("repeat", 1))
             for _ in range(repeat):
                 self.apply_effect(effect, source="enemy")
 
@@ -72,7 +72,7 @@ class Combat:
         self.energy -= card.cost
 
         for effect in card.effects:
-            repeat = effect.get("repeat", 1)
+            repeat = int(effect.get("repeat", 1))
             for _ in range(repeat):
                 self.apply_effect(effect, source="player")
 
@@ -81,13 +81,19 @@ class Combat:
     # ---------------- EFFECT SYSTEM ----------------
     def apply_effect(self, effect, source):
         effect_type = effect.get("effectType")
-        value = effect.get("baseValue", 0)
-        target = effect.get("target")
+        value       = effect.get("baseValue", 0)
+        target      = effect.get("target")
+
+        # Target sets that apply to the monster vs the player.
+        # Enemy targets cover all valid editor options for player cards
+        # (selectedEnemy, randomEnemy, allEnemies) as well as legacy "enemy".
+        ENEMY_TARGETS  = {"selectedEnemy", "randomEnemy", "allEnemies", "enemy"}
+        PLAYER_TARGETS = {"player", "self"}
 
         if effect_type == "damage":
-            if target in ["selectedEnemy", "enemy"]:
+            if target in ENEMY_TARGETS:
                 self.deal_damage_to_monster(value)
-            elif target == "player":
+            elif target in PLAYER_TARGETS:
                 self.deal_damage_to_player(value)
 
         elif effect_type == "block":
@@ -102,6 +108,13 @@ class Combat:
                     self.player.max_health,
                     self.player.health + value
                 )
+
+        elif effect_type == "gainEnergy":
+            self.energy += value
+
+        elif effect_type == "draw":
+            for _ in range(int(value)):
+                self.player.draw_card()
 
     # ---------------- DAMAGE ----------------
     def deal_damage_to_monster(self, amount):

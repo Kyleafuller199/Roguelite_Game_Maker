@@ -2,37 +2,52 @@
  * Play.jsx
  *
  * Root of the in-browser game loop. Owns all game state and decides
- * which screen to show (map, combat, rest, treasure, event).
+ * which screen to show.
  *
- * Flow:
- *   Editor → "Start Run" saves payload to sessionStorage → /play loads
- *   → creates a backend game session → fetches the map → shows MapScreen
- *   → player clicks a node → shows the appropriate screen
- *   → combat ends / continue → back to MapScreen
+ * Screen flow:
+ *   Editor → "Start Run" → sessionStorage
+ *     ├─ Single character  → /play creates session → MapScreen
+ *     └─ Multi character   → /play → CharacterSelectScreen → session → MapScreen
+ *
+ *   MapScreen → node click:
+ *     ├─ combat/elite/boss → CombatScreen
+ *     │     └─ victory     → CardRewardScreen (if pool has cards) → MapScreen
+ *     ├─ rest              → RestScreen → MapScreen
+ *     ├─ treasure          → TreasureScreen → MapScreen
+ *     └─ event             → EventScreen → MapScreen
+ *
+ * sessionStorage keys:
+ *   runPayload          — resolved run payload for the selected character
+ *   characterSelectData — { characters, payloads } when project has >1 character
  */
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { API_BASE, styles } from "@/components/game/shared/gameStyles";
-import MapScreen      from "@/components/game/screens/MapScreen";
-import CombatScreen   from "@/components/game/screens/CombatScreen";
-import RestScreen     from "@/components/game/screens/RestScreen";
-import TreasureScreen from "@/components/game/screens/TreasureScreen";
-import EventScreen    from "@/components/game/screens/EventScreen";
+import { API_BASE, styles }      from "@/components/game/shared/gameStyles";
+import MapScreen                 from "@/components/game/screens/MapScreen";
+import CombatScreen              from "@/components/game/screens/CombatScreen";
+import RestScreen                from "@/components/game/screens/RestScreen";
+import TreasureScreen            from "@/components/game/screens/TreasureScreen";
+import EventScreen               from "@/components/game/screens/EventScreen";
+import CardRewardScreen          from "@/components/game/screens/CardRewardScreen";
+import CharacterSelectScreen     from "@/components/game/screens/CharacterSelectScreen";
+
+// Helpers — read sessionStorage safely (values may be absent or malformed)
+function getRunPayload()     { try { return JSON.parse(sessionStorage.getItem("runPayload"))      ?? null; } catch { return null; } }
+function getCharSelectData() { try { return JSON.parse(sessionStorage.getItem("characterSelectData")) ?? null; } catch { return null; } }
 
 export default function Play() {
   const navigate = useNavigate();
 
   // ── Game session & map ────────────────────────────────────────────────────
-  // sessionId ties every action to a live GameState on the backend
   const [sessionId,     setSessionId]     = useState(null);
-  const [mapData,       setMapData]       = useState(null);   // node graph from Kyle's generator
+  const [mapData,       setMapData]       = useState(null);
 
-  // ── Active combat state (returned by the backend after each action) ───────
-  const [gameState,     setGameState]     = useState(null);   // player hp, hand, monster hp, energy
-  const [monsterInfo,   setMonsterInfo]   = useState(null);   // monster name, image, folder
-  const [outcome,       setOutcome]       = useState(null);   // "victory" | "defeat" | null
+  // ── Active combat state ───────────────────────────────────────────────────
+  const [gameState,     setGameState]     = useState(null);
+  const [monsterInfo,   setMonsterInfo]   = useState(null);
+  const [outcome,       setOutcome]       = useState(null);
 
   // ── Draw / discard piles ──────────────────────────────────────────────────
   const [drawCount,     setDrawCount]     = useState(0);
@@ -41,31 +56,64 @@ export default function Play() {
   const [discardPile,   setDiscardPile]   = useState([]);
 
   // ── Map navigation state ──────────────────────────────────────────────────
-  const [currentNodeId, setCurrentNodeId] = useState(null);  // node the player is on
-  const [visitedIds,    setVisitedIds]    = useState(new Set()); // completed nodes
-  const [activeNode,    setActiveNode]    = useState(null);   // node currently being played
-  const [midCombat,     setMidCombat]     = useState(false);  // true when player pauses mid-fight
+  const [currentNodeId, setCurrentNodeId] = useState(null);
+  const [visitedIds,    setVisitedIds]    = useState(new Set());
+  const [activeNode,    setActiveNode]    = useState(null);
+  const [midCombat,     setMidCombat]     = useState(false);
 
-  // ── Screen routing ────────────────────────────────────────────────────────
-  const [screen,        setScreen]        = useState("loading"); // "loading"|"map"|"combat"|"rest"|"treasure"|"event"
-  const [error,         setError]         = useState(
-    () => sessionStorage.getItem("runPayload")
-      ? null
-      : "No run payload found — go back to the editor and click Start Run."
+  // ── Card reward state ─────────────────────────────────────────────────────
+  const [rewardCards,   setRewardCards]   = useState([]);
+
+  // ── Initial screen + character options — read sessionStorage at mount time ─
+  // Lazy useState initializers run at component instantiation (first render),
+  // NOT at module load time, so they always see the values set by the editor.
+  const [characterOptions] = useState(() => getCharSelectData()?.characters ?? []);
+
+  const [screen, setScreen] = useState(() => {
+    if (getCharSelectData()) return "characterSelect";
+    if (getRunPayload())     return "loading";
+    return "error";
+  });
+
+  const [error, setError] = useState(() =>
+    !getCharSelectData() && !getRunPayload()
+      ? "No run payload found — go back to the editor and click Start Run."
+      : null
   );
 
-  // ── On mount: create backend session + fetch map ──────────────────────────
-  // 1. POST the run payload to /api/game/session/ → get session_id
-  // 2. GET /api/game/map/ → get the node graph
-  // 3. Show the map screen
+  // ── Session start helper ──────────────────────────────────────────────────
+  // Used by handleCharacterSelect (user-triggered, not inside an effect).
+  async function startGameSession(payload) {
+    try {
+      const { session_id } = await fetch(`${API_BASE}/api/game/session/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).then(r => r.json());
+
+      setSessionId(session_id);
+
+      const map = await fetch(`${API_BASE}/api/game/map/`).then(r => r.json());
+      setMapData(map);
+      setScreen("map");
+    } catch {
+      setError("Failed to connect to the backend. Is it running?");
+    }
+  }
+
+  // ── On mount: start session for single-character / already-selected flow ──
+  // setState is called inside .then() callbacks (not directly in the effect
+  // body), which is the pattern the react-hooks/set-state-in-effect rule allows.
   useEffect(() => {
-    const raw = sessionStorage.getItem("runPayload");
-    if (!raw) return;
+    const payload    = getRunPayload();
+    const charSelect = getCharSelectData();
+
+    if (!payload || charSelect) return; // handled by CharacterSelectScreen instead
 
     fetch(`${API_BASE}/api/game/session/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: raw,
+      body: JSON.stringify(payload),
     })
       .then(r => r.json())
       .then(({ session_id }) => {
@@ -80,10 +128,20 @@ export default function Play() {
       .catch(() => setError("Failed to connect to the backend. Is it running?"));
   }, []);
 
+  // ── Character selected ────────────────────────────────────────────────────
+  async function handleCharacterSelect(characterId) {
+    const charSelect = getCharSelectData();
+    const payload    = charSelect?.payloads?.[characterId] ?? null;
+    if (!payload) { setError("Character payload not found."); return; }
+
+    sessionStorage.setItem("runPayload", JSON.stringify(payload));
+    sessionStorage.removeItem("characterSelectData");
+
+    setScreen("loading");
+    await startGameSession(payload);
+  }
+
   // ── Node click: enter a map node ──────────────────────────────────────────
-  // Sends the clicked node to the backend. The backend picks an enemy,
-  // starts combat via Kyle's GameState, and returns the initial game state.
-  // Routes to the correct screen based on node type and returned game_state.
   function handleNodeClick(node) {
     fetch(`${API_BASE}/api/game/node/`, {
       method: "POST",
@@ -104,18 +162,15 @@ export default function Play() {
         if (discard_pile) setDiscardPile(discard_pile);
         if (monster_info) setMonsterInfo(monster_info);
 
-        // "scene" = Kyle's term for active combat
         if (state.game_state === "scene") setScreen("combat");
-        else if (node.type === "rest")      setScreen("rest");
-        else if (node.type === "treasure")  setScreen("treasure");
-        else if (node.type === "event")     setScreen("event");
+        else if (node.type === "rest")     setScreen("rest");
+        else if (node.type === "treasure") setScreen("treasure");
+        else if (node.type === "event")    setScreen("event");
       })
       .catch(() => setError("Failed to enter node."));
   }
 
   // ── Play a card ───────────────────────────────────────────────────────────
-  // Sends the card index to the backend → Kyle's engine applies effects
-  // (damage, block, heal) → returns updated state with new hp, hand, energy
   function handlePlayCard(cardIndex) {
     fetch(`${API_BASE}/api/game/play-card/`, {
       method: "POST",
@@ -135,8 +190,6 @@ export default function Play() {
   }
 
   // ── End turn ──────────────────────────────────────────────────────────────
-  // Discards hand, runs the enemy's next move via Kyle's engine,
-  // then draws a fresh hand of 5. Returns updated state.
   function handleEndTurn() {
     fetch(`${API_BASE}/api/game/end-turn/`, {
       method: "POST",
@@ -155,19 +208,48 @@ export default function Play() {
       .catch(() => setError("Failed to end turn."));
   }
 
+  // ── Victory: route to card reward or straight back to map ─────────────────
+  function handleVictory() {
+    const payload = getRunPayload();
+    const pool    = payload?.cardPool ?? [];
+    const cardMap = payload?.cardMap  ?? {};
+
+    if (pool.length > 0) {
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+      const picks    = shuffled
+        .slice(0, Math.min(3, shuffled.length))
+        .map(id => cardMap[id])
+        .filter(Boolean);
+
+      setRewardCards(picks);
+      setScreen("cardReward");
+    } else {
+      returnToMap();
+    }
+  }
+
+  // ── Card reward: player picks a card ──────────────────────────────────────
+  function handleRewardPick(card) {
+    fetch(`${API_BASE}/api/game/add-card/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, card_id: card.id }),
+    })
+      .then(() => returnToMap())
+      .catch(() => returnToMap());
+  }
+
   // ── Map navigation helpers ────────────────────────────────────────────────
 
-  // "← Map" mid-fight: preserves combat state, shows locked map with red node
   function pauseCombat() {
     if (outcome) {
-      returnToMap(); // fight already over — clear everything
+      returnToMap();
     } else {
       setMidCombat(true);
       setScreen("map");
     }
   }
 
-  // Victory / defeat / non-combat continue: clears all combat state
   function returnToMap() {
     setMidCombat(false);
     setScreen("map");
@@ -179,15 +261,18 @@ export default function Play() {
     setDiscardCount(0);
     setDrawPile([]);
     setDiscardPile([]);
+    setRewardCards([]);
   }
 
-  // Clicking the red mid-combat node resumes the paused fight
   function resumeCombat(node) {
     if (node.id === activeNode?.id) {
       setMidCombat(false);
       setScreen("combat");
     }
   }
+
+  // Whether the current character has card rewards available
+  const hasCardReward = (getRunPayload()?.cardPool?.length ?? 0) > 0;
 
   // ── Screen rendering ──────────────────────────────────────────────────────
 
@@ -208,7 +293,15 @@ export default function Play() {
     );
   }
 
-  // Map: mid-combat swaps handler so only the red node is clickable
+  if (screen === "characterSelect") {
+    return (
+      <CharacterSelectScreen
+        characterOptions={characterOptions}
+        onSelectCharacter={handleCharacterSelect}
+      />
+    );
+  }
+
   if (screen === "map") {
     return (
       <MapScreen
@@ -236,6 +329,18 @@ export default function Play() {
         onPlayCard={handlePlayCard}
         onEndTurn={handleEndTurn}
         onBack={pauseCombat}
+        onVictory={handleVictory}
+        hasReward={hasCardReward}
+      />
+    );
+  }
+
+  if (screen === "cardReward") {
+    return (
+      <CardRewardScreen
+        rewardCards={rewardCards}
+        onSelectCard={handleRewardPick}
+        onSkip={returnToMap}
       />
     );
   }

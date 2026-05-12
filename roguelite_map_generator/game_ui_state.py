@@ -43,12 +43,20 @@ class UIState:
 
         card = self.player.hand[index]
 
+        # Pre-check energy before touching the hand
+        if card.cost > self.combat.energy:
+            return {"success": False}
+
+        # Remove the card from hand BEFORE effects fire so that draw effects
+        # see the correct hand size (otherwise a full hand of 5 blocks draws).
+        self.player.hand.pop(index)
+
         success = self.combat.play_card(card)
 
         if not success:
+            # Shouldn't happen after the pre-check, but restore on failure
+            self.player.hand.insert(index, card)
             return {"success": False}
-
-        self.player.hand.pop(index)
 
         return {
             "success": True,

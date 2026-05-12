@@ -220,8 +220,10 @@ def enter_node(request):
         if hasattr(game, '_persistent_hp'):
             game.player.health = game._persistent_hp
 
-        # Set up draw and discard piles for this combat
+        # Set up draw and discard piles for this combat.
+        # Shuffle fresh every combat so reward cards don't always appear last.
         game.player.deck = list(game._pending_deck)
+        random.shuffle(game.player.deck)
         game._discard    = []
 
         # Patch draw_card now that a fresh Player exists
@@ -401,6 +403,39 @@ def _check_outcome(game):
     if game.player and game.player.health <= 0:
         return 'defeat'
     return None
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def add_card_to_deck(request):
+    """
+    POST /api/game/add-card/
+
+    Adds a card reward to the player's run deck after a combat victory.
+
+    Body: { session_id, card_id }
+
+    Looks up card_id in the run config's cardMap, wraps it in a Card object,
+    and appends it to _pending_deck so it appears in all future combats.
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest('Invalid JSON')
+
+    session_id = data.get('session_id')
+    card_id    = data.get('card_id')
+
+    game = _sessions.get(session_id)
+    if not game:
+        return HttpResponseBadRequest('Invalid session')
+
+    card_data = game.run_config.get('cardMap', {}).get(card_id)
+    if not card_data:
+        return HttpResponseBadRequest('Card not found in cardMap')
+
+    game._pending_deck.append(Card(card_data))
+    return JsonResponse({'status': 'ok', 'deck_size': len(game._pending_deck)})
 
 
 @require_http_methods(['GET'])

@@ -112,9 +112,26 @@ export default function ProjectNodeInspector({ project, state, actions }) {
   }
 
   function handleStartRun() {
-    const payload = buildRunPayload(state, project.id);
-    if (!payload) { setStatus("error"); return; }
-    sessionStorage.setItem("runPayload", JSON.stringify(payload));
+    if (characters.length > 1) {
+      // Build a payload for every character and let the player choose in-game
+      const payloads = {};
+      for (const char of characters) {
+        const p = buildRunPayload(state, project.id, char.id);
+        if (p) payloads[char.id] = p;
+      }
+      if (Object.keys(payloads).length === 0) { setStatus("error"); return; }
+      sessionStorage.setItem("characterSelectData", JSON.stringify({
+        characters: characters.map(c => ({ id: c.id, name: c.name, imageUrl: c.imageUrl ?? "" })),
+        payloads,
+      }));
+      sessionStorage.removeItem("runPayload");
+    } else {
+      // Single character — go straight to the game
+      const payload = buildRunPayload(state, project.id);
+      if (!payload) { setStatus("error"); return; }
+      sessionStorage.setItem("runPayload", JSON.stringify(payload));
+      sessionStorage.removeItem("characterSelectData");
+    }
     navigate("/play");
   }
 

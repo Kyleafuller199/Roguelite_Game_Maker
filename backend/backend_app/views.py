@@ -255,6 +255,13 @@ def enter_node(request):
         game.game_state   = 'map'
         game.current_node = node
 
+        # Rest node fully heals the player
+        if node_type == 'rest' and game.player:
+            game.player.health = game.player.max_health
+
+            # Persist healed HP into future combats
+            game._persistent_hp = game.player.health
+
     return JsonResponse({'state': game.get_state()})
 
 

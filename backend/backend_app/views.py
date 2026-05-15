@@ -258,7 +258,8 @@ def enter_node(request):
         game.game_state   = 'map'
         game.current_node = node
 
-        # For rest nodes, return current HP so the frontend can show it before healing
+        # For rest nodes, return current HP so the frontend can show it before healing.
+        # Actual healing is handled by POST /api/game/rest/ when the player clicks Rest.
         if node_type == 'rest':
             return JsonResponse({
                 'state':         game.get_state(),

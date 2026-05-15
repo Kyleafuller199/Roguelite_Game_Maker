@@ -83,7 +83,7 @@ export default function Onboarding({ onClose }) {
   const isFirst = step === 0;
 
   return (
-    // Full-screen overlay
+    // Full-screen overlayd
     <div style={{
       position: "fixed", inset: 0, zIndex: 1000,
       background: "rgba(0,0,0,0.7)",

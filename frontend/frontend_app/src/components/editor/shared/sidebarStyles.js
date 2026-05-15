@@ -8,22 +8,24 @@
  * propagates across every sidebar surface.
  */
 
+import { colors } from "@/styles/theme";
+
 // ── Colour tokens ─────────────────────────────────────────────────────────────
 
 /** Background fill for selected entities (active toggle button, selected list items, etc.) */
-export const COLOR_SELECTED_BG    = "#181716";
+export const COLOR_SELECTED_BG    = colors.canvasBg;
 
 /** Primary text colour — used on selected / active elements */
-export const COLOR_TEXT_MAIN      = "#e5e5e5";
+export const COLOR_TEXT_MAIN      = colors.textPrimary;
 
 /** Secondary text colour — used on idle / non-selected elements */
-export const COLOR_TEXT_SECONDARY = "#b3b3b3";
+export const COLOR_TEXT_SECONDARY = colors.textSecondary;
 
 /** Sidebar panel background */
-export const COLOR_SIDEBAR_BG     = "#383838";
+export const COLOR_SIDEBAR_BG     = colors.editorBg;
 
 /** Background applied on pointer-hover */
-export const COLOR_HOVER_BG       = "#454545";
+export const COLOR_HOVER_BG       = colors.hoverBg;
 
 // ── Layout objects ────────────────────────────────────────────────────────────
 

@@ -1,8 +1,12 @@
 import { useState } from "react";
+import { API_BASE, colors, font, radius } from "@/components/game/shared/gameStyles";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
-
-const TYPE_COLOR = { Attack: "#c0392b", Skill: "#27ae60", Power: "#8e44ad", Curse: "#6d3d7a" };
+const TYPE_COLOR = {
+  Attack: colors.cardAttack,
+  Skill:  colors.cardSkill,
+  Power:  colors.cardPower,
+  Curse:  colors.cardCurse,
+};
 
 export function effectDesc(eff) {
   const v = eff.baseValue ?? 0;
@@ -23,7 +27,7 @@ export function effectDesc(eff) {
 export default function CombatCard({ card, energy, onClick }) {
   const [hovered, setHovered] = useState(false);
   const canPlay   = energy !== undefined ? card.cost <= energy : true;
-  const typeColor = TYPE_COLOR[card.type] ?? "#555";
+  const typeColor = TYPE_COLOR[card.type] ?? colors.textDisabled;
 
   return (
     <button
@@ -33,9 +37,9 @@ export default function CombatCard({ card, energy, onClick }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         width: 120, flexShrink: 0,
-        background: "#1a1816",
-        border: `2px solid ${canPlay ? typeColor + "99" : "rgba(255,255,255,0.06)"}`,
-        borderRadius: 10,
+        background: colors.canvasBg,
+        border: `2px solid ${canPlay ? typeColor + "99" : colors.borderSubtle}`,
+        borderRadius: radius.lg,
         display: "flex", flexDirection: "column",
         opacity: canPlay ? 1 : 0.4,
         cursor: canPlay ? "pointer" : "not-allowed",
@@ -65,13 +69,14 @@ export default function CombatCard({ card, energy, onClick }) {
           <span style={{ fontSize: 28, opacity: 0.2 }}>⚔</span>
         )}
 
-        {/* Cost bubble — top left over the art */}
+        {/* Cost bubble */}
         <div style={{
           position: "absolute", top: 6, left: 6,
           width: 24, height: 24, borderRadius: 999,
-          background: "#111", border: "2px solid rgba(255,255,255,0.4)",
+          background: "#111",
+          border: `2px solid ${colors.borderStrong}`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 12, fontWeight: 800, color: "#fff",
+          fontSize: font.sizeMD, fontWeight: 800, color: colors.textPrimary,
         }}>
           {card.cost}
         </div>
@@ -79,18 +84,18 @@ export default function CombatCard({ card, energy, onClick }) {
 
       {/* Info area */}
       <div style={{ padding: "6px 8px 8px", display: "flex", flexDirection: "column", gap: 3 }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: "#e5e5e5", lineHeight: 1.2 }}>
+        <span style={{ fontSize: font.sizeSM, fontWeight: 700, color: colors.textPrimary, lineHeight: 1.2 }}>
           {card.name}
         </span>
         <span style={{
-          fontSize: 8, fontWeight: 700, textTransform: "uppercase",
+          fontSize: font.sizeXS, fontWeight: 700, textTransform: "uppercase",
           letterSpacing: 0.5, color: typeColor,
         }}>
           {card.type}
         </span>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 2 }}>
           {(card.effects ?? []).map((eff, i) => (
-            <span key={i} style={{ fontSize: 9, color: "#bbb", lineHeight: 1.4 }}>
+            <span key={i} style={{ fontSize: font.sizeXS, color: colors.textSecondary, lineHeight: 1.4 }}>
               {effectDesc(eff)}
             </span>
           ))}

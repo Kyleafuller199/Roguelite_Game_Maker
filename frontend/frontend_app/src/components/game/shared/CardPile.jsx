@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { colors, font, radius } from "@/components/game/shared/gameStyles";
 import CombatCard from "./CombatCard";
 
 export default function CardPile({ label, count, cards = [], faded = false }) {
@@ -18,23 +19,23 @@ export default function CardPile({ label, count, cards = [], faded = false }) {
           padding: 0,
         }}
       >
-        <div style={{
-          width: 46, height: 64, borderRadius: 6,
-          background: faded ? "#2a2018" : "#1e1c1b",
-          border: `1px solid ${faded ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.2)"}`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 16, fontWeight: 800,
-          color: faded ? "#555" : "#e5e5e5",
-          boxShadow: count > 0 ? "2px 2px 0 #111, 4px 4px 0 #0a0a0a" : "none",
-          transition: "transform 0.1s",
-          transform: "none",
-        }}
-        onMouseEnter={e => { if (cards.length > 0) e.currentTarget.style.transform = "scale(1.05)"; }}
-        onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
+        <div
+          style={{
+            width: 46, height: 64, borderRadius: radius.md,
+            background: faded ? "#2a2018" : colors.canvasBg,
+            border: `1px solid ${faded ? colors.borderSubtle : colors.borderMedium}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: font.sizeXL, fontWeight: 800,
+            color: faded ? colors.textDisabled : colors.textPrimary,
+            boxShadow: count > 0 ? "2px 2px 0 #111, 4px 4px 0 #0a0a0a" : "none",
+            transition: "transform 0.1s",
+          }}
+          onMouseEnter={e => { if (cards.length > 0) e.currentTarget.style.transform = "scale(1.05)"; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = "none"; }}
         >
           {count}
         </div>
-        <span style={{ fontSize: 9, color: "#666", textTransform: "uppercase", letterSpacing: 1 }}>
+        <span style={{ fontSize: font.sizeXS, color: colors.textDim, textTransform: "uppercase", letterSpacing: 1 }}>
           {label}
         </span>
       </button>
@@ -54,9 +55,9 @@ export default function CardPile({ label, count, cards = [], faded = false }) {
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: "#1a1918",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 14,
+              background: colors.surfaceBg,
+              border: `1px solid ${colors.borderLight}`,
+              borderRadius: radius.xxl,
               padding: "24px",
               maxWidth: "80vw",
               maxHeight: "75vh",
@@ -67,15 +68,16 @@ export default function CardPile({ label, count, cards = [], faded = false }) {
           >
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#e5e5e5" }}>
+              <span style={{ fontSize: font.sizeLG, fontWeight: 700, color: colors.textPrimary }}>
                 {label} Pile — {count} card{count !== 1 ? "s" : ""}
               </span>
               <button
                 onClick={() => setOpen(false)}
                 style={{
-                  background: "transparent", border: "1px solid rgba(255,255,255,0.15)",
-                  borderRadius: 6, color: "#aaa", padding: "3px 10px",
-                  cursor: "pointer", fontSize: 12,
+                  background: "transparent",
+                  border: `1px solid ${colors.borderMedium}`,
+                  borderRadius: radius.md, color: colors.textMuted,
+                  padding: "3px 10px", cursor: "pointer", fontSize: font.sizeMD,
                 }}
               >
                 ✕
@@ -83,20 +85,12 @@ export default function CardPile({ label, count, cards = [], faded = false }) {
             </div>
 
             {/* Cards grid */}
-            <div style={{
-              display: "flex", flexWrap: "wrap", gap: 10,
-              overflowY: "auto",
-              justifyContent: "center",
-            }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, overflowY: "auto", justifyContent: "center" }}>
               {cards.length === 0 ? (
-                <span style={{ color: "#555", fontSize: 13 }}>Empty</span>
+                <span style={{ color: colors.textDisabled, fontSize: font.sizeMD }}>Empty</span>
               ) : (
                 cards.map((card, i) => (
-                  <CombatCard
-                    key={`${card.id}_${i}`}
-                    card={card}
-                    energy={999}
-                  />
+                  <CombatCard key={`${card.id}_${i}`} card={card} energy={999} />
                 ))
               )}
             </div>

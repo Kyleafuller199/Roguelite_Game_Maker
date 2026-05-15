@@ -5,16 +5,10 @@
  * Displays a card for each character (portrait + name). Clicking a card
  * calls onSelectCharacter(characterId) and Play.jsx takes over to build
  * the session with that character's payload.
- *
- * characterOptions shape: [{ id, name, imageUrl }]
- * imageUrl is the filename only (e.g. "hero.png") — served from
- * /api/assets/file/?path=playable_characters/<imageUrl>
  */
 
 import { useState } from "react";
-import { API_BASE, styles } from "@/components/game/shared/gameStyles";
-
-// ── Single character card ─────────────────────────────────────────────────────
+import { API_BASE, styles, colors, font, radius } from "@/components/game/shared/gameStyles";
 
 function CharacterCard({ character, onSelect }) {
   const [hovered, setHovered] = useState(false);
@@ -27,15 +21,14 @@ function CharacterCard({ character, onSelect }) {
       style={{
         display: "flex", flexDirection: "column", alignItems: "center", gap: 16,
         background: hovered ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.55)",
-        border: `2px solid ${hovered ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.1)"}`,
-        borderRadius: 18, padding: "28px 36px",
-        cursor: "pointer", color: "#e5e5e5",
+        border: `2px solid ${hovered ? colors.borderStrong : colors.borderLight}`,
+        borderRadius: radius.xxl, padding: "28px 36px",
+        cursor: "pointer", color: colors.textPrimary,
         transform: hovered ? "translateY(-10px)" : "none",
         transition: "all 0.2s ease",
         minWidth: 180,
       }}
     >
-      {/* Portrait */}
       {character.imageUrl ? (
         <img
           src={`${API_BASE}/api/assets/file/?path=playable_characters/${character.imageUrl}`}
@@ -47,44 +40,33 @@ function CharacterCard({ character, onSelect }) {
         <div style={{
           width: 140, height: 200,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#444", fontSize: 52,
+          color: colors.textDisabled, fontSize: 52,
         }}>
           ⚔
         </div>
       )}
-
-      {/* Name */}
-      <span style={{ fontSize: 17, fontWeight: 700, letterSpacing: 0.3 }}>
+      <span style={{ fontSize: font.sizeXL, fontWeight: 700, letterSpacing: 0.3 }}>
         {character.name || "Unnamed"}
       </span>
     </button>
   );
 }
 
-// ── Screen ────────────────────────────────────────────────────────────────────
-
 export default function CharacterSelectScreen({ characterOptions = [], onSelectCharacter }) {
   return (
     <div style={styles.page}>
-
-      {/* ── Header ────────────────────────────────────────────────── */}
       <div style={styles.topBar}>
-        <span style={{
-          fontSize: 15, fontWeight: 700, color: "#e5e5e5",
-          margin: "0 auto",
-        }}>
+        <span style={{ fontSize: font.sizeLG, fontWeight: 700, color: colors.textPrimary, margin: "0 auto" }}>
           Choose Your Character
         </span>
       </div>
 
-      {/* ── Subtitle ──────────────────────────────────────────────── */}
       <div style={{ textAlign: "center", paddingTop: 28 }}>
-        <p style={{ margin: 0, color: "#888", fontSize: 13 }}>
+        <p style={{ margin: 0, color: colors.textMuted, fontSize: font.sizeMD }}>
           Your choice is permanent for this run.
         </p>
       </div>
 
-      {/* ── Character cards ───────────────────────────────────────── */}
       <div style={{
         flex: 1,
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -98,7 +80,6 @@ export default function CharacterSelectScreen({ characterOptions = [], onSelectC
           />
         ))}
       </div>
-
     </div>
   );
 }

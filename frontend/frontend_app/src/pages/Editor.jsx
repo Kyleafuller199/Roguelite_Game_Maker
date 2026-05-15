@@ -29,6 +29,7 @@ import { EditorProvider } from "@/state/editor/EditorState";
 import EditorSidebar from "@/components/editor/sidebar/EditorSidebar";
 import EditorInspector from "@/components/editor/inspector/EditorInspector";
 import EditorCanvas from "@/components/editor/canvas/EditorCanvas";
+import StartRunHeaderButton from "@/components/editor/inspector/project/StartRunHeaderButton";
 
 /**
  * Editor
@@ -54,20 +55,23 @@ export default function Editor() {
           <AppHeader
             title="Editor"
             rightAction={
-              <button
-                onClick={() => setShowOnboarding(true)}
-                title="Open guide"
-                style={{
-                  background: "transparent",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  borderRadius: 6, color: "#888",
-                  width: 28, height: 28,
-                  cursor: "pointer", fontSize: 14,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                }}
-              >
-                ?
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <StartRunHeaderButton />
+                <button
+                  onClick={() => setShowOnboarding(true)}
+                  title="Open guide"
+                  style={{
+                    background: "transparent",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    borderRadius: 6, color: "#888",
+                    width: 28, height: 28,
+                    cursor: "pointer", fontSize: 14,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  ?
+                </button>
+              </div>
             }
           />
         }

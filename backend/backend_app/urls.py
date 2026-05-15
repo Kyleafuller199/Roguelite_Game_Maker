@@ -30,4 +30,6 @@ urlpatterns = [
     path('api/game/play-card/', views.play_card),
     path('api/game/end-turn/', views.end_turn),
     path('api/game/add-card/', views.add_card_to_deck),
+    path('api/game/rest/', views.rest_heal),
+    path('api/game/treasure/', views.open_treasure),
 ]

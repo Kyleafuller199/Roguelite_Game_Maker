@@ -18,7 +18,17 @@ class UIState:
             },
             "monster": {
                 "health": self.combat.monster.health,
-                "max_health": self.combat.monster.max_health
+                "max_health": self.combat.monster.max_health,
+                "strength":   self.combat.monster_strength,
+                "weakness":   self.combat.monster_weakness,
+                "vulnerable": self.combat.monster_vulnerable,
+                "frail":      self.combat.monster_frail
+            },
+            "status": {
+                "player_strength":  self.combat.player_strength,
+                "player_weakness":  self.combat.player_weakness,
+                "player_vulnerable": self.combat.player_vulnerable,
+                "player_frail":     self.combat.player_frail
             }
         }
 

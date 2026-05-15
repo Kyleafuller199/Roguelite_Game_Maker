@@ -24,7 +24,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { API_BASE, styles }      from "@/components/game/shared/gameStyles";
+import { API_BASE, styles, colors, font, radius } from "@/components/game/shared/gameStyles";
+import { relicEffectLines }      from "@/components/game/shared/relicUtils";
 import MapScreen                 from "@/components/game/screens/MapScreen";
 import CombatScreen              from "@/components/game/screens/CombatScreen";
 import RestScreen                from "@/components/game/screens/RestScreen";
@@ -36,6 +37,56 @@ import CharacterSelectScreen     from "@/components/game/screens/CharacterSelect
 // Helpers — read sessionStorage safely (values may be absent or malformed)
 function getRunPayload()     { try { return JSON.parse(sessionStorage.getItem("runPayload"))      ?? null; } catch { return null; } }
 function getCharSelectData() { try { return JSON.parse(sessionStorage.getItem("characterSelectData")) ?? null; } catch { return null; } }
+
+// Single relic badge with a hover tooltip showing effects
+function RelicBarItem({ relic }) {
+  const [hovered, setHovered] = useState(false);
+  const lines = relicEffectLines(relic);
+
+  return (
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Badge */}
+      <div style={{
+        background: "rgba(0,0,0,0.82)",
+        border: `1px solid rgba(240,192,48,0.45)`,
+        borderRadius: radius.lg, padding: "5px 10px",
+        fontSize: font.sizeSM, color: colors.gold, fontWeight: 600,
+        maxWidth: 160, cursor: "default", userSelect: "none",
+      }}>
+        {relic.identity?.name ?? "Relic"}
+      </div>
+
+      {/* Tooltip — appears to the right when hovered */}
+      {hovered && (
+        <div style={{
+          position: "absolute", left: "calc(100% + 8px)", top: 0,
+          background: "rgba(10,8,6,0.96)",
+          border: `1px solid rgba(240,192,48,0.4)`,
+          borderRadius: radius.xl, padding: "10px 14px",
+          minWidth: 200, maxWidth: 260, zIndex: 200,
+          pointerEvents: "none",
+        }}>
+          <div style={{ fontSize: font.sizeMD, fontWeight: 700, color: colors.gold, marginBottom: 4 }}>
+            {relic.identity?.name ?? "Relic"}
+          </div>
+          <div style={{ fontSize: font.sizeXS, color: colors.textMuted, marginBottom: 6 }}>
+            {relic.identity?.rarity ?? ""}
+          </div>
+          {lines.length > 0
+            ? lines.map((line, i) => (
+                <div key={i} style={{ fontSize: font.sizeSM, color: colors.textSecondary, lineHeight: 1.5 }}>{line}</div>
+              ))
+            : <div style={{ fontSize: font.sizeSM, color: colors.textDisabled }}>No effects defined.</div>
+          }
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Play() {
   const navigate = useNavigate();
@@ -63,6 +114,12 @@ export default function Play() {
 
   // ── Card reward state ─────────────────────────────────────────────────────
   const [rewardCards,   setRewardCards]   = useState([]);
+
+  // ── Non-combat node data (rest HP, etc.) ──────────────────────────────────
+  const [nodeData,      setNodeData]      = useState(null);
+
+  // ── Relics collected during this run ──────────────────────────────────────
+  const [playerRelics,  setPlayerRelics]  = useState([]);
 
   // ── Initial screen + character options — read sessionStorage at mount time ─
   // Lazy useState initializers run at component instantiation (first render),
@@ -93,6 +150,11 @@ export default function Play() {
 
       setSessionId(session_id);
 
+      // Seed the player's relic bar with their starting relic (if any)
+      const startingRelicId = payload?.character?.startingRelicId;
+      const startingRelic   = startingRelicId ? payload?.relicMap?.[startingRelicId] : null;
+      if (startingRelic) setPlayerRelics([startingRelic]);
+
       const map = await fetch(`${API_BASE}/api/game/map/`).then(r => r.json());
       setMapData(map);
       setScreen("map");
@@ -118,6 +180,10 @@ export default function Play() {
       .then(r => r.json())
       .then(({ session_id }) => {
         setSessionId(session_id);
+        // Seed the relic bar with the starting relic (if the character has one)
+        const startingRelicId = payload?.character?.startingRelicId;
+        const startingRelic   = startingRelicId ? payload?.relicMap?.[startingRelicId] : null;
+        if (startingRelic) setPlayerRelics([startingRelic]);
         return fetch(`${API_BASE}/api/game/map/`);
       })
       .then(r => r.json())
@@ -161,6 +227,8 @@ export default function Play() {
         if (draw_pile)    setDrawPile(draw_pile);
         if (discard_pile) setDiscardPile(discard_pile);
         if (monster_info) setMonsterInfo(monster_info);
+
+        setNodeData(data);
 
         if (state.game_state === "scene") setScreen("combat");
         else if (node.type === "rest")     setScreen("rest");
@@ -262,6 +330,7 @@ export default function Play() {
     setDrawPile([]);
     setDiscardPile([]);
     setRewardCards([]);
+    setNodeData(null);
   }
 
   function resumeCombat(node) {
@@ -271,10 +340,17 @@ export default function Play() {
     }
   }
 
+  function handleRelicPick(relic) {
+    setPlayerRelics(prev => [...prev, relic]);
+  }
+
   // Whether the current character has card rewards available
   const hasCardReward = (getRunPayload()?.cardPool?.length ?? 0) > 0;
 
   // ── Screen rendering ──────────────────────────────────────────────────────
+  // Screens that don't need the relic bar get early returns.
+  // All gameplay screens share a single return so the fixed relic bar
+  // renders as an overlay on top of every screen without prop-drilling.
 
   if (error) {
     return (
@@ -302,8 +378,11 @@ export default function Play() {
     );
   }
 
+  // ── Gameplay screens — rendered with the persistent relic bar ─────────────
+  let content = null;
+
   if (screen === "map") {
-    return (
+    content = (
       <MapScreen
         mapData={mapData}
         currentNodeId={currentNodeId}
@@ -313,10 +392,8 @@ export default function Play() {
         midCombatNodeId={midCombat ? activeNode?.id : null}
       />
     );
-  }
-
-  if (screen === "combat") {
-    return (
+  } else if (screen === "combat") {
+    content = (
       <CombatScreen
         gameState={gameState}
         monsterInfo={monsterInfo}
@@ -333,21 +410,37 @@ export default function Play() {
         hasReward={hasCardReward}
       />
     );
-  }
-
-  if (screen === "cardReward") {
-    return (
+  } else if (screen === "cardReward") {
+    content = (
       <CardRewardScreen
         rewardCards={rewardCards}
         onSelectCard={handleRewardPick}
         onSkip={returnToMap}
       />
     );
+  } else if (screen === "rest") {
+    content = <RestScreen sessionId={sessionId} nodeData={nodeData} onContinue={returnToMap} />;
+  } else if (screen === "treasure") {
+    content = <TreasureScreen sessionId={sessionId} onRelicPick={handleRelicPick} onContinue={returnToMap} />;
+  } else if (screen === "event") {
+    content = <EventScreen onContinue={returnToMap} />;
   }
 
-  if (screen === "rest")     return <RestScreen     onContinue={returnToMap} />;
-  if (screen === "treasure") return <TreasureScreen onContinue={returnToMap} />;
-  if (screen === "event")    return <EventScreen    onContinue={returnToMap} />;
+  return (
+    <>
+      {content}
 
-  return null;
+      {/* Persistent relic bar — fixed top-left, visible on all gameplay screens */}
+      {playerRelics.length > 0 && (
+        <div style={{
+          position: "fixed", top: 52, left: 12, zIndex: 100,
+          display: "flex", flexDirection: "column", gap: 6,
+        }}>
+          {playerRelics.map((relic, i) => (
+            <RelicBarItem key={relic.id ?? i} relic={relic} />
+          ))}
+        </div>
+      )}
+    </>
+  );
 }

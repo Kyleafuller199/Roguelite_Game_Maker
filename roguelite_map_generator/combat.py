@@ -14,6 +14,18 @@ class Combat:
         self.player_block = 0
         self.monster_block = 0
 
+        # Status effects
+        # Strength does NOT tick down — permanent flat damage bonus for the combat
+        self.player_strength  = 0
+        self.monster_strength = 0
+        # Weakness, Vulnerable, Frail tick at the START of the affected entity's OWN turn
+        self.player_weakness    = 0
+        self.monster_weakness   = 0
+        self.player_vulnerable  = 0
+        self.monster_vulnerable = 0
+        self.player_frail  = 0
+        self.monster_frail = 0
+
         self.turn_count = 1
         self.enemy_move_index = 0
 
@@ -30,16 +42,31 @@ class Combat:
         if self.turn != "player":
             return
 
+        # Tick down player debuffs at the END of the player's turn so that debuffs
+        # applied by the enemy are fully active for the entire next player turn.
+        self.player_weakness   = max(0, self.player_weakness   - 1)
+        self.player_vulnerable = max(0, self.player_vulnerable - 1)
+        self.player_frail      = max(0, self.player_frail      - 1)
+
         self.turn = "enemy"
         self.execute_enemy_turn()
 
     def execute_enemy_turn(self):
+        # Block resets at the start of the monster's turn
+        self.monster_block = 0
+
         move = self.get_enemy_move()
 
         for effect in move.get("effects", []):
             repeat = int(effect.get("repeat", 1))
             for _ in range(repeat):
                 self.apply_effect(effect, source="enemy")
+
+        # Tick down monster debuffs at the END of the monster's turn so that debuffs
+        # applied by the player are fully active for the entire next monster turn.
+        self.monster_weakness   = max(0, self.monster_weakness   - 1)
+        self.monster_vulnerable = max(0, self.monster_vulnerable - 1)
+        self.monster_frail      = max(0, self.monster_frail      - 1)
 
         self.turn_count += 1
         self.start_player_turn()
@@ -98,9 +125,11 @@ class Combat:
 
         elif effect_type == "block":
             if source == "player":
-                self.player_block += value
+                gain = int(value * 0.75) if self.player_frail > 0 else value
+                self.player_block += gain
             else:
-                self.monster_block += value
+                gain = int(value * 0.75) if self.monster_frail > 0 else value
+                self.monster_block += gain
 
         elif effect_type == "heal":
             if source == "player":
@@ -116,8 +145,42 @@ class Combat:
             for _ in range(int(value)):
                 self.player.draw_card()
 
+        elif effect_type == "strength":
+            # Strength on the player buffs the player; enemy-sourced strength buffs the monster
+            if source == "player" or target in PLAYER_TARGETS:
+                self.player_strength += value
+            else:
+                self.monster_strength += value
+
+        elif effect_type in ("weak", "weakness"):
+            if target in ENEMY_TARGETS:
+                self.monster_weakness += value
+            elif target in PLAYER_TARGETS or source == "enemy":
+                self.player_weakness += value
+
+        elif effect_type == "vulnerable":
+            if target in ENEMY_TARGETS:
+                self.monster_vulnerable += value
+            elif target in PLAYER_TARGETS or source == "enemy":
+                self.player_vulnerable += value
+
+        elif effect_type == "frail":
+            if target in ENEMY_TARGETS:
+                self.monster_frail += value
+            elif target in PLAYER_TARGETS or source == "enemy":
+                self.player_frail += value
+
     # ---------------- DAMAGE ----------------
     def deal_damage_to_monster(self, amount):
+        # Strength: permanent flat bonus to all attacks
+        amount += self.player_strength
+        # Weakness: attacker deals 25% less damage
+        if self.player_weakness > 0:
+            amount = int(amount * 0.75)
+        # Vulnerable on the monster: takes 50% more damage
+        if self.monster_vulnerable > 0:
+            amount = int(amount * 1.5)
+
         if self.monster_block > 0:
             absorbed = min(amount, self.monster_block)
             self.monster_block -= absorbed
@@ -127,6 +190,15 @@ class Combat:
             self.monster.health -= amount
 
     def deal_damage_to_player(self, amount):
+        # Monster strength: permanent flat bonus to all its attacks
+        amount += self.monster_strength
+        # Monster weakness: it deals 25% less damage
+        if self.monster_weakness > 0:
+            amount = int(amount * 0.75)
+        # Vulnerable on the player: takes 50% more damage
+        if self.player_vulnerable > 0:
+            amount = int(amount * 1.5)
+
         if self.player_block > 0:
             absorbed = min(amount, self.player_block)
             self.player_block -= absorbed

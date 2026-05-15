@@ -154,6 +154,10 @@ def create_session(request):
     # the first combat node is entered (see enter_node below).
     game._pending_deck = deck
 
+    # Initialise persistent HP so rest sites can show the correct value even
+    # before the player has entered a single combat node.
+    game._persistent_hp = 100
+
     session_id = str(uuid.uuid4())
     _sessions[session_id] = game
 
@@ -251,9 +255,16 @@ def enter_node(request):
         })
 
     else:
-        # Non-combat node — just update position for now
         game.game_state   = 'map'
         game.current_node = node
+
+        # For rest nodes, return current HP so the frontend can show it before healing
+        if node_type == 'rest':
+            return JsonResponse({
+                'state':         game.get_state(),
+                'player_hp':     _get_persistent_hp(game),
+                'player_max_hp': _get_max_hp(game),
+            })
 
     return JsonResponse({'state': game.get_state()})
 
@@ -390,6 +401,91 @@ def _inject_intent(game, state):
     except (AttributeError, KeyError, TypeError):
         pass
     return state
+
+
+def _get_persistent_hp(game):
+    """Current player HP, pulling from _persistent_hp if set (survives combat resets)."""
+    if hasattr(game, '_persistent_hp'):
+        return game._persistent_hp
+    if game.player:
+        return game.player.health
+    return 80
+
+
+def _get_max_hp(game):
+    return game.player.max_health if game.player else 100
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def rest_heal(request):
+    """
+    POST /api/game/rest/
+    Heals the player for 25% of their max HP (rounded down, minimum 1).
+    Returns updated HP values.
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest('Invalid JSON')
+
+    game = _sessions.get(data.get('session_id'))
+    if not game:
+        return HttpResponseBadRequest('Invalid session')
+
+    max_hp    = _get_max_hp(game)
+    current   = _get_persistent_hp(game)
+    heal      = max(1, max_hp // 4)
+    new_hp    = min(max_hp, current + heal)
+
+    game._persistent_hp = new_hp
+    if game.player:
+        game.player.health = new_hp
+
+    return JsonResponse({'healed': new_hp - current, 'hp': new_hp, 'max_hp': max_hp})
+
+
+@csrf_exempt
+@require_http_methods(['POST'])
+def open_treasure(request):
+    """
+    POST /api/game/treasure/
+    Picks up to 2 random relics from the run's relic pool and returns them
+    for the player to choose from. The chosen relic is stored for display
+    purposes (full relic effect implementation is Kyle's backend responsibility).
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponseBadRequest('Invalid JSON')
+
+    game = _sessions.get(data.get('session_id'))
+    if not game:
+        return HttpResponseBadRequest('Invalid session')
+
+    starting_relic_id = game.run_config.get('character', {}).get('startingRelicId')
+    relic_map  = game.run_config.get('relicMap', {})
+    relic_pool = [
+        r for r in game.run_config.get('relicPool', [])
+        if r != starting_relic_id
+        and relic_map.get(r, {}).get('identity', {}).get('rarity') != 'Boss'
+    ]
+
+    if not relic_pool:
+        return JsonResponse({'relics': []})
+
+    # Pick up to 2 unique relics to offer
+    picks     = random.sample(relic_pool, min(2, len(relic_pool)))
+    relics    = [relic_map[r] for r in picks if r in relic_map]
+
+    # Store the chosen relic id if the player sends choice_index
+    choice_index = data.get('choice_index')
+    if choice_index is not None and 0 <= choice_index < len(relics):
+        if not hasattr(game, '_relics'):
+            game._relics = []
+        game._relics.append(relics[choice_index])
+
+    return JsonResponse({'relics': relics})
 
 
 def _check_outcome(game):

@@ -10,11 +10,38 @@
  */
 
 import { useNavigate } from "react-router-dom";
-import { API_BASE, SCENE_BG, styles } from "@/components/game/shared/gameStyles";
+import { useEffect } from "react";
+import { API_BASE, SCENE_BG, styles, colors, font, radius } from "@/components/game/shared/gameStyles";
 import SceneLayout   from "@/components/game/shared/SceneLayout";
 import HealthBar     from "@/components/game/shared/HealthBar";
 import CardPile      from "@/components/game/shared/CardPile";
 import CombatCard, { effectDesc } from "@/components/game/shared/CombatCard";
+
+// Inline status-effect badges shown under HP/block in each stat box
+function StatusBadges({ strength = 0, weakness = 0, vulnerable = 0, frail = 0 }) {
+  const badges = [
+    { label: "STR",   value: strength,   color: colors.statusStrength   },
+    { label: "WEAK",  value: weakness,   color: colors.statusWeak       },
+    { label: "VUL",   value: vulnerable, color: colors.statusVulnerable },
+    { label: "FRAIL", value: frail,      color: colors.statusFrail      },
+  ].filter(b => b.value > 0);
+
+  if (badges.length === 0) return null;
+
+  return (
+    <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "center", marginTop: 2 }}>
+      {badges.map(b => (
+        <span key={b.label} style={{
+          fontSize: font.sizeXS, padding: "2px 5px", borderRadius: radius.sm,
+          background: `${b.color}22`, border: `1px solid ${b.color}66`,
+          color: b.color, fontWeight: 800, letterSpacing: 0.4,
+        }}>
+          {b.label} {b.value}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function CombatScreen({
   gameState,      // full state from Kyle's GameState.get_state()
@@ -32,6 +59,23 @@ export default function CombatScreen({
   hasReward,      // true when the character's card pool has reward options
 }) {
   const navigate = useNavigate();
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────────
+  // E = end turn   1-5 = play the card at that hand position
+  useEffect(() => {
+    function onKey(e) {
+      if (outcome) return;
+      if (e.key === "e" || e.key === "E") { onEndTurn?.(); return; }
+      const n = parseInt(e.key);
+      if (n >= 1 && n <= 5) {
+        const hand = gameState?.combat?.player?.hand ?? [];
+        const card = hand[n - 1];
+        if (card && card.cost <= (gameState?.combat?.combat?.energy ?? 0)) onPlayCard?.(card.index);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [outcome, gameState, onEndTurn, onPlayCard]);
 
   // ── Unpack Kyle's game state ──────────────────────────────────────────────
   const combat = gameState?.combat;
@@ -65,13 +109,13 @@ export default function CombatScreen({
       {/* ── Top bar: back button, node type, energy display ──────────────── */}
       <div style={{ ...styles.topBar, position: "relative", zIndex: 2 }}>
         <button onClick={onBack} style={styles.btn}>← Map</button>
-        <span style={{ color: "#ccc", fontSize: 13, textTransform: "capitalize" }}>
+        <span style={{ color: colors.textSecondary, fontSize: font.sizeMD, textTransform: "capitalize" }}>
           {activeNode?.type ?? "Combat"}
         </span>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: "#f0c030", fontSize: 13 }}>⚡</span>
+          <span style={{ color: colors.gold, fontSize: font.sizeMD }}>⚡</span>
           <span style={{ fontWeight: 700 }}>{turn?.energy ?? 0}</span>
-          <span style={{ color: "#555" }}>/ 3</span>
+          <span style={{ color: colors.textDisabled }}>/ 3</span>
         </div>
       </div>
 
@@ -89,12 +133,18 @@ export default function CombatScreen({
           <div style={styles.statBox}>
             <span style={{ fontWeight: 700 }}>{charName}</span>
             <HealthBar current={player?.health ?? 0} max={player?.max_health ?? 100} />
-            <span style={{ fontSize: 11, color: "#aaa" }}>
+            <span style={{ fontSize: font.sizeSM, color: colors.textMuted }}>
               {player?.health ?? 0} / {player?.max_health ?? 100}
             </span>
             {(turn?.player_block ?? 0) > 0 && (
               <span style={styles.blockBadge}>🛡 {turn.player_block}</span>
             )}
+            <StatusBadges
+              strength={combat?.status?.player_strength}
+              weakness={combat?.status?.player_weakness}
+              vulnerable={combat?.status?.player_vulnerable}
+              frail={combat?.status?.player_frail}
+            />
           </div>
           <img
             src={`${API_BASE}/api/assets/file/?path=playable_characters/${charImg}`}
@@ -115,18 +165,24 @@ export default function CombatScreen({
             {(turn?.enemy_block ?? 0) > 0 && (
               <span style={styles.blockBadge}>🛡 {turn.enemy_block}</span>
             )}
+            <StatusBadges
+              strength={enemy?.strength}
+              weakness={enemy?.weakness}
+              vulnerable={enemy?.vulnerable}
+              frail={enemy?.frail}
+            />
             {/* Intent: shows the enemy's next move name and effects */}
             {intentMove && (
               <div style={{
-                fontSize: 11, color: "#e5a230",
+                fontSize: font.sizeSM, color: colors.orange,
                 background: "rgba(229,162,48,0.1)",
                 border: "1px solid rgba(229,162,48,0.25)",
-                borderRadius: 6, padding: "4px 10px",
+                borderRadius: radius.md, padding: "4px 10px",
                 textAlign: "center", lineHeight: 1.5,
               }}>
                 <div style={{ fontWeight: 700 }}>⚠ {intentMove.name}</div>
                 {(intentMove.effects ?? []).map((eff, i) => (
-                  <div key={i} style={{ fontSize: 10, color: "#c8913a" }}>
+                  <div key={i} style={{ fontSize: font.sizeXS, color: colors.orange }}>
                     {effectDesc(eff)}
                   </div>
                 ))}
@@ -150,10 +206,10 @@ export default function CombatScreen({
           display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", gap: 16,
         }}>
-          <h2 style={{ margin: 0, fontSize: 36, color: outcome === "victory" ? "#f0c030" : "#c0392b" }}>
+          <h2 style={{ margin: 0, fontSize: 36, color: outcome === "victory" ? colors.gold : colors.red }}>
             {outcome === "victory" ? "Victory!" : "Defeat"}
           </h2>
-          <p style={{ color: "#aaa", fontSize: 14, margin: 0 }}>
+          <p style={{ color: colors.textMuted, fontSize: font.sizeLG, margin: 0 }}>
             {outcome === "victory" ? "The enemy has been defeated." : "You have fallen in battle."}
           </p>
           {outcome === "victory"
